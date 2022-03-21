@@ -14,13 +14,13 @@
                             attrs="{'invisible': [('state', '!=', 'sale')]}"
                             icon="fa-cog">
                     </button>
-<!--                    <button-->
-<!--                            name="action_attachment"-->
-<!--                            type="object"-->
-<!--                            class="oe_stat_button"-->
-<!--                            string="Kirim SO"-->
-<!--                            icon="fa-paper-plane">-->
-<!--                    </button>-->
+                    <!--                    <button-->
+                    <!--                            name="action_attachment"-->
+                    <!--                            type="object"-->
+                    <!--                            class="oe_stat_button"-->
+                    <!--                            string="Kirim SO"-->
+                    <!--                            icon="fa-paper-plane">-->
+                    <!--                    </button>-->
                     <button
                             name="action_view_wo_button"
                             type="object"
@@ -29,17 +29,17 @@
                         <field string="WO" name="wo_count" widget="statinfo"/>
                     </button>
                 </div>
-                <!--                <field name="partner_id" position="after">-->
-                <!--                    <field name="kontrak_id" domain="[('mc_cust','=', partner_id), ('mc_isopen','=','true')]"/>-->
-                <!--                </field>-->
-                <!--                <field name="kontrak_id" position="after">-->
-                <!--                    <button name="insert_kontrak"-->
-                <!--                            type="object"-->
-                <!--                            string="Insert Kontrak"/>-->
-                <!--                </field>-->
-                <!--                <field name="validity_date" position="before">-->
-                <!--                    <field name="x_start_date"/>-->
-                <!--                </field>-->
+                <field name="partner_id" position="after">
+                    <field name="kontrak_id" domain="[('mc_cust','=', partner_id), ('mc_isopen','=','true')]"/>
+                </field>
+                <field name="kontrak_id" position="after">
+                    <button name="insert_kontrak"
+                            type="object"
+                            string="Insert Kontrak"/>
+                </field>
+                <field name="validity_date" position="before">
+                    <field name="x_start_date"/>
+                </field>
                 <!-- Readonly column -->
                 <xpath expr="/form/sheet/notebook/page/field[@name='order_line']/tree/field[@name='product_id']"
                        position="attributes">
