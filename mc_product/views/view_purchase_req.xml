@@ -1,0 +1,44 @@
+<odoo>
+    <data>
+        <!--Form buat popup message button create PR-->
+         <record id="pop_message_pr_wizard_view_form" model="ir.ui.view">
+            <field name="name">custom.pop.message.form</field>
+            <field name="model">x.popup.message.pr</field>
+            <field name="arch" type="xml">
+                <form string="Custom POP Message">
+                    <field name="name"/>
+                    <group>
+                        <field name="x_no_pr"></field> <!-- val no SO -->
+                        <field name="x_customer_id"></field> <!-- val customer (top 1) -->
+                        <!--<field name="x_product_pr"></field> -->
+                    </group>
+                    <footer>
+                       <button name="create_pr" string="Create PR" class="oe_highlight" type="object"></button>
+                       <button name="dont_need_pr" string="Don't Need PR" type="object"></button>
+                       <button string="Discard" special="cancel"/>
+                    </footer>
+               </form>
+            </field>
+        </record>
+
+
+        <record id="pop_message_check_prod_wizard_view_form" model="ir.ui.view">
+            <field name="name">custom.pop.message.check.prod</field>
+            <field name="model">x.check.prod.pr</field>
+            <field name="arch" type="xml">
+                <form string="Custom POP Message">
+                    <field name="name"/>
+                    <group>
+                        <field name="x_no_pr"></field> <!-- val no SO -->
+                        <field name="x_customer_id"></field> <!-- val customer (top 1) -->
+                        <!--<field name="x_product_pr"></field> -->
+                    </group>
+                    <footer>
+                       <button name="confirm_create_pr" string="Yes" class="oe_highlight" type="object"></button>
+                       <button string="Discard" special="cancel"/>
+                    </footer>
+               </form>
+            </field>
+        </record>
+    </data>
+</odoo>

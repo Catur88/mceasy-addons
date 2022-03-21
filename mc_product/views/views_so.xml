@@ -1,0 +1,114 @@
+<odoo>
+    <data>
+        <record model="ir.ui.view" id="sales_form_view">
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale.view_order_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='partner_id']" position="after">
+                   <field name="is_block"/>
+                   <field name="x_po_cust"/>
+                   <field name="x_is_pkp"/>
+                </xpath>
+
+                <xpath expr="//field[@name='payment_term_id']" position="after">
+                    <field name="x_sales_external"/>
+                    <field name="x_status_so" invisible="1"/>
+                    <field name="x_status_pr"/>
+                </xpath>
+
+                <xpath expr="/form/sheet/notebook/page/field[@name='order_line']/tree/field[@name='name']"
+                       position="after">
+                    <field name="x_bentuk"/>
+                    <field name="x_panjang"/>
+                    <field name="x_lebar"/>
+                    <field name="x_bahan"/>
+                    <field name="x_feature"/>
+                    <field name="x_finishing1" invisible="1"/>
+                    <field name="x_finishing2" invisible="1"/>
+                    <field name="x_diecut"/>
+                    <field name="x_internal_categ"/>
+                    <field name="x_flag" invisible="1"/>
+                    <field name="x_quo_purchase_m2" invisible="1"/>
+                    <field name="x_quo_purchase_price_pcs" invisible="1"/>
+                </xpath>
+
+                <!--<xpath expr="/form/sheet/notebook/page/field[@name='order_line']/tree/field[@name='product_id']"-->
+                       <!--position="replace">-->
+                    <!--<field name="product_id" required="True" readonly="1"/>-->
+                <!--</xpath>-->
+
+                <xpath expr="/form/sheet/notebook/page/field[@name='order_line']/tree/field[@name='product_id']"
+                       position="before">
+                    <field name="x_sq" domain="[('x_customer_id', '=', parent.partner_id), ('x_flag_quo', '=', False),
+                                                                ('x_state_renego', 'in', ('3', '5', '6')),
+                                                                ('end_of_date', '&gt;=', current_date)]"/>
+                </xpath>
+
+                <xpath expr="/form/sheet/notebook/page/field[@name='order_line']/form/group/group/field[@name='product_id']" position="after">
+                    <field name="x_sq"/>
+                </xpath>
+
+                <xpath expr="/form/sheet/notebook/page/field[@name='order_line']/tree/field[@name='price_subtotal']"
+                       position="after">
+                    <field name="x_new_product"/>
+                    <field name="x_duedate_kirim"/>
+                    <field name="is_new_item" invisible="1"/>
+                    <button name="btn_create_product" string="Create Product" type="object" attrs="{'invisible': [('is_new_item', '==', False)]}"/>
+                </xpath>
+
+                <xpath expr="//field[@name='note']" position="replace">
+                    <group>
+                        <field name="x_note" />
+                    </group>
+                    <field name="note" groups="sales_team.group_sale_manager,sales_team.group_sale_salesman"/>
+                </xpath>
+
+                <notebook>
+                    <page name="global_status" string="Global Status">
+                        <field name="x_glob_stat_so" string="Global Status" >
+                            <!--<field name="x_cek_raymond" invisible="1"/>-->
+                            <tree create="false" class="text-center" default_order="name, x_so_line, create_date">
+                                <field name="name" bg_color="white:name != False;"/>
+                                <field name="x_customer_id" bg_color="white:x_customer_id != False;"/>
+                                <field name="x_so_line" bg_color="white:x_so_line != False;"/>
+                                <field name="x_qty_order" bg_color="white:x_qty_order != False;#09FD12:x_selisih_qty &lt; 1;red:x_selisih_qty &gt; 0"/>
+                                <field name="x_duedate" widget="date" bg_color="white:x_duedate != False;yellow:x_status_duedate &lt; 3;red:x_status_duedate &lt; 1;#09FD12:x_status_duedate_done == 'DONE ON TIME';orange:x_status_duedate_done == 'DONE LATE'"/>
+                                <field name="x_status_terakhir" bg_color="white:x_status_terakhir != False;white:x_status_terakhir == False;"/>
+                                <field name="x_status_confirm_1" class="text-center" fg_color="white:x_status_confirm_1=='-';" bg_color="#625C5B:x_status_confirm_1 == '-';#77d98f:x_status_confirm_1 not in (False, '-');white:x_status_confirm_1 == False"/>
+                                <field name="x_status_unlock_2" class="text-center" fg_color="white:x_status_unlock_2=='-';" bg_color="#625C5B:x_status_unlock_2 == '-';#77d98f:x_status_unlock_2 not in (False, '-');white:x_status_unlock_2 == False"/>
+                                <field name="x_status_planned_3" fg_color="white:x_status_planned_3=='-';" bg_color="#625C5B:x_status_planned_3 == '-';#77d98f:x_status_planned_3 not in (False, '-');white:x_status_planned_3 == False"/>
+                                <field name="x_status_material_4" fg_color="white:x_status_material_4=='-';" bg_color="#625C5B:x_status_material_4 == '-';#77d98f:x_status_material_4 not in (False, '-');white:x_status_material_4 == False"/>
+                                <field name="x_status_cetak_5" fg_color="white:x_status_cetak_5=='-';" bg_color="#625C5B:x_status_cetak_5 == '-';#77d98f:x_status_cetak_5 not in (False, '-');white:x_status_cetak_5 == False;#FBE37A:x_status_cetak_5_2 == 'START'"/>
+                                <field name="x_status_cetak_5_2" invisible="1"/>
+                                <field name="x_status_finishing_6" fg_color="white:x_status_finishing_6=='-';" bg_color="#625C5B:x_status_finishing_6 == '-';#77d98f:x_status_finishing_6 not in (False, '-');white:x_status_finishing_6 == False;#FBE37A:x_status_finishing_6_2 == 'START'"/>
+                                <field name="x_status_finishing_6_2" invisible="1"/>
+                                <field name="x_status_packing_7" fg_color="white:x_status_packing_7=='-';" bg_color="#625C5B:x_status_packing_7 == '-';#77d98f:x_status_packing_7 not in (False, '-');white:x_status_packing_7 == False;#FBE37A:x_status_packing_7_2 == 'START'"/>
+                                <field name="x_status_packing_7_2" invisible="1"/>
+                                <field name="x_status_partial_8" fg_color="white:x_status_partial_8=='-';" bg_color="#625C5B:x_status_partial_8 == '-';#77d98f:x_status_partial_8 not in (False, '-');white:x_status_partial_8 == False"/>
+                                <field name="x_status_full_9" fg_color="white:x_status_full_9=='-';" bg_color="#625C5B:x_status_full_9 == '-';#77d98f:x_status_full_9 not in (False, '-');white:x_status_full_9 == False"/>
+                                <field name="x_status_pengiriman_10" fg_color="white:x_status_pengiriman_10=='-';" bg_color="#625C5B:x_status_pengiriman_10 == '-';#77d98f:x_status_pengiriman_10 not in (False, '-');white:x_status_pengiriman_10 == False"/>
+                                <field name="x_status_duedate" invisible="1"/>
+                                <field name="x_status_duedate_done" invisible="1"/>
+                                <field name="x_status_duedate_done_save" invisible="1"/>
+                                <field name="x_total_leadtime_save" bg_color="white:name != False;"/>
+                                <field name="x_selisih_qty" invisible="1"/>
+                                <field name="x_total_leadtime" bg_color="white:name != False;" invisible="1"/>
+                            </tree>
+                        </field>
+                    </page>
+                </notebook>
+            </field>
+        </record>
+
+        <!--Inherit SO Line Tree-->
+        <record id="inherit_sale_order_tree" model="ir.ui.view">
+            <field name="inherit_id" ref="sale.view_order_tree"/>
+            <field name="model">sale.order</field>
+            <field name="arch" type="xml">
+                <xpath expr='//tree/field[@name="state"]' position="after" >
+                    <field name="x_status_pr"/>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

@@ -1,0 +1,57 @@
+<odoo>
+    <data>
+        <!--
+            SALE ORDER
+            Replace Button from Sale Order
+         -->
+        <record model="ir.ui.view" id="sale_form_view_custom">
+            <field name="name">sale.order.form</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale.view_order_form"/>
+            <field name="arch" type="xml">
+                <div class="oe_button_box" name="button_box">
+                    <!--Tambhan button purchase request-->
+                    <button
+                        name="action_view_purchase"
+                        type="object"
+                        class="oe_stat_button"
+                        icon="fa-shopping-cart"
+                        attrs="{'invisible': [('state', 'not in', ['locked', 'done'])]}">
+                    <field string="Purchase" name="purchase_request_count" widget="statinfo"/>
+                    </button>
+                </div>
+
+                <header position="replace">
+                    <header position="inside">
+                        <button name="%(sale.action_view_sale_advance_payment_inv)d" string="Create Invoice"
+                        type="action" class="btn-primary"
+                        attrs="{'invisible': [('invoice_status', '!=', 'to invoice')]}"/>
+                        <button name="%(sale.action_view_sale_advance_payment_inv)d" string="Create Invoice"
+                            type="action" context="{'default_advance_payment_method': 'percentage'}"
+                            attrs="{'invisible': ['|',('invoice_status', '!=', 'no'), ('state', '!=', 'sale')]}"/>
+                        <button name="action_quotation_send" string="Send by Email" type="object" states="draft" class="btn-primary"/>
+                        <!--<button name="print_quotation" string="Print" type="object" states="draft" class="btn-primary"/>-->
+                        <button name="action_confirm" states="sent" string="Confirm Sale" class="btn-primary o_sale_confirm" type="object" invisible="1"/>
+                        <button name="action_confirm" string="Confirm Sale" class="o_sale_confirm" type="object"
+                                attrs="{'invisible': [('state', 'in', ['sale', 'done', 'cancel'])]}"/>
+                        <!--<button name="print_quotation" string="Print" type="object" states="sent,sale"/>-->
+                        <button name="action_quotation_send" string="Send by Email" type="object" states="sent,sale"/>
+                        <button name="action_cancel" states="draft,sent,sale" type="object" string="Cancel"/>
+                        <button name="action_draft" states="cancel" type="object" string="Set to Quotation"/>
+                        <button name="action_done" type="object" string="Lock" states="sale"
+                            help="If the sale is locked, you can not modify it anymore. However, you will still be able to invoice or deliver."/>
+                        <button name="unlock_so" string="Unlock" type="object" groups="base.group_system" states="done"/>
+
+                        <!--uswa-tambah button create PR-->
+                        <button name="popup_create_pr" string="Create PR" type="object"
+                                attrs="{'invisible': [('state', 'not in', ['locked', 'done'])]}"/>
+                        <!--<button name="popup_create_po" string="Create PO" type="object"-->
+                                <!--attrs="{'invisible': [('state', 'not in', ['locked', 'done'])]}"/>-->
+
+                        <field name="state" widget="statusbar" statusbar_visible="draft,sent,sale"/>
+                    </header>
+                </header>
+            </field>
+        </record>
+    </data>
+</odoo>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record model="ir.ui.view" id="x_sq_popup_view_pricing_gm">
+        <field name="name">x.sq.popup.pricing.gm</field>
+        <field name="model">x.sales.quotation</field>
+        <field name="type">form</field>
+        <field name="arch" type="xml">
+            <form create="false">
+                <group>
+                    <!--<span>The following customer is about or exceeded their credit limit. This operation needs an Authorized Employee to approve the sale order:</span>-->
+                </group>
+                <group>
+                  <field name="x_harga_renego_sales" widget="monetary"/>
+                  <field name="x_harga_renego" widget="monetary"/>
+                  <field name="x_renego_total" widget="monetary"/>
+                  <field name="x_profit_renego"/>
+                </group>
+                <footer>
+                    <button name="action_confirm_dir"
+                                type="object"
+                                string="Confirm"
+                                class="oe_highlight"
+                                groups="base.group_system"/>
+                    <button string="Cancel" special="cancel" />
+                    <!--<button name="agent_exceed_limit" string="Request Manager to Approve Sale" type="object" class="oe_highlight" />                 -->
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

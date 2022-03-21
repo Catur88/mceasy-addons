@@ -1,0 +1,13 @@
+<odoo>
+    <data>
+        <record id="properties_product_template_form_view" model="ir.ui.view">
+            <field name="inherit_id" ref="product.product_template_form_view"/>
+            <field name="model">product.template</field>
+            <field name="arch" type="xml">
+                <field name="uom_id" position="before">
+                    <field name="x_sales_type"/>
+                </field>
+            </field>
+        </record>
+    </data>
+</odoo>

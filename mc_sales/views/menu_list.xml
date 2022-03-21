@@ -1,0 +1,8 @@
+<odoo>
+    <data>
+        <menuitem name="Contract" id="menu_customer_contract"
+                  parent="sale.sale_order_menu" sequence="5"
+                  action="list_contract_action"  />
+
+    </data>
+</odoo>

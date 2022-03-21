@@ -1,0 +1,365 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <data>
+        <report
+            id="report_account_invoices_custom"
+            model="account.invoice"
+            string="Invoice Sprint"
+            report_type="qweb-pdf"
+            name="lpj_sales.report_invoice_custom"
+            file="lpj_sales.report_invoice_custom"
+            menu="True"
+        />
+
+        <record id="paperformat_invoice" model="report.paperformat">
+            <field name="name">European A4 low margin</field>
+            <field name="default" eval="True" />
+            <field name="format">A4</field>
+            <field name="page_height">0</field>
+            <field name="page_width">0</field>
+            <field name="orientation">Portrait</field>
+            <field name="margin_top">6</field>
+            <field name="margin_bottom">4</field>
+            <field name="margin_left">6</field>
+            <field name="margin_right">6</field>
+            <field name="header_line" eval="False" />
+            <field name="header_spacing">0</field> <!-- Jika ingin header muncul ubah nilai - 0 -->
+            <field name="dpi">90</field>
+        </record>
+
+        <record id="lpj_sales.report_account_invoices_custom" model="ir.actions.report.xml">
+            <field name="paperformat_id" ref="lpj_sales.paperformat_invoice" />
+        </record>
+
+        <template id="report_invoice_document">
+            <t t-call="report.html_container">
+                <t t-set="o" t-value="o.with_context({'lang':o.partner_id.lang})" />
+                <div class="page">
+                    <div class="row">
+                        <div class="col-xs-6">
+                            <h4 t-field="res_company.name"/>
+                            <span t-field="res_company.street"/>, <span t-field="res_company.street2"/><br/>
+                            <span>Telp: </span><br/>
+                            <span>Email: fac.sprintindonesia@gmail.com</span><br/>
+                        </div>
+                    </div>
+                    <br/>
+                    <!-- Untuk garis horizontal-->
+                    <div class="row zero_min_height">
+                        <div class="col-xs-12">
+                            <div style="border-bottom: 1px solid black;"/>
+                        </div>
+                    </div>
+                    <br/>
+
+                    <div class="row">
+                        <!--Pelanggan kotak sebelah kiri-->
+                        <div class="col-xs-12">
+                            <h5><strong>PELANGGAN</strong></h5>
+                        </div>
+                        <div class="col-xs-6">
+                            <div style="border:1px solid black; padding: 5px">
+                                <div class="row">
+                                    <div class="col-xs-3">
+                                        NAMA
+                                    </div>
+                                    <div class="col-xs-9">
+                                        <p t-field="o.partner_id.name"/>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-xs-3">
+                                        ALAMAT
+                                    </div>
+                                    <div class="col-xs-9">
+                                        <span t-field="o.partner_id.street"/>,<br/>
+                                        <span t-field="o.partner_id.street2"/>,<br/>
+                                        <span t-field="o.partner_id.city"/>,
+                                        <span t-field="o.partner_id.state_id.name"/>,
+                                        <span t-field="o.partner_id.zip"/>,<br/>
+                                        <span t-field="o.partner_id.country_id.name"/>,
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-xs-3">
+                                        TELP
+                                    </div>
+                                    <div class="col-xs-9">
+                                        <p t-field="o.partner_id.phone"/>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-xs-3">
+                                        FAX
+                                    </div>
+                                    <div class="col-xs-9">
+                                        <p t-field="o.partner_id.fax"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!--Faktur, kotak sebelah kanan-->
+                        <div class="col-xs-6" style="text-alignment:right;">
+                            <div style="border:1px solid black; padding:5px">
+                                <div class="row">
+                                    <div class="col-xs-4">
+                                        FAKTUR #
+                                    </div>
+                                    <div class="col-xs-8">
+                                        <p t-field="o.x_no_faktur"/>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-xs-4">
+                                        TANGGAL
+                                    </div>
+                                    <div class="col-xs-8">
+                                        <p><span t-esc="context_timestamp(datetime.datetime.now()).strftime('%d %B %Y')"/></p>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-xs-4">
+                                        JATUH TEMPO
+                                    </div>
+                                    <div class="col-xs-8">
+                                        <p t-field="o.x_jatuh_tempo"/>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-xs-4">
+                                        SO Number
+                                    </div>
+                                    <div class="col-xs-8">
+                                        <p t-field="o.origin"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h2>
+                        <span t-if="o.type == 'out_invoice' and (o.state == 'open' or o.state == 'paid')">Invoice</span>
+                        <span t-if="o.type == 'out_invoice' and o.state == 'proforma2'">PRO-FORMA</span>
+                        <span t-if="o.type == 'out_invoice' and o.state == 'draft'">Draft Invoice</span>
+                        <span t-if="o.type == 'out_invoice' and o.state == 'cancel'">Cancelled Invoice</span>
+                        <span t-if="o.type == 'out_refund'">Refund</span>
+                        <span t-if="o.type == 'in_refund'">Vendor Refund</span>
+                        <span t-if="o.type == 'in_invoice'">Vendor Bill</span>
+                        <span t-field="o.number"/>
+                    </h2>
+
+                    <div class="row mt32 mb32">
+                        <div class="col-xs-2" t-if="o.name">
+                            <strong>Description:</strong>
+                            <p t-field="o.name"/>
+                        </div>
+                        <div class="col-xs-2" t-if="o.date_invoice">
+                            <strong>Invoice Date:</strong>
+                            <p t-field="o.date_invoice"/>
+                        </div>
+                        <div class="col-xs-2" t-if="o.date_due and o.type == 'out_invoice' and (o.state == 'open' or o.state == 'paid')">
+                            <strong>Due Date:</strong>
+                            <p t-field="o.date_due"/>
+                        </div>
+                        <div class="col-xs-2" t-if="o.origin">
+                            <strong>Source:</strong>
+                            <p t-field="o.origin"/>
+                        </div>
+                        <div class="col-xs-2" t-if="o.partner_id.ref">
+                            <strong>Customer Code:</strong>
+                            <p t-field="o.partner_id.ref"/>
+                        </div>
+                        <div name="reference" class="col-xs-2" t-if="o.reference">
+                            <strong>Reference:</strong>
+                            <p t-field="o.reference"/>
+                        </div>
+                    </div>
+
+                    <!-- Is there a discount on at least one line? -->
+                    <t t-set="display_discount" t-value="any([l.discount for l in o.invoice_line_ids])"/>
+                    <!--Detail Invoices-->
+                    <table class="table table-bordered" style="border: 1px solid black;">
+                        <thead>
+                            <tr>
+                                <th style="border:1px solid black;">No.</th>
+                                <th style="border:1px solid black;">Keterangan</th>
+                                <th class="hidden">Source Document</th>
+                                <th class="text-right" style="border:1px solid black;">QTY</th>
+                                <th class="text-right" style="border:1px solid black;">Harga Satuan (Rp.)</th>
+                                <th t-if="display_discount" class="text-right" style="border:1px solid black;">Diskon(%)</th>
+                                <th class="text-right" style="border:1px solid black;">Pajak</th>
+                                <th class="text-right" style="border:1px solid black;">Jumlah (Rp.)</th>
+                            </tr>
+                        </thead>
+                        <tbody class="invoice_tbody">
+                            <t t-set="i" t-value="1"/>
+                            <tr t-foreach="o.invoice_line_ids" t-as="l">
+                                <td style="border: 1px solid black;">
+                                    <span t-esc="i"/>
+                                    <t t-set="i" t-value="i+1"/>
+                                </td>
+                                <td style="border: 1px solid black;"><span t-field="l.name"/></td>
+                                <td class="hidden" style="border: 1px solid black;"><span t-field="l.origin"/></td>
+                                <td class="text-right" style="border: 1px solid black;">
+                                    <span t-field="l.quantity"/>
+                                    <span t-field="l.uom_id"  groups="product.group_uom"/>
+                                </td>
+                                <td class="text-right" style="border: 1px solid black;">
+                                    <span t-field="l.price_unit"/>
+                                </td>
+                                <td t-if="display_discount" class="text-right" style="border: 1px solid black;">
+                                    <span t-field="l.discount"/>
+                                </td>
+                                <td class="text-right" style="border: 1px solid black;">
+                                    <span t-esc="', '.join(map(lambda x: (x.description or x.name), l.invoice_line_tax_ids))"/>
+                                </td>
+                                <td class="text-right" style="border: 1px solid black;">
+                                    <span t-field="l.price_subtotal"
+                                        t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <!--Total Amount-->
+                    <div class="row">
+                        <div class="col-xs-4 pull-right">
+                            <table class="table table-condensed">
+                                <tr class="border-black">
+                                    <td><strong>Subtotal</strong></td>
+                                    <td class="text-right">
+                                        <span t-field="o.amount_untaxed" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                                    </td>
+                                </tr>
+                                <t t-foreach="o._get_tax_amount_by_group()" t-as="amount_by_group">
+                                    <tr>
+                                        <td><span t-esc="amount_by_group[0] if len(o.tax_line_ids) > 1 else (o.tax_line_ids.tax_id.description or o.tax_line_ids.tax_id.name)"/></td>
+                                        <td class="text-right">
+                                            <span t-esc="amount_by_group[2]"/>
+                                        </td>
+                                    </tr>
+                                </t>
+                                <tr class="border-black">
+                                    <td><strong>Total</strong></td>
+                                    <td class="text-right">
+                                         <span t-field="o.amount_total" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                                    </td>
+                                </tr>
+                                <tr class="border-black">
+                                    <td>Bayaran Diterima</td>
+                                    <td class="text-right">
+                                        <span t-field="o.x_bayaran_diterima" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                                    </td>
+                                </tr>
+                                <tr class="border-black">
+                                    <td>Sisa Tagihan</td>
+                                    <td class="text-right">
+                                        <span t-field="o.residual" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- DO NOT REMOVE THIS TABLE. MANDATORY IN SOME COUNTRIES -->
+                    <div class="row" t-if="len(o.tax_line_ids) > 0">
+                        <div class="col-xs-6">
+                            <table class="table table-condensed">
+                                <thead>
+                                    <tr>
+                                        <th>Tax</th>
+                                        <th class="text-right">Base</th>
+                                        <th class="text-right">Amount</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr t-foreach="o.tax_line_ids" t-as="t">
+                                        <td><span t-field="t.tax_id.description"/></td>
+                                        <td class="text-right">
+                                            <span t-field="t.base" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                                        </td>
+                                        <td class="text-right">
+                                            <span t-field="t.amount" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!--Detail Pembayaran dan Ttd-->
+                    <div class="row">
+                        <!--Detail Pembayaran kotak sebelah kiri-->
+                        <div class="col-xs-8">
+                            <h5><strong>DETAIL PEMBAYARAN</strong></h5>
+                            <!--Detail Pembayaran-->
+                            <div style="border:1px solid black; padding:5px">
+                                <div class="row">
+                                    <div class="col-xs-4">
+                                        NAMA BANK:
+                                    </div>
+                                    <div class="col-xs-8">
+                                        Bank Central Asia
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-xs-4">
+                                        CABANG BANK:
+                                    </div>
+                                    <div class="col-xs-8">
+                                        Surabaya
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-xs-4">
+                                        NOMOR AKUN BANK:
+                                    </div>
+                                    <div class="col-xs-8">
+                                        4647457788
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-xs-4">
+                                        ATAS NAMA:
+                                    </div>
+                                    <div class="col-xs-8">
+                                        Sukses Printnusa Indonesia, PT
+                                    </div>
+                                </div>
+                            </div>
+                            <!--Terbilang-->
+                            <div style="border:1px solid black; margin-top:10px; padding:5px">
+                                <div class="row">
+                                    <div class="col-xs-12">
+                                        TERBILANG
+                                        <br/>
+                                        <span t-field="o.amount_to_text"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!--TTD sebelah kanan-->
+                        <div class="col-xs-4" style="text-align: center; text-alignment: right">
+                            <span style="font-size: 16px">Hormat Kami,</span>
+                            <br/>
+                            <br/>
+                            <br/>
+                            <br/>
+                            <br/>
+                            <br/>
+                            <br/>
+                            .................................
+                        </div>
+                    </div>
+                </div>
+            </t>
+        </template>
+
+        <template id="report_invoice_custom">
+            <t t-call="report.html_container">
+                <t t-foreach="docs" t-as="o">
+                    <t t-call="lpj_sales.report_invoice_document" t-lang="o.partner_id.lang"/>
+                </t>
+            </t>
+        </template>
+    </data>
+</odoo>

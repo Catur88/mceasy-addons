@@ -1,0 +1,100 @@
+<odoo>
+    <data>
+        <record model="ir.ui.view" id="global_status_tree">
+            <field name="name">x.global.status.so.tree</field>
+            <field name="model">x.global.status.so</field>
+            <field name="arch" type="xml">
+
+                <tree create="false" class="text-center" default_order="name, x_so_line, create_date">
+                    <field name="name" bg_color="white:name != False;"/>
+                    <field name="x_customer_id" bg_color="white:x_customer_id != False;"/>
+                    <field name="x_so_line" bg_color="white:x_so_line != False;"/>
+                    <field name="x_qty_order" bg_color="white:x_qty_order != False;#09FD12:x_selisih_qty &lt; 1;red:x_selisih_qty &gt; 0"/>
+                    <field name="x_duedate" widget="date" bg_color="white:x_duedate != False;yellow:x_status_duedate &lt; 3;red:x_status_duedate &lt; 1;#09FD12:x_status_duedate_done == 'DONE ON TIME';orange:x_status_duedate_done == 'DONE LATE'"/>
+                    <field name="x_status_terakhir" bg_color="white:x_status_terakhir != False;white:x_status_terakhir == False;"/>
+                    <field name="x_status_confirm_1" class="text-center" fg_color="white:x_status_confirm_1=='-';" bg_color="#625C5B:x_status_confirm_1 == '-';#77d98f:x_status_confirm_1 not in (False, '-');white:x_status_confirm_1 == False"/>
+                    <field name="x_status_unlock_2" class="text-center" fg_color="white:x_status_unlock_2=='-';" bg_color="#625C5B:x_status_unlock_2 == '-';#77d98f:x_status_unlock_2 not in (False, '-');white:x_status_unlock_2 == False"/>
+                    <field name="x_status_planned_3" fg_color="white:x_status_planned_3=='-';" bg_color="#625C5B:x_status_planned_3 == '-';#77d98f:x_status_planned_3 not in (False, '-');white:x_status_planned_3 == False"/>
+                    <field name="x_status_material_4" fg_color="white:x_status_material_4=='-';" bg_color="#625C5B:x_status_material_4 == '-';#77d98f:x_status_material_4 not in (False, '-');white:x_status_material_4 == False"/>
+                    <field name="x_status_cetak_5" fg_color="white:x_status_cetak_5=='-';" bg_color="#625C5B:x_status_cetak_5 == '-';#77d98f:x_status_cetak_5 not in (False, '-');white:x_status_cetak_5 == False;#FBE37A:x_status_cetak_5_2 == 'START'"/>
+                    <field name="x_status_cetak_5_2" invisible="1"/>
+                    <field name="x_status_finishing_6" fg_color="white:x_status_finishing_6=='-';" bg_color="#625C5B:x_status_finishing_6 == '-';#77d98f:x_status_finishing_6 not in (False, '-');white:x_status_finishing_6 == False;#FBE37A:x_status_finishing_6_2 == 'START'"/>
+                    <field name="x_status_finishing_6_2" invisible="1"/>
+                    <field name="x_status_packing_7" fg_color="white:x_status_packing_7=='-';" bg_color="#625C5B:x_status_packing_7 == '-';#77d98f:x_status_packing_7 not in (False, '-');white:x_status_packing_7 == False;#FBE37A:x_status_packing_7_2 == 'START'"/>
+                    <field name="x_status_packing_7_2" invisible="1"/>
+                    <field name="x_status_partial_8" fg_color="white:x_status_partial_8=='-';" bg_color="#625C5B:x_status_partial_8 == '-';#77d98f:x_status_partial_8 not in (False, '-');white:x_status_partial_8 == False"/>
+                    <field name="x_status_full_9" fg_color="white:x_status_full_9=='-';" bg_color="#625C5B:x_status_full_9 == '-';#77d98f:x_status_full_9 not in (False, '-');white:x_status_full_9 == False"/>
+                    <field name="x_status_pengiriman_10" fg_color="white:x_status_pengiriman_10=='-';" bg_color="#625C5B:x_status_pengiriman_10 == '-';#77d98f:x_status_pengiriman_10 not in (False, '-');white:x_status_pengiriman_10 == False"/>
+                    <field name="x_status_duedate" invisible="1"/>
+                    <field name="x_status_duedate_done" invisible="1"/>
+                    <field name="x_status_duedate_done_save" invisible="1"/>
+                    <field name="x_total_leadtime_save" bg_color="white:name != False;"/>
+                    <field name="x_selisih_qty" invisible="1"/>
+                    <field name="x_total_leadtime" bg_color="white:name != False;" invisible="1"/>
+                </tree>
+            </field>
+        </record>
+
+         <record model="ir.ui.view" id="global_status_form">
+            <field name="name">x.global.status.so.form</field>
+            <field name="model">x.global.status.so</field>
+            <field name="arch" type="xml">
+                <form>
+                    <group>
+                        <field name="name"/>
+                        <field name="x_customer_id"/>
+                        <field name="x_so_line"/>
+                        <field name="x_status_repeat"/>
+                        <field name="x_qty_order"/>
+                        <field name="x_ok"/>
+                        <field name="x_sjk"/>
+                        <field name="x_product"/>
+                        <field name="x_duedate"/>
+                        <field name="x_status_confirm_1"/>
+                        <field name="x_status_unlock_2"/>
+                        <field name="x_status_planned_3"/>
+                        <field name="x_status_material_4"/>
+                        <field name="x_status_cetak_5"/>
+                        <field name="x_status_finishing_6"/>
+                        <field name="x_status_packing_7"/>
+                        <field name="x_status_partial_8"/>
+                        <field name="x_status_full_9"/>
+                        <field name="x_status_pengiriman_10"/>
+                        <field name="x_status_terakhir"/>
+                    </group>
+
+
+                    <!--<button name="act_req_dk" type="object" string="Request" class="oe_highlight" attrs="{'invisible':['|','|',('x_status_cr','=','reject'),('x_flag_reqdk','=',True),('x_flag_appdk','=',True)]}"/>-->
+                    <!--<button name="act_approve" type="object" string="Approve" class="oe_highlight" attrs="{'invisible':['|', '|','|',('x_status_cr','=','approve'), ('x_status_cr','=','reject'),('x_status_cr','=','done'),('x_is_salemanager', '=', False)]}"/>-->
+                </form>
+            </field>
+        </record>
+
+        <!-- Filter search design request -->
+        <record id="view_global_status_filter" model="ir.ui.view">
+            <field name="name">x.global.status.filter</field>
+            <field name="model">x.global.status.so</field>
+            <field name="arch" type="xml">
+                <search string="Global Status">
+                    <field name="name"></field>
+                    <separator/>
+                    <field name="x_product"></field>
+                    <field name="x_customer_id"></field>
+                    <!--<field name="x_sq"></field>-->
+                </search>
+            </field>
+         </record>
+
+        <record model="ir.actions.act_window" id="list_global_status">
+            <field name="name">Global Status</field>
+            <field name="res_model">x.global.status.so</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+
+        <menuitem name="Global Status SO" id="global_status_so"
+                  parent="sales_team.menu_sales"
+                  sequence="113"
+                  action="list_global_status"/>
+    </data>
+</odoo>

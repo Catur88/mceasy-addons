@@ -1,0 +1,44 @@
+<odoo>
+    <data>
+
+        <record model="ir.ui.view" id="other_precost_tree">
+            <field name="name">x.other.precost.tree</field>
+            <field name="model">x.other.precost</field>
+            <field name="arch" type="xml">
+
+                <tree>
+                    <field name="name"/>
+                    <field name="x_tgl_update"/>
+                    <field name="x_percentage"/>
+                </tree>
+            </field>
+        </record>
+
+         <record model="ir.ui.view" id="other_precost_form">
+            <field name="name">x.other.precost.form</field>
+            <field name="model">x.other.precost</field>
+            <field name="arch" type="xml">
+                <form>
+                        <group>
+                            <field name="name"/>
+                            <field name="x_tgl_update"/>
+                            <field name="x_percentage"/>
+
+                        </group>
+
+
+                    <!--<button name="act_req_dk" type="object" string="Request" class="oe_highlight" attrs="{'invisible':['|','|',('x_status_cr','=','reject'),('x_flag_reqdk','=',True),('x_flag_appdk','=',True)]}"/>-->
+                    <!--<button name="act_approve" type="object" string="Approve" class="oe_highlight" attrs="{'invisible':['|', '|','|',('x_status_cr','=','approve'), ('x_status_cr','=','reject'),('x_status_cr','=','done'),('x_is_salemanager', '=', False)]}"/>-->
+                </form>
+            </field>
+        </record>
+
+        <record model="ir.actions.act_window" id="list_other_precost">
+            <field name="name">Other Precost</field>
+            <field name="res_model">x.other.precost</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+
+    </data>
+</odoo>

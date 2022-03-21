@@ -1,0 +1,66 @@
+<odoo>
+    <data>
+
+        <record model="ir.ui.view" id="product_type_tree">
+            <field name="name">x.product.type.tree</field>
+            <field name="model">x.product.type.precost</field>
+            <field name="arch" type="xml">
+
+                <tree>
+                    <field name="name"/>
+                    <field name="x_categ"/>
+                    <field name="x_tgl_update"/>
+                    <field name="x_moq"/>
+                    <field name="x_ids_proces_cost"/>
+                </tree>
+            </field>
+        </record>
+
+         <record model="ir.ui.view" id="product_type_form">
+            <field name="name">x.product.type.form</field>
+            <field name="model">x.product.type.precost</field>
+            <field name="arch" type="xml">
+                <form>
+
+                        <group>
+                            <field name="name"/>
+                            <field name="x_categ"/>
+                            <field name="x_tgl_update"/>
+                            <field name="x_moq"/>
+                            <field name="x_ids_proces_cost"/>
+                            <field name="x_profit_margin">
+                                <tree editable="bottom">
+                                    <field name="x_product_type_id" domain="[('id','=',parent.id)]" invisible="1"></field>
+                                    <field name="x_profit_margin_id"></field>
+                                    <field name="x_percentage"></field>
+                                </tree>
+                            </field>
+                            <field name="x_ids_bahan"/>
+                            <field name="x_ids_tinta"/>
+                            <field name="x_waste">
+                                <tree>
+                                    <field name="x_product_type_id" domain="[('id','=',parent.id)]" invisible="1"></field>
+                                    <field name="name"/>
+                                    <field name="x_batas_atas"/>
+                                    <field name="x_batas_bawah"/>
+                                    <field name="x_waste_config"/>
+                                </tree>
+                            </field>
+                        </group>
+
+
+                    <!--<button name="act_req_dk" type="object" string="Request" class="oe_highlight" attrs="{'invisible':['|','|',('x_status_cr','=','reject'),('x_flag_reqdk','=',True),('x_flag_appdk','=',True)]}"/>-->
+                    <!--<button name="act_approve" type="object" string="Approve" class="oe_highlight" attrs="{'invisible':['|', '|','|',('x_status_cr','=','approve'), ('x_status_cr','=','reject'),('x_status_cr','=','done'),('x_is_salemanager', '=', False)]}"/>-->
+                </form>
+            </field>
+        </record>
+
+        <record model="ir.actions.act_window" id="list_product_type">
+            <field name="name">Product Type</field>
+            <field name="res_model">x.product.type.precost</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+
+    </data>
+</odoo>

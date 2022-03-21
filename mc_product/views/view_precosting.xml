@@ -1,0 +1,672 @@
+<odoo>
+    <data>
+
+        <record model="ir.ui.view" id="x_sq_tree_view">
+            <field name="name">x.sq.tree</field>
+            <field name="model">x.sales.quotation</field>
+            <field name="arch" type="xml">
+                <tree default_order="create_date desc">
+                    <field name="name" string = "Code"/>
+                    <field name="x_sales_id" string = "Sales"/>
+                    <field name="x_customer_id" string = "Customer"/>
+                    <field name="item_description" string = "Item Name"/>
+                    <field name="x_repeat_order" string = "Repeat Order"/>
+                    <!--<field name="x_desc_sq" string = "Description"/>-->
+                    <field name="x_status_cr" string = "Status SQ" invisible="1"/>
+                    <field name="x_req_dk" />
+                    <!--<field name="x_status_dk"/>-->
+                    <field name="x_qty"/>
+                    <field name="x_harga_renego" string = "Harga Renego"/>
+                    <field name="x_state_renego" string = "Status Renego"/>
+                    <field name="x_flag_reqdk" invisible="1"/>
+                    <field name="x_flag_appdk" invisible="1"/>
+                    <field name="x_is_salemanager" invisible="1"/>
+
+                    <!--<button name="act_req_dk" type="object" string="Request" class="oe_highlight" attrs="{'invisible':['|','|',('x_status_cr','=','reject'),('x_flag_reqdk','=',True),('x_flag_appdk','=',True)]}"/>-->
+                    <!--<button name="act_approve" type="object" string="Approve" class="oe_highlight" attrs="{'invisible':['|', '|','|',('x_status_cr','=','approve'), ('x_status_cr','=','reject'),('x_status_cr','=','done'),('x_is_salemanager', '=', False)]}"/>-->
+                     <button name="reset_precosting"
+                                type="object"
+                                string="Reset"
+                                groups="base.group_system"
+                                class="oe_highlight"/>
+                    <button name="action_open_block_moq"
+                                type="object"
+                                string="Open Block MOQ"
+                                class="oe_highlight"
+                                groups="base.group_system"
+                                attrs="{'invisible':[('x_state_renego', '!=', '8')]}" />
+                    <button name="action_confirm_spv"
+                                type="object"
+                                string="Confirm"
+                                class="oe_highlight"
+                                groups="sales_team.group_sale_manager"
+                                attrs="{'invisible':[('x_state_renego', '!=', '5')]}"/>
+                    <!--<button name="act_reject" type="object" string="Reject" class="oe_highlight" attrs="{'invisible':['|',('x_status_cr','=','reject'),('x_status_cr','=','done')]}"/>-->
+                    <button name="act_reject" type="object" string="Reject" class="oe_highlight" attrs="{'invisible':[('x_state_renego', 'in', ('6'))]}"/>
+                </tree>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="x_sq_view">
+            <field name="name">x.sales.quotation.form</field>
+            <field name="model">x.sales.quotation</field>
+            <!--<field name="inherit_id" ref="crm.crm_stage_form"/>-->
+            <field name="arch" type="xml">
+                <form string="Sales Quotation Form" duplicate="0">
+                    <header>
+                        <button name="action_precosting"
+                                type="object"
+                                string="Precost"
+                                class="oe_highlight"
+                                attrs="{'invisible':[('x_state_renego', '!=', '1')]}"/>
+                        <button name="action_renego"
+                                type="object"
+                                string="Renego"
+                                class="oe_highlight"
+                                attrs="{'invisible':[('x_state_renego', 'not in', ('2','4','5', '6'))]}"/>
+
+                        <button name="action_confirm_dir"
+                                type="object"
+                                string="Confirm"
+                                class="oe_highlight"
+                                groups="base.group_system"
+                                attrs="{'invisible':[('x_state_renego', '!=', '3')]}"/>
+
+                        <!--<button name="action_pricing"-->
+                                <!--type="object"-->
+                                <!--string="Confirm"-->
+                                <!--class="oe_highlight"-->
+                                <!--groups="base.group_system"-->
+                                <!--attrs="{'invisible':[('x_state_renego', '!=', '3')]}"/>-->
+
+                        <button name="action_confirm_pricing"
+                                type="object"
+                                string="Confirm"
+                                class="oe_highlight"
+                                attrs="{'invisible':[('x_state_renego', '!=', '4')]}"/>
+
+                        <button name="action_confirm_spv"
+                                type="object"
+                                string="Confirm"
+                                class="oe_highlight"
+                                groups="sales_team.group_sale_manager"
+                                attrs="{'invisible':[('x_state_renego', '!=', '5')]}"/>
+
+                        <!--<button name="action_reject"-->
+                                <!--type="object"-->
+                                <!--string="Reject"-->
+                                <!--groups="sales_team.group_sale_manager"-->
+                                <!--attrs="{'invisible':[('x_state_renego', 'not in', ('3','5'))]}"/>-->
+                        <!--<field name="x_state_renego" widget="statusbar"/>-->
+                        <button name="act_reject"
+                                type="object"
+                                string="Reject"
+                                groups="sales_team.group_sale_manager"
+                                attrs="{'invisible':[('x_state_renego', 'not in', ('3','5'))]}"/>
+                        <field name="x_state_renego" widget="statusbar"/>
+
+                        <button name="reset_precosting"
+                                type="object"
+                                string="Set to Draft"
+                                class="oe_highlight"
+                                attrs="{'invisible':[('x_state_renego', 'in', ('7'))]}" />
+
+                        <button name="action_open_block_moq"
+                                type="object"
+                                string="Open Block MOQ"
+                                groups="base.group_system"
+                                attrs="{'invisible':[('x_state_renego', '!=', '8')]}" />
+
+                        <!--<button name="get_deals"-->
+                                <!--type="object"-->
+                                <!--string="Get Deals"-->
+                                <!--attrs="{'invisible': [('x_id_deals_zoho', '!=', False)]}"-->
+                                <!--class="oe_highlight"/>-->
+
+
+                    </header>
+
+                    <group>
+                        <field name="x_note_moq" style="text-align:center;font-size:20px;background:#E75B3E;font-weight:bold" readonly="1" attrs="{'invisible':[('x_state_renego','!=','8')]}"/>
+                        <group>
+                            <field name="item_description" string = "Item Name"/>
+                            <field name="x_repeat_order" string = "Repeat Order"/>
+                            <field name="description" string = "Description"/>
+                            <field name="compute_field" invisible="1"/>
+                            <field name="x_status_cr" string = "Status SQ" attrs="{'readonly': [('compute_field', '=', False)]}" invisible="1"/>
+                            <field name="x_sales_id" string = "Sales"/>
+                            <field name="x_customer_id" string = "Customer"/>
+                            <field name="x_request_date" string = "Request Date" invisible="1"/>
+                            <!--<field name="x_duedate_drawing" string = "Duedate Drawing"/>-->
+                            <!--<field name="x_id_estimated_product" domain = "[('x_crm_lead','=',x_id_lead)]" invisible="1" />-->
+                            <!--<field name="x_id_product_repeat" domain = "[('x_crm_lead_repeat','=',x_id_lead)]" invisible="1" />-->
+                            <!--<field name="x_id_lead" invisible="1"/>-->
+                            <!--<field name="x_code_deals_zoho"/>-->
+                            <!--<field name="x_id_deals_zoho" invisible="1"/>-->
+                            <!--<field name="x_id_contact_zoho" invisible="1"/>-->
+                            <!--<field name="x_manufacturing_type" attrs="{'readonly': True}"/>-->
+                            <!--<field name="x_planning_type" attrs="{'readonly': True}"/>-->
+
+                            <field name="x_cek_dir" invisible="1"/>
+                            <field name="x_cek_administrator" invisible="1"/>
+                            <field name="x_category_precost" invisible="1"/>
+
+
+                        </group>
+                        <group>
+                            <field name="x_product"/>
+                            <!--<field name="x_drawing_file_prd" widget="image"/>-->
+                            <!--<field name="x_status_dk"/>-->
+                            <field name="x_req_dk" string = "Request Duedate Kirim" />
+                            <field name="x_flag_kalkulator" invisible="1"/>
+                            <!--<field name="x_req_dk_digital" attrs="{'invisible':[('x_customer_id','!=',1407)]}" readonly="1"/>-->
+                            <!--<field name="x_tgl_plan_drawing" readonly="1"/>-->
+                            <!--<field name="x_tgl_plan_unlock" readonly="1"/>-->
+                            <!--<field name="x_tgl_plan_layout" readonly="1"/>-->
+                            <field name="x_flag_reqdk" invisible="1"/>
+                            <field name="x_flag_appdk" invisible="1"/>
+
+
+                        </group>
+                        <group>
+                            <!--<button name="act_req_dk" type="object" string="Request" class="oe_highlight" attrs="{'invisible':['|',('x_status_cr','=','reject'),('x_status_dk','=','requested')]}"/>-->
+                        </group>
+                        <group>
+                            <!--<button name="act_req_dk"-->
+                                    <!--type="object"-->
+                                    <!--string="Request Duedate"-->
+                                    <!--class="oe_highlight"-->
+                                    <!--attrs="{'invisible':['|',('x_status_cr','=','reject'),-->
+                                                             <!--('x_status_dk','=','requested')]}"/>-->
+                            <button name="action_confirm_dir"
+                                type="object"
+                                string="Confirm Special"
+                                class="oe_highlight"
+                                groups="account.group_account_manager"
+                                attrs="{'invisible':['|',('x_state_renego', 'in', ('1','6','7','8')), ('x_cek_dir','=',True)]}"/>
+                        </group>
+                        <group string="Estimated BOM">
+
+                            <field name="x_qty" string = "Quantity (pcs)" attrs="{'readonly':[('x_state_renego', '!=', '1')]}"/>
+                            <field name="x_flag_onchange" invisible="1"/>
+                            <field name="x_qty_m2" string = "Quantity Estimasi MKT (m2)" readonly="1"/>
+                            <field name="x_area_m2_tot2" string = "Quantity Estimasi PRD (m2)" readonly="1"/>
+                            <field name="x_length" attrs="{'readonly':[('x_state_renego', '!=', '1')]}"/>
+                            <field name="x_length_m" invisible = "1"/>
+                            <field name="x_width" attrs="{'readonly':[('x_state_renego', '!=', '1')]}"/>
+                            <field name="x_width_m" invisible="1"/>
+                            <!--<field name="x_packing_category_id" attrs="{'readonly':[('x_state_renego', '!=', '1')]}"/>-->
+                            <field name="x_satuan" attrs="{'readonly':[('x_state_renego', '!=', '1')]}"/>
+                            <field name="x_bentuk_prod" attrs="{'readonly':[('x_state_renego', '!=', '1')]}"/>
+
+                            <field name="x_product_type_precost" attrs="{'readonly':[('x_state_renego', '!=', '1')]}"/>
+                            <!--<field name="x_supplier_id" string = "Supplier" attrs="{'readonly':[('x_state_renego', '!=', '1')]}"/>-->
+                            <!--<field name="x_material_type_id" attrs="{'readonly':[('x_state_renego', '!=', '1')]}"/>-->
+                            <field name="x_material_type_id2" attrs="{'readonly':[('x_state_renego', '!=', '1')]}" domain = "['&amp;',('x_ids_type','=',x_product_type_precost),('x_active','=',True)]"/>
+                            <!--<field name="x_numbers_of_colors" attrs="{'readonly':[('x_state_renego', '!=', '1')]}"/>-->
+                            <field name="x_numbers_of_colors2" attrs="{'readonly':[('x_state_renego', '!=', '1')]}" domain = "[('x_ids_type','=',x_product_type_precost)]"/>
+                            <!--<field name="x_varnish" attrs="{'readonly':[('x_state_renego', '!=', '1')]}"/>-->
+                            <!--<field name="x_special_color" attrs="{'readonly':[('x_state_renego', '!=', '1')]}"/>-->
+                            <!--<field name="x_ink_coverage" attrs="{'readonly':[('x_state_renego', '!=', '1')]}"/>-->
+                            <field name="x_reg_cr_mkt" attrs="{'readonly':[('x_state_renego', '!=', '1')]}"/>
+                            <!--<field name="x_offering_digital" attrs="{'invisible':[('x_product_type_precost', '!=', 3)],'readonly':[('x_state_renego', '!=', '1')]}"/>-->
+                            <field name="x_offering_digital" attrs="{'readonly':[('x_state_renego', '!=', '1')]}"/>
+                            <field name="x_jumlah_cr_mkt" attrs="{'invisible':[('x_reg_cr_mkt','!=',True)]}"/>
+                            <!--<field name="x_mrpwordkcenter_id" string = "Prime Machine" invisible="1"/>-->
+
+                        </group>
+                        <group>
+                            <field name="x_harga_renego_sales" widget='monetary' groups="sales_team.group_sale_manager"/>
+                            <field name="x_harga_renego" widget='monetary' attrs="{'readonly':['&amp;',('x_state_renego', '=', '3'),('x_cek_administrator', '=', False)],'invisible':[('x_state_renego','=','8')]}"/>
+                            <!--<field name="x_harga_renego" string = "Harga Renego"/>-->
+                            <field name="x_renego_total" widget='monetary' attrs="{'invisible':[('x_state_renego','=','8')]}" groups="sales_team.group_sale_manager"/>
+                            <field name="x_profit_renego" attrs="{'invisible':['|',('x_state_renego','=','8'),('x_product_type_precost', '=', 3)]}" groups="sales_team.group_sale_manager"/>
+
+
+                        </group>
+                        <!--<group>-->
+                            <!--<field name="x_ids_feature" widget="many2many_checkboxes" attrs="{'readonly':[('x_state_renego', '!=', '1')]}"/>-->
+                        <!--</group>-->
+                        <!--<group>-->
+                            <!--<field name="x_ids_feature2"/>-->
+                        <!--</group>-->
+                    </group>
+                     <notebook>
+                         <page string="Feature">
+                             <group>
+                                 <group>
+                                    <field name="x_ids_feature" widget="many2many_checkboxes" attrs="{'readonly':[('x_state_renego', '!=', '1')]}"/>
+                                </group>
+                                <group>
+                                    <field name="x_ids_feature2"/>
+                                </group>
+                             </group>
+                         </page>
+                            <!--<page string="PreCosting" id="page_precosting_sq">-->
+                                <!--<group>-->
+                                    <!--<group string="Estimated BOM">-->
+
+
+                                    <!--</group>-->
+                                    <!--<group></group>-->
+                                    <!--<group>-->
+                                        <!--<group>-->
+                                            <!--&lt;!&ndash;<field name="x_qty" string = "Quantity (pcs)" attrs="{'readonly':[('x_state_renego', '!=', '1')]}"/>&ndash;&gt;-->
+                                            <!--&lt;!&ndash;<field name="x_flag_onchange" invisible="1"/>&ndash;&gt;-->
+                                            <!--&lt;!&ndash;<field name="x_qty_m2" string = "Quantity Estimasi MKT (m2)" readonly="1"/>&ndash;&gt;-->
+                                            <!--&lt;!&ndash;<field name="x_area_m2_tot2" string = "Quantity Estimasi PRD (m2)" readonly="1"/>&ndash;&gt;-->
+                                            <!--&lt;!&ndash;<field name="x_length" attrs="{'readonly':[('x_state_renego', '!=', '1')]}"/>&ndash;&gt;-->
+                                            <!--&lt;!&ndash;<field name="x_length_m" invisible = "1"/>&ndash;&gt;-->
+                                            <!--&lt;!&ndash;<field name="x_width" attrs="{'readonly':[('x_state_renego', '!=', '1')]}"/>&ndash;&gt;-->
+                                            <!--&lt;!&ndash;<field name="x_width_m" invisible="1"/>&ndash;&gt;-->
+                                            <!--&lt;!&ndash;<field name="x_packing_category_id" attrs="{'readonly':[('x_state_renego', '!=', '1')]}"/>&ndash;&gt;-->
+                                            <!--&lt;!&ndash;<field name="x_satuan" attrs="{'readonly':[('x_state_renego', '!=', '1')]}"/>&ndash;&gt;-->
+
+                                            <!--&lt;!&ndash;<field name="x_product_type_precost" attrs="{'readonly':[('x_state_renego', '!=', '1')]}"/>&ndash;&gt;-->
+                                            <!--&lt;!&ndash;&lt;!&ndash;<field name="x_supplier_id" string = "Supplier" attrs="{'readonly':[('x_state_renego', '!=', '1')]}"/>&ndash;&gt;&ndash;&gt;-->
+                                            <!--&lt;!&ndash;&lt;!&ndash;<field name="x_material_type_id" attrs="{'readonly':[('x_state_renego', '!=', '1')]}"/>&ndash;&gt;&ndash;&gt;-->
+                                            <!--&lt;!&ndash;<field name="x_material_type_id2" attrs="{'readonly':[('x_state_renego', '!=', '1')]}" domain = "[('x_ids_type','=',x_product_type_precost)]"/>&ndash;&gt;-->
+                                            <!--&lt;!&ndash;&lt;!&ndash;<field name="x_numbers_of_colors" attrs="{'readonly':[('x_state_renego', '!=', '1')]}"/>&ndash;&gt;&ndash;&gt;-->
+                                            <!--&lt;!&ndash;<field name="x_numbers_of_colors2" attrs="{'readonly':[('x_state_renego', '!=', '1')]}" domain = "[('x_ids_type','=',x_product_type_precost)]"/>&ndash;&gt;-->
+                                            <!--&lt;!&ndash;&lt;!&ndash;<field name="x_varnish" attrs="{'readonly':[('x_state_renego', '!=', '1')]}"/>&ndash;&gt;&ndash;&gt;-->
+                                            <!--&lt;!&ndash;&lt;!&ndash;<field name="x_special_color" attrs="{'readonly':[('x_state_renego', '!=', '1')]}"/>&ndash;&gt;&ndash;&gt;-->
+                                            <!--&lt;!&ndash;&lt;!&ndash;<field name="x_ink_coverage" attrs="{'readonly':[('x_state_renego', '!=', '1')]}"/>&ndash;&gt;&ndash;&gt;-->
+                                            <!--&lt;!&ndash;<field name="x_reg_cr_mkt" attrs="{'readonly':[('x_state_renego', '!=', '1')]}"/>&ndash;&gt;-->
+                                            <!--&lt;!&ndash;<field name="x_offering_digital" attrs="{'invisible':[('x_product_type_precost', '!=', 9)],'readonly':[('x_state_renego', '!=', '1')]}"/>&ndash;&gt;-->
+                                            <!--&lt;!&ndash;<field name="x_jumlah_cr_mkt" attrs="{'invisible':[('x_reg_cr_mkt','!=',True)]}"/>&ndash;&gt;-->
+                                            <!--&lt;!&ndash;<field name="x_mrpwordkcenter_id" string = "Prime Machine" invisible="1"/>&ndash;&gt;-->
+                                        <!--</group>-->
+                                        <!--<group>-->
+                                                <!--&lt;!&ndash;&lt;!&ndash;<field name="x_mrpwordkcenter_id" string = "Prime Machine"/>&ndash;&gt;&ndash;&gt;-->
+                                                <!--&lt;!&ndash;<field name="x_ids_feature" widget="many2many_checkboxes" attrs="{'readonly':[('x_state_renego', '!=', '1')]}"/>&ndash;&gt;-->
+
+                                        <!--</group>-->
+                                    <!--</group>-->
+                                    <!--<group>-->
+
+                                            <!--&lt;!&ndash;<field name="x_ids_feature2"/>&ndash;&gt;-->
+
+                                    <!--</group>-->
+
+                                    <!--<group string="Precost 2.0" invisible="1">-->
+                                        <!--&lt;!&ndash;<field name="x_mrpwordkcenter_id" string = "Prime Machine" invisible="1"/>&ndash;&gt;-->
+                                        <!--<field name="x_material_type_id" attrs="{'readonly':[('x_state_renego', '!=', '1')]}"/>-->
+                                        <!--<field name="x_numbers_of_colors" attrs="{'readonly':[('x_state_renego', '!=', '1')]}"/>-->
+                                        <!--<field name="x_varnish" attrs="{'readonly':[('x_state_renego', '!=', '1')]}"/>-->
+                                        <!--<field name="x_special_color" attrs="{'readonly':[('x_state_renego', '!=', '1')]}"/>-->
+                                        <!--<field name="x_ink_coverage" attrs="{'readonly':[('x_state_renego', '!=', '1')]}"/>-->
+                                        <!--<field name="x_lamination" attrs="{'readonly':[('x_state_renego', '!=', '1')]}" />-->
+                                        <!--<field name="x_category_foil" attrs="{'readonly':[('x_state_renego', '!=', '1')]}"/>-->
+
+                                    <!--</group>-->
+                                <!--</group>-->
+                            <!--</page>-->
+                            <page string="Price" id="page_price" groups="sales_team.group_sale_manager,sales_team.group_sale_salesman">
+                                <group>
+                                    <group string="Porpose">
+                                        <!--<field name="x_propose_price_low" attrs="{'readonly': [('compute_field', '=', False)]}"/>-->
+                                        <!--<field name="x_propose_price_high" attrs="{'readonly': [('compute_field', '=', False)]}"/>-->
+                                        <field name="start_of_date"></field>
+                                        <field name="end_of_date"></field>
+                                    </group>
+                                    <group string="Price">
+                                        <field name="compute_field" invisible="1"/>
+                                        <field name="x_price_low" attrs="{'invisible':[('x_state_renego','=','8')]}"/>
+                                        <field name="x_price_high" attrs="{'invisible':[('x_state_renego','=','8')]}"/>
+                                        <field name="x_price_low_digital" attrs="{'invisible':[('x_state_renego','!=','8')]}"/>
+                                        <field name="x_price_high_digital" attrs="{'invisible':[('x_state_renego','!=','8')]}"/>
+                                        <field name="x_price_fix" />
+                                        <!--<field name="x_price_fix_odoo" groups="base.group_system"/>-->
+                                        <field name="x_harga_repeat" domain="[('order_id','=', x_order)]" attrs="{'invisible':[('x_repeat_order','!=',True)]}"/>
+                                        <!--<field name="x_hpp"/>-->
+                                    </group>
+
+                                    <field name="x_range_price_sq" string="Price Range" attrs="{'invisible':['|',('x_state_renego','=','8'),('x_product_type_precost', '=', 8)]}">
+                                        <!--<field name="x_cek_administrator" invisible="1"/>-->
+                                        <tree create="false" edit="false" editable="bottom" decoration-danger ="x_hpp_pcs == 0">
+                                            <field name="currency_id" invisible="1"/>
+                                            <!--<field name="name" string="Nama"/>-->
+                                            <!--<field name="x_quantity" string="Quantity"/>-->
+                                            <field name="x_quantity_range" string="Quantity Range"/>
+                                            <!--<field name="x_quantity_roundup" string="Quantity Roundup"/>-->
+                                            <!--<field name="x_quantity_roundup2" string="Quantity Roundup2"/>-->
+                                            <!--<field name="x_quantity_m2" string="Quantity m2"/>-->
+                                            <field name="x_price_pcs" widget="monetary" string="Price per pcs"/>
+                                            <!--<field name="x_coba" string="Coba"/>-->
+                                            <!--<field name="x_price_pcs_range2" string="Price per pcs range"/>-->
+                                            <!--<field name="x_price_m2" string="Price per m2"/>-->
+                                            <field name="x_price_total_range" string="Price Total"/>
+                                            <field name="x_hpp_pcs" widget="monetary" string="HPP per pcs" groups="sales_team.group_sale_manager"/>
+                                            <!--<field name="x_hpp_total" widget="monetary" string="HPP Total" groups="base.group_system"/>-->
+                                            <!--<field name="x_hpp_m2" string="HPP per m2" />-->
+                                            <field name="x_hpp_total_range" string="HPP Total" groups="sales_team.group_sale_manager"/>
+                                            <field name="x_prosentase_profit" string="Prosentase Profit (%)" groups="sales_team.group_sale_manager"/>
+                                            <!--<field name="x_prosentase_profit_range" groups="base.group_system"/>-->
+                                        </tree>
+                                    </field>
+
+                                    <field name="x_range_price_sq2" string="Price Range" attrs="{'invisible':['|',('x_state_renego','=','8'),('x_product_type_precost', '!=', 8)]}">
+                                        <!--<field name="x_cek_administrator" invisible="1"/>-->
+                                        <tree create="false" edit="false" editable="bottom" >
+                                            <field name="currency_id" invisible="1"/>
+                                            <field name="name" string="Nama Kategori"/>
+                                            <field name="x_quantity" string="Quantity Minimum (pcs)"/>
+                                            <!--<field name="x_quantity_range" string="Quantity Range"/>-->
+                                            <!--<field name="x_quantity_roundup" string="Quantity Roundup"/>-->
+                                            <!--<field name="x_quantity_roundup2" string="Quantity Roundup2"/>-->
+                                            <!--<field name="x_quantity_m2" string="Quantity m2"/>-->
+                                            <field name="x_price_pcs" string="Price per pcs (Rp)"/>
+                                            <field name="x_price_total" string="Price Total (Rp)"/>
+                                            <!--<field name="x_coba" string="Coba"/>-->
+                                            <!--<field name="x_price_pcs_range" string="Price per pcs range"/>-->
+                                            <!--<field name="x_price_m2" string="Price per m2"/>-->
+                                            <!--<field name="x_price_total_range" string="Price Total"/>-->
+                                            <!--<field name="x_hpp_pcs" widget="monetary" string="HPP per pcs" groups="base.group_system"/>-->
+                                            <!--<field name="x_hpp_m2" string="HPP per m2" />-->
+                                            <!--<field name="x_hpp_total_range" string="HPP Total" groups="base.group_system"/>-->
+                                            <!--<field name="x_prosentase_profit" string="Prosentase Profit" groups="base.group_system"/>-->
+                                        </tree>
+                                    </field>
+                                </group>
+                            </page>
+
+                             <page name="summary_precosting" string="Summary Precosting" groups="sales_team.group_sale_manager">
+                                 <group>
+                                     <group></group>
+                                     <group></group>
+
+                                     <p style="font-size:20px;">Summary Precosting <strong></strong></p>
+                                    <field name="x_summary_precosting" string=" " attrs="{'invisible':[('x_product_type_precost', '=', 8)]}">
+                                        <tree editable = 'bottom' fonts="bold:name in ('Total COGS (HPP)', 'Total Sales Price Low', 'Total Sales Price High')">
+                                            <field name="name" string="Cost Factor" bg_color="#bed1d1:name in ('Total COGS (HPP)','Total Sales Price Low', 'Total Sales Price High');white:name not in ('Total COGS (HPP)','Total Sales Price Low', 'Total Sales Price High')"/>
+                                            <field name="x_cost_m2" string="Cost/m2 (Rp)" bg_color="#bed1d1:name in ('Total COGS (HPP)','Total Sales Price Low', 'Total Sales Price High');white:name not in ('Total COGS (HPP)','Total Sales Price Low', 'Total Sales Price High')"/>
+                                            <field name="x_cost_pcs" string="Cost/pcs (Rp)" bg_color="#bed1d1:name in ('Total COGS (HPP)','Total Sales Price Low', 'Total Sales Price High');white:name not in ('Total COGS (HPP)','Total Sales Price Low', 'Total Sales Price High')"/>
+                                            <field name="x_total_cost" string="Total Cost (Rp)" bg_color="#bed1d1:name in ('Total COGS (HPP)','Total Sales Price Low', 'Total Sales Price High');white:name not in ('Total COGS (HPP)','Total Sales Price Low', 'Total Sales Price High')"/>
+                                            <field name="x_cost_margin_hpp3" bg_color="#bed1d1:name in ('Total COGS (HPP)','Total Sales Price Low', 'Total Sales Price High');white:name not in ('Total COGS (HPP)','Total Sales Price Low', 'Total Sales Price High')"/>
+                                            <field name="x_cost_margin_low3" bg_color="#bed1d1:name in ('Total COGS (HPP)','Total Sales Price Low', 'Total Sales Price High');white:name not in ('Total COGS (HPP)','Total Sales Price Low', 'Total Sales Price High')"/>
+                                            <field name="currency_id" invisible="1"/>
+                                        </tree>
+                                    </field>
+
+                                     <field name="x_summary_precosting2" string=" " attrs="{'invisible':[('x_product_type_precost', '!=', 8)]}">
+                                        <tree editable = 'bottom' fonts="bold:name in ('Total COGS (HPP)', 'Total Sales Price Low', 'Total Sales Price High')">
+                                            <field name="name" string="Cost Factor"/>
+                                            <field name="x_cost_m2" string="Cost/m2 (Rp)" />
+                                            <!--<field name="x_cost_pcs" string="Cost/pcs" widget='monetary' />-->
+                                            <!--<field name="x_total_cost" string="Total Cost" widget='monetary' />-->
+                                            <!--<field name="x_cost_margin_hpp3"/>-->
+                                            <!--<field name="x_cost_margin_low3"/>-->
+                                            <field name="currency_id" invisible="1"/>
+                                        </tree>
+                                    </field>
+                                     <group>
+                                         <!--<field name="x_cost_m2_hpp" widget="monetary"/>-->
+                                         <!--<field name="x_cost_pcs_hpp" widget="monetary"/>-->
+                                         <!--<field name="x_total_cost_hpp" widget="monetary"/>-->
+                                     </group>
+                                     <group></group>
+                                     <!--<p style="font-size:20px;">Summary Precosting <strong>Low</strong></p>-->
+                                     <!--<field name="x_summary_precosting_low" string=" ">-->
+                                        <!--<tree editable = 'bottom'>-->
+                                            <!--<field name="name" string="Cost Factor"/>-->
+                                            <!--<field name="x_cost_m2" string="Cost/m2" widget='monetary'/>-->
+                                            <!--<field name="x_cost_pcs" string="Cost/pcs" widget='monetary'/>-->
+                                            <!--<field name="x_total_cost" string="Total Cost" widget='monetary'/>-->
+                                            <!--<field name="x_cost_margin_hpp3" />-->
+                                            <!--<field name="x_cost_margin_low3" />-->
+                                            <!--<field name="currency_id" invisible="1"/>-->
+                                        <!--</tree>-->
+                                    <!--</field>-->
+                                     <group>
+                                         <!--<field name="x_cost_m2_low" widget="monetary"/>-->
+                                         <!--<field name="x_cost_pcs_low" widget="monetary"/>-->
+                                         <!--<field name="x_total_cost_low" widget="monetary"/>-->
+                                     </group>
+                                     <group></group>
+
+                                     <!--<p style="font-size:20px;">Summary Precosting <strong>High</strong></p>-->
+                                     <!--<field name="x_summary_precosting_high" string=" ">-->
+                                        <!--<tree editable = 'bottom'>-->
+                                            <!--<field name="name" string="Cost Factor"/>-->
+                                            <!--<field name="x_cost_m2" string="Cost/m2" widget='monetary' />-->
+                                            <!--<field name="x_cost_pcs" string="Cost/pcs" widget='monetary' />-->
+                                            <!--<field name="x_total_cost" string="Total Cost" widget='monetary' />-->
+                                            <!--<field name="x_cost_margin_hpp3" />-->
+                                            <!--<field name="x_cost_margin_low3" />-->
+                                            <!--<field name="currency_id" invisible="1"/>-->
+                                        <!--</tree>-->
+                                    <!--</field>-->
+                                     <group>
+                                         <!--<field name="x_cost_m2_high" widget="monetary" font="bold"/>-->
+                                         <!--<field name="x_cost_pcs_high" widget="monetary"/>-->
+                                         <!--<field name="x_total_cost_high" widget="monetary"/>-->
+                                     </group>
+
+                                 </group>
+                             </page>
+
+                             <page string="Pricing GM" groups="sales_team.group_sale_manager">
+
+                                            <group>
+                                                <group string = 'Detail Precost'>
+                                                <field name="currency_id" invisible="1"/>
+                                                <field name="x_hpp_total" widget='monetary' attrs="{'invisible':[('x_product_type_precost', '=', 3)]}"/>
+                                                <field name="x_price_renego_low_digital" widget='monetary' attrs="{'invisible':[('x_product_type_precost', '!=', 8)]}"/>
+                                                <field name="x_hpp_pcs" widget='monetary' attrs="{'invisible':[('x_product_type_precost', '=', 8)]}"/>
+                                                <field name="x_price_total" string = "Harga Standart Total" widget='monetary' />
+                                                <field name="x_price_high2" string = "Harga Standart/pcs" readonly="1" widget='monetary' />
+                                                <field name="x_profit_standart" attrs="{'invisible':[('x_product_type_precost', '=', 8)]}"/>
+                                                <field name="x_m2_standart" widget='monetary' />
+                                                <field name="x_renego_total2" widget='monetary' />
+                                                <field name="x_harga_renego2" string = "Harga Renego/pcs" widget='monetary' />
+                                                <field name="x_profit_renego2" attrs="{'invisible':[('x_product_type_precost', '=', 8)]}"/>
+                                                <field name="x_m2_renego" widget='monetary' />
+                                                </group>
+                                                <group string = 'Waste'>
+                                                <field name="x_area_m2_tot" readonly="1" groups="sales_team.group_sale_manager"/>
+                                                <field name="x_waste_produksi" readonly="1" groups="sales_team.group_sale_manager"/>
+                                                <field name="x_waste_produksi_m2" readonly="1" groups="sales_team.group_sale_manager"/>
+                                                <field name="x_waste_config" readonly="1" groups="sales_team.group_sale_manager"/>
+                                                <field name="x_waste_config_m2" readonly="1" groups="sales_team.group_sale_manager"/>
+                                                <field name="x_total_waste_m2" readonly="1" groups="sales_team.group_sale_manager"/>
+                                            </group>
+
+                                            </group>
+
+                                        <!--<tree editable = 'bottom'>-->
+                                            <!--<field name="currency_id" invisible="1"/>-->
+                                            <!--<field name="x_hpp_total" widget='monetary' />-->
+                                            <!--<field name="x_hpp_pcs" widget='monetary' />-->
+                                            <!--<field name="x_price_total" string = "Harga Standart Total" widget='monetary' />-->
+                                            <!--<field name="x_price_high2" string = "Harga Standart/pcs" readonly="1" widget='monetary' />-->
+                                            <!--<field name="x_profit_standart"/>-->
+                                            <!--<field name="x_m2_standart" widget='monetary' />-->
+                                            <!--<field name="x_renego_total2" widget='monetary' />-->
+                                            <!--<field name="x_harga_renego2" string = "Harga Renego/pcs" widget='monetary' />-->
+                                            <!--<field name="x_profit_renego2"/>-->
+                                            <!--<field name="x_m2_renego" widget='monetary' />-->
+                                        <!--</tree>-->
+                             </page>
+
+                             <page name="price_level" string="Analysis Price Level" groups="sales_team.group_sale_manager">
+                                    <field name="x_price_level" >
+                                        <tree editable = 'bottom'>
+                                            <field name="currency_id" invisible="1"/>
+                                            <field name="name" string="Cost Factor" attrs="{'invisible':[('name','=','Director Bottom Price')]}"/>
+                                            <field name="x_cost_pcs" string="Price/pcs" widget="monetary" attrs="{'invisible':[('name','=','Director Bottom Price')]}"/>
+                                            <field name="x_cost_m2" string="Price/m2" widget="monetary" attrs="{'invisible':[('name','=','Director Bottom Price')]}"/>
+                                            <field name="x_total_cost" string="Total Price" widget="monetary" attrs="{'invisible':[('name','=','Director Bottom Price')]}"/>
+                                            <field name="x_percentage" attrs="{'invisible':[('name','=','Director Bottom Price')]}"/>
+                                        </tree>
+                                    </field>
+                             </page>
+
+                             <page name="history_sq" string="History SQ">
+                                <field name="x_history_sq">
+                                    <tree editable = 'bottom' default_order="create_date desc">
+                                        <field name="currency_id" invisible="1"/>
+                                        <field name="name" string="Action"/>
+                                        <field name="create_date" string="Tanggal Action"/>
+                                        <field name="create_uid" string="Admin"/>
+                                        <field name="x_quantity" string="Quantity"/>
+                                        <field name="x_price" string="Price" widget="monetary"/>
+                                        <field name="x_description" string="Keterangan"/>
+                                    </tree>
+                                </field>
+                            </page>
+
+                            <page name="purchase_price" string="Purchase Price">
+                                <group>
+                                    <group>
+                                        <field name="x_status_quo_purchase" />
+                                        <field name="x_quo_purchase_price_pcs" />
+                                    </group>
+                                </group>
+                            </page>
+
+
+
+                            <!--<page name="summary_precosting_repeat" string="Summary Precosting Repeat" groups="base.group_system">-->
+                                <!--<field name="x_summary_precosting_repeat" >-->
+                                    <!--<tree editable = 'bottom'>-->
+                                        <!--<field name="name" string="Cost Factor"/>-->
+                                        <!--<field name="x_cost_m2" string="Cost/m2"/>-->
+                                        <!--<field name="x_cost_pcs" string="Cost/pcs"/>-->
+                                        <!--<field name="x_total_cost" string="Total Cost"/>-->
+                                        <!--<field name="x_cost_margin_hpp" string="Cost Margin to HPP"/>-->
+                                        <!--<field name="x_cost_margin_low" string="Cost Margin to Price Low"/>-->
+                                    <!--</tree>-->
+                                <!--</field>-->
+                            <!--</page>-->
+
+
+
+
+
+
+                            <page name="history_sq_win" string="History Harga Product"
+                                  attrs="{'invisible': [('x_repeat_order', '=', False)]}">
+                                <group>
+                                    <group></group>
+                                    <group></group>
+                                    <!--<group>-->
+                                    <p style="font-size:20px;">History SQ <strong>WIN</strong></p>
+                                        <field name="x_history_win" string=" ">
+                                            <!--<group>-->
+                                            <tree>
+                                                <field name="currency_id" invisible="1"/>
+                                                <field name="name"/>
+                                                <field name="x_sq_win"/>
+                                                <field name="x_date" string = "Tanggal SQ"/>
+                                                <field name="x_quantity" string = "Quantity"/>
+                                                <field name="x_total_cost" string = "Total Price" widget="monetary"/>
+                                                <field name="x_cost_pcs" string = "Harga/pcs" widget="monetary"/>
+                                                <!--<field name="x_cost_m2" string = "Harga/m2"/>-->
+                                                <field name="x_profit" string = "Profit Harga"/>
+                                            </tree>
+                                            <!--</group>-->
+                                        </field>
+
+
+                                        <p style="font-size:20px;">History SQ <strong>LOST</strong></p>
+                                        <field name="x_history_lost" string=" ">
+                                            <!--<group>-->
+                                            <tree>
+                                                <field name="currency_id" invisible="1"/>
+                                                <field name="name"/>
+                                                <field name="x_sq_lost"/>
+                                                <field name="x_date" string = "Tanggal SQ"/>
+                                                <field name="x_quantity" string = "Quantity"/>
+                                                <field name="x_total_cost" string = "Total Price" widget="monetary"/>
+                                                <field name="x_cost_pcs" string = "Harga/pcs" widget="monetary"/>
+                                                <!--<field name="x_cost_m2" string = "Harga/m2"/>-->
+                                                <field name="x_profit" string = "Profit Harga"/>
+                                            </tree>
+                                            <!--</group>-->
+                                        </field>
+
+                                        <p style="font-size:20px;">History SQ <strong>PENDING</strong></p>
+                                        <field name="x_history_pending" string=" ">
+                                            <!--<group>-->
+                                            <tree>
+                                                <field name="currency_id" invisible="1"/>
+                                                <field name="name"/>
+                                                <field name="x_sq_pending"/>
+                                                <field name="x_date" string = "Tanggal SQ"/>
+                                                <field name="x_quantity" string = "Quantity"/>
+                                                <field name="x_total_cost" string = "Total Price" widget="monetary"/>
+                                                <field name="x_cost_pcs" string = "Harga/pcs" widget="monetary"/>
+                                                <!--<field name="x_cost_m2" string = "Harga/m2"/>-->
+                                                <field name="x_profit" string = "Profit Harga"/>
+                                            </tree>
+                                            <!--</group>-->
+                                        </field>
+                                    <!--</group>-->
+                                </group>
+                            </page>
+
+                     </notebook>
+                    <div class="oe_chatter">
+                        <field name="message_follower_ids" widget="mail_followers"/>
+                        <field name="message_ids" widget="mail_thread"/>
+                    </div>
+                </form>
+            </field>
+        </record>
+
+
+        <!-- Filter search design request -->
+        <record id="view_quotation_filter" model="ir.ui.view">
+            <field name="name">x.sales.quotation.filter</field>
+            <field name="model">x.sales.quotation</field>
+            <field name="arch" type="xml">
+                <search string="Sales Quotation">
+                    <field name="name"></field>
+                    <separator/>
+                    <field name="x_product"></field>
+                    <field name="item_description"></field>
+                    <field name="x_customer_id"></field>
+                    <!--<field name="x_sq"></field>-->
+                </search>
+            </field>
+         </record>
+
+
+          <record model="ir.actions.act_window" id="x_sq">
+            <field name="name">Precosting</field>
+            <field name="res_model">x.sales.quotation</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+              <field name="view_id" ref="x_sq_tree_view"></field>
+            <field name="domain">[('name', 'not in', ['Kalkulator'])]</field>
+        </record>
+
+
+        <record model="ir.ui.view" id="reject_reason_form">
+            <field name="name">rejectsq.reason.form</field>
+            <field name="model">x.reject.reason</field>
+            <field name="arch" type="xml">
+                <form string="Approval Stage Form">
+                    <sheet>
+                        <group>
+                            <field name="name"/>
+                            <field name="x_reject_reason"/>
+                            <field name="x_desc"/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!--<menuitem name="Precosting" id="menu_precosting"-->
+                          <!--parent="sales_team.menu_sales" sequence="9"/>-->
+
+
+        <menuitem id="x_sales_quotation" name="Precosting"
+                  parent="sales_team.menu_sales"
+                  sequence="9"
+                  action="x_sq"/>
+
+
+    </data>
+</odoo>
