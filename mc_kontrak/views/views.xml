@@ -84,7 +84,7 @@
                                         <tree editable="bottom" create="1">
                                             <field name="product_id"/>
                                             <field name="mc_qty_kontrak"/>
-                                            <field name="mc_qty_terpasang" readonly="1"/>
+                                            <field name="mc_qty_terpasang" readonly="1" string="QTY SO"/>
                                             <field name="mc_harga_produk"/>
                                             <field name="mc_harga_diskon"/>
                                             <field name="tax_id" domain="[('type_tax_use', '=', 'sale')]"/>
