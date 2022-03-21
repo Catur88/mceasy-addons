@@ -14,13 +14,6 @@
                             attrs="{'invisible': [('state', '!=', 'sale')]}"
                             icon="fa-cog">
                     </button>
-                    <!--                    <button-->
-                    <!--                            name="action_attachment"-->
-                    <!--                            type="object"-->
-                    <!--                            class="oe_stat_button"-->
-                    <!--                            string="Kirim SO"-->
-                    <!--                            icon="fa-paper-plane">-->
-                    <!--                    </button>-->
                     <button
                             name="action_view_wo_button"
                             type="object"
@@ -36,6 +29,9 @@
                     <button name="insert_kontrak"
                             type="object"
                             string="Insert Kontrak"/>
+                </field>
+                <field name="validity_date" position="before">
+                    <field name="x_no_po"/>
                 </field>
                 <field name="validity_date" position="before">
                     <field name="x_start_date"/>
@@ -68,7 +64,7 @@
                 <!--                Rename Column-->
                 <xpath expr="/form/sheet/notebook/page/field[@name='order_line']/tree/field[@name='qty_delivered']"
                        position="attributes">
-                    <attribute name="string">QTY Terpasang</attribute>
+                    <attribute name="string">QTY SO</attribute>
                 </xpath>
                 <!--                -->
                 <xpath expr="/form/sheet/notebook/page/field[@name='order_line']/tree/field[@name='name']"

@@ -221,6 +221,7 @@ class CustomSalesOrder(models.Model):
     # x_mc_harga_produk = fields.Monetary(string='Standard Price')
     x_mc_isopen = fields.Boolean()
     x_start_date = fields.Date(string='Start Date')
+    x_no_po = fields.Char(string='No PO Customer')
 
     def write(self, vals):
         print('method write diakses')
@@ -627,7 +628,7 @@ class WorkOrder(models.Model):
             self.env.cr.execute(query)
 
             query = """
-                            UPDATE mc_kontrak_work_order SET state = 'sale' WHERE id = %s
+                            UPDATE mc_kontrak_work_order SET state = 'done' WHERE id = %s
                     """ % self.id
             self.env.cr.execute(query)
 

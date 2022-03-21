@@ -34,7 +34,6 @@
         'report/kontrak_template.xml',
         'report/wo_report.xml',
         'report/wo_template.xml',
-        'report/custom_header.xml',
     ],
     # only loaded in demonstration mode
     'demo': [
