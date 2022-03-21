@@ -627,7 +627,7 @@ class WorkOrder(models.Model):
             self.env.cr.execute(query)
 
             query = """
-                            UPDATE mc_kontrak_work_order SET state = 'sale' WHERE id = %s
+                            UPDATE mc_kontrak_work_order SET state = 'done' WHERE id = %s
                     """ % self.id
             self.env.cr.execute(query)
 

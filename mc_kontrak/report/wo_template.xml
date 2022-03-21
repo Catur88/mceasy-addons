@@ -68,13 +68,46 @@
                 </t>
             </table>
 
+            <br/>
             <p>2. Instalasi Perangkat VSMS (Hardware)</p>
-            <table style="width:100%; table-layout:fixed;">
+            <table style="width:100%;">
                 <tr>
                     <td>a)</td>
                     <td>Perangkat VSMS sudah terpasang dengan baik</td>
-                    <td></td>
+                    <td style="border: 1px solid blue;" width="10"></td>
+
+                    <td>f)</td>
+                    <td>Kendaraan bisa dinyalakan mesinnya dengan normal</td>
+                    <td style="border: 1px solid blue;"></td>
                 </tr>
+                <tr>
+                    <td>b)</td>
+                    <td>Kabel 12V dan GND sudah terpasang</td>
+                    <td style="border: 1px solid blue;"></td>
+
+                    <td>g)</td>
+                    <td>Kabel sudah dirapikan</td>
+                    <td style="border: 1px solid blue;"></td>
+                </tr>
+                <tr>
+                    <td>c)</td>
+                    <td>Kabel relay sudah terpasang sesuai dengan wiring diagram</td>
+                    <td style="border: 1px solid blue;"></td>
+
+                    <td>h)</td>
+                    <td>LED biru bisa menyala tanpa kedip</td>
+                    <td style="border: 1px solid blue;"></td>
+                </tr>
+                <tr>
+                    <td>d)</td>
+                    <td>Kabel sensor sudah terpasang di out kunci kontak</td>
+                    <td style="border: 1px solid blue;" width="10"></td>
+
+                    <td>i)</td>
+                    <td>LED hijau bisa menyala tanpa kedip</td>
+                    <td style="border: 1px solid blue;" width="10"></td>
+                </tr>
+
             </table>
         </t>
     </template>
