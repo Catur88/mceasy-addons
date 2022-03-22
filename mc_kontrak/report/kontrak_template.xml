@@ -754,30 +754,50 @@
                 </thead>
                 <tbody class="sale_tbody">
                     <t t-foreach="doc.product_order_line" t-as="line">
-                        <tr>
-                            <td name="td_name">
-                                <span t-field="line.product_id.name"/>
-                            </td>
-                            <td name="td_qty" class="text-right">
-                                <span t-field="line.mc_qty_kontrak"/>
-                            </td>
-                            <td name="td_price" class="text-right">
-                                Rp.
-                                <span t-esc="line.mc_harga_produk"/>
-                            </td>
-                            <td name="td_price_discount" class="text-right">
-                                Rp.
-                                <span t-esc="line.mc_harga_diskon"/>
-                            </td>
-                            <td name="td_period">
-                                <span t-field="line.mc_period"/>
-                                -
-                                <span t-field="line.mc_period_info"/>
-                            </td>
-                            <td name="td_subtotal" class="text-right">
-                                <span t-field="line.mc_payment"/>
-                            </td>
-                        </tr>
+                        <t t-if="not line.display_type">
+                            <tr>
+                                <td name="td_name">
+                                    <span t-field="line.product_id.name"/>
+                                </td>
+                                <td name="td_qty" class="text-right">
+                                    <span t-field="line.mc_qty_kontrak"/>
+                                </td>
+                                <td name="td_price" class="text-right">
+                                    Rp.
+                                    <span t-esc="line.mc_harga_produk"/>
+                                </td>
+                                <td name="td_price_discount" class="text-right">
+                                    Rp.
+                                    <span t-esc="line.mc_harga_diskon"/>
+                                </td>
+                                <td name="td_period">
+                                    <span t-field="line.mc_period"/>
+                                    -
+                                    <span t-field="line.mc_period_info"/>
+                                </td>
+                                <td name="td_subtotal" class="text-right">
+                                    <span t-field="line.mc_payment"/>
+                                </td>
+                            </tr>
+                        </t>
+                        <t t-else="">
+                            <tr>
+                                <td colspan="6" class="text-right">
+                                    <b><span t-esc="doc.x_subtotal_otf"/></b>
+                                </td>
+                            </tr>
+                            <tr>
+
+                                <td name="td_section" colspan="6">
+                                    <b><span t-field="line.name"/></b>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="6" class="text-right">
+                                    <b><span t-esc="doc.x_subtotal_sub"/></b>
+                                </td>
+                            </tr>
+                        </t>
                     </t>
                     <tr>
                         <td colspan="5" class="text-right">Total</td>

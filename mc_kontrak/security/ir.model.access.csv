@@ -4,3 +4,4 @@ access_mc_kontrak_product_order_line,mc_kontrak.product_order_line,model_mc_kont
 access_mc_kontrak_histori_so,mc_kontrak.histori_so,model_mc_kontrak_histori_so,base.group_user,1,1,1,1
 access_mc_kontrak_work_order,mc_kontrak.work_order,model_mc_kontrak_work_order,base.group_user,1,1,1,1
 access_mc_kontrak_work_order_line,mc_kontrak.work_order_line,model_mc_kontrak_work_order_line,base.group_user,1,1,1,1
+access_mc_kontrak_device_wo,mc_kontrak.device_wo,model_mc_kontrak_device_wo,base.group_user,1,1,1,1

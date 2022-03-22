@@ -16,3 +16,4 @@ class HistoriSO(models.Model):
     x_status_pembayaran = fields.Char(string='Status Pembayaran')
     x_note = fields.Text(string='Note')
     x_qty_terpasang = fields.Integer(string='QTY Terpasang')
+    x_qty_so = fields.Integer(string='QTY SO')
