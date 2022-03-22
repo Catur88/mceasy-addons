@@ -373,9 +373,9 @@ class CustomSalesOrder(models.Model):
                 query = """
                             INSERT INTO mc_kontrak_histori_so(x_kontrak_id,
                             x_order_id, x_tgl_start, x_tgl_end, x_item, x_period, x_status_pembayaran,
-                            x_note) VALUES ('%s','%s','%s','%s','%s','%s','%s','')
+                            x_note) VALUES ('%s','%s',now(),'%s','%s','%s','%s','')
                         """ % (
-                    self.kontrak_id.id, row.order_id.id, self.x_start_date, self.validity_date, row.product_id.id,
+                    self.kontrak_id.id, row.order_id.id, self.validity_date, row.product_id.id,
                     periode, self.state)
                 self.env.cr.execute(query)
 
@@ -601,15 +601,12 @@ class WorkOrder(models.Model):
                 # self.env.cr.execute(query)
                 # getPeriod = self.env.cr.dictfetchone()
                 # periode = str(getPeriod['mc_period']) + " " + str(getPeriod['mc_period_info'])
-                #
-                # query = """
-                #             INSERT INTO mc_kontrak_histori_so(x_kontrak_id,
-                #             x_order_id, x_tgl_start, x_tgl_end, x_item, x_period, x_status_pembayaran,
-                #             x_note) VALUES ('%s','%s','%s','%s','%s','%s','%s','')
-                #         """ % (
-                #     self.kontrak_id.id, row.order_id.id, self.x_start_date, self.validity_date, row.product_id.id,
-                #     periode, self.state)
-                # self.env.cr.execute(query)
+
+                query = """
+                            UPDATE mc_kontrak_histori_so SET x_qty_terpasang = x_qty_terpasang + %s WHERE x_order_id = %s
+                            AND x_kontrak_id = %s AND id = %s
+                        """ % (row.qty_delivered, row.order_id.id, row.kontrak_id.id, row.kontrak_id.histori_so_line.id)
+                self.env.cr.execute(query)
 
                 if query:
                     print('oke, qty dikurangi')

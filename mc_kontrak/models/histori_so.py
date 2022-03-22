@@ -15,3 +15,4 @@ class HistoriSO(models.Model):
     x_period = fields.Char(string='Period')
     x_status_pembayaran = fields.Char(string='Status Pembayaran')
     x_note = fields.Text(string='Note')
+    x_qty_terpasang = fields.Integer(string='QTY Terpasang')
