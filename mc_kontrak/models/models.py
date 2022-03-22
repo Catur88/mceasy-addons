@@ -45,7 +45,9 @@ class mc_kontrak(models.Model):
     def write(self, vals):
         if self.product_order_line:
             print('hitung subtotal by section')
-            subtotal_otf = subtotal_sub = 0
+            subtotal_otf = 0
+            subtotal_sub = 0
+            print(subtotal_sub, subtotal_otf)
 
             query = """
                 SELECT id FROM mc_kontrak_product_order_line
@@ -62,6 +64,10 @@ class mc_kontrak(models.Model):
             self.env.cr.execute(query)
             print(query)
             subtotal_sub = self.env.cr.fetchone()[0]
+            if subtotal_sub is None:
+                subtotal_sub = 0
+
+            print(subtotal_sub)
 
             query = """
                 SELECT SUM(mc_payment) as subtotal_sub FROM mc_kontrak_product_order_line
@@ -70,6 +76,10 @@ class mc_kontrak(models.Model):
             self.env.cr.execute(query)
             print(query)
             subtotal_otf = self.env.cr.fetchone()[0]
+            if subtotal_otf is None:
+                subtotal_otf = 0
+
+            print(subtotal_otf)
 
             query = """
                 UPDATE mc_kontrak_mc_kontrak SET x_subtotal_otf = %s,
@@ -77,6 +87,7 @@ class mc_kontrak(models.Model):
             """ % (subtotal_sub, subtotal_otf, self.id)
             self.env.cr.execute(query)
             print(query)
+
         return super(mc_kontrak, self).write(vals)
 
     def action_sent(self):
