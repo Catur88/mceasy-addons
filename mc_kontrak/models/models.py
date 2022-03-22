@@ -439,7 +439,7 @@ class CustomSalesOrder(models.Model):
 class CustomSalesOrderLine(models.Model):
     _inherit = 'sale.order.line'
 
-    product_id = fields.Many2one('product.product', readonly=True)
+    product_id = fields.Many2one('product.product')
     order_id = fields.Many2one('sale.order', required=True, Store=True, Index=True)
     kontrak_id = fields.Many2one('mc_kontrak.mc_kontrak')
     kontrak_line_id = fields.Many2one('mc_kontrak.product_order_line')
