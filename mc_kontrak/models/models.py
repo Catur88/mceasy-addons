@@ -271,7 +271,7 @@ class CustomSalesOrder(models.Model):
     _order = 'kontrak_id DESC'
 
     # Relasi
-    kontrak_id = fields.Many2one('mc_kontrak.mc_kontrak', string='No Kontrak', required=True, ondelete='cascade')
+    kontrak_id = fields.Many2one('mc_kontrak.mc_kontrak', string='No Kontrak', ondelete='cascade')
     kontrak_product_line = fields.Many2one('mc_kontrak.product_order_line')
 
     wo_count = fields.Integer(string='WO', compute='_count_wo')
