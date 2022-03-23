@@ -55,38 +55,43 @@ class mc_kontrak(models.Model):
             """ % self.id
             self.env.cr.execute(query)
             print(query)
-            idSection = self.env.cr.fetchone()[0]
+            print(self.env.cr.fetchone())
+            if self.env.cr.fetchone() is None:
+                idSection = 0
+            else:
+                idSection = self.env.cr.fetchone()[0]
 
-            query = """
-                SELECT SUM(mc_payment) as subtotal_sub FROM mc_kontrak_product_order_line
-                WHERE id < %s
-            """ % idSection
-            self.env.cr.execute(query)
-            print(query)
-            subtotal_sub = self.env.cr.fetchone()[0]
-            if subtotal_sub is None:
-                subtotal_sub = 0
+            if idSection != 0:
+                query = """
+                                SELECT SUM(mc_payment) as subtotal_sub FROM mc_kontrak_product_order_line
+                                WHERE id < %s
+                            """ % idSection
+                self.env.cr.execute(query)
+                print(query)
+                subtotal_sub = self.env.cr.fetchone()[0]
+                if subtotal_sub is None:
+                    subtotal_sub = 0
 
-            print(subtotal_sub)
+                print(subtotal_sub)
 
-            query = """
-                SELECT SUM(mc_payment) as subtotal_sub FROM mc_kontrak_product_order_line
-                WHERE id > %s
-            """ % idSection
-            self.env.cr.execute(query)
-            print(query)
-            subtotal_otf = self.env.cr.fetchone()[0]
-            if subtotal_otf is None:
-                subtotal_otf = 0
+                query = """
+                                SELECT SUM(mc_payment) as subtotal_sub FROM mc_kontrak_product_order_line
+                                WHERE id > %s
+                            """ % idSection
+                self.env.cr.execute(query)
+                print(query)
+                subtotal_otf = self.env.cr.fetchone()[0]
+                if subtotal_otf is None:
+                    subtotal_otf = 0
 
-            print(subtotal_otf)
+                print(subtotal_otf)
 
-            query = """
-                UPDATE mc_kontrak_mc_kontrak SET x_subtotal_otf = %s,
-                x_subtotal_sub = %s WHERE id = %s
-            """ % (subtotal_sub, subtotal_otf, self.id)
-            self.env.cr.execute(query)
-            print(query)
+                query = """
+                    UPDATE mc_kontrak_mc_kontrak SET x_subtotal_otf = %s,
+                    x_subtotal_sub = %s WHERE id = %s
+                """ % (subtotal_sub, subtotal_otf, self.id)
+                self.env.cr.execute(query)
+                print(query)
 
         return super(mc_kontrak, self).write(vals)
 
@@ -636,14 +641,14 @@ class WorkOrder(models.Model):
                 # getPeriod = self.env.cr.dictfetchone()
                 # periode = str(getPeriod['mc_period']) + " " + str(getPeriod['mc_period_info'])
 
-                query = """
-                            UPDATE mc_kontrak_histori_so SET x_qty_terpasang = x_qty_terpasang + %s WHERE x_order_id = %s
-                            AND x_kontrak_id = %s AND id = %s
-                        """ % (row.qty_delivered, row.order_id.id, row.kontrak_id.id, row.kontrak_id.histori_so_line.id)
-                self.env.cr.execute(query)
+                # query = """
+                #             UPDATE mc_kontrak_histori_so SET x_qty_terpasang = x_qty_terpasang + %s WHERE x_order_id = %s
+                #             AND x_kontrak_id = %s AND id = %s
+                #         """ % (row.qty_delivered, row.order_id.id, row.kontrak_id.id, row.kontrak_id.histori_so_line.id)
+                # self.env.cr.execute(query)
 
-                if query:
-                    print('oke, qty dikurangi')
+                # if query:
+                #     print('oke, qty dikurangi')
                 i = i + 1
             query = """
                             update sale_order set
