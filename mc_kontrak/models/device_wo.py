@@ -10,5 +10,5 @@ class DeviceWO(models.Model):
     x_simcard = fields.Char(string='No Simcard')
 
     # Relasi
-    x_work_order_id = fields.Many2one('mc_kontrak.work_order')
+    x_work_order_id = fields.Many2one('mc_kontrak.work_order', ondelete='cascade')
     x_partner_id = fields.Many2one('res.partner')

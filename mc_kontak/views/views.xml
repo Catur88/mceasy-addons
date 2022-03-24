@@ -1,0 +1,68 @@
+<odoo>
+    <data>
+        <record id="view_order_form_inherit" model="ir.ui.view">
+            <field name="name">res.partner.form</field>
+            <field name="model">res.partner</field>
+            <field name="inherit_id" ref="base.view_partner_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//page[@name='contact_addresses']" position='after'>
+                    <page string='Device Terpasang'>
+                            <field name="x_device_wo" mode="tree,kanban" nolabel="1">
+                                <tree editable="bottom" create="1" >
+                                    <field name="x_jenis_kendaraan"/>
+                                    <field name="x_nopol"/>
+                                    <field name="x_imei"/>
+                                    <field name="x_tahun"/>
+                                    <field name="x_simcard"/>
+                                    <field name="x_work_order_id" string="Nomor WO"/>
+                                </tree>
+                            </field>
+                    </page>
+                </xpath>
+            </field>
+        </record>
+
+        <!-- explicit list view definition -->
+        <!--    <record model="ir.ui.view" id="mc_kontak.list">-->
+        <!--      <field name="name">mc_kontak list</field>-->
+        <!--      <field name="model">mc_kontak.mc_kontak</field>-->
+        <!--      <field name="arch" type="xml">-->
+        <!--        <tree>-->
+        <!--          <field name="x_test"/>-->
+        <!--        </tree>-->
+        <!--      </field>-->
+        <!--    </record>-->
+
+        <!--    &lt;!&ndash; actions opening views on models &ndash;&gt;-->
+        <!--    <record model="ir.actions.act_window" id="mc_kontak.action_window">-->
+        <!--      <field name="name">mc_kontak window</field>-->
+        <!--      <field name="res_model">mc_kontak.mc_kontak</field>-->
+        <!--      <field name="view_mode">tree,form</field>-->
+        <!--    </record>-->
+
+        <!--    &lt;!&ndash; server action to the one above &ndash;&gt;-->
+        <!--    <record model="ir.actions.server" id="mc_kontak.action_server">-->
+        <!--      <field name="name">mc_kontak server</field>-->
+        <!--      <field name="model_id" ref="model_mc_kontak_mc_kontak"/>-->
+        <!--      <field name="state">code</field>-->
+        <!--      <field name="code">-->
+        <!--        action = {-->
+        <!--          "type": "ir.actions.act_window",-->
+        <!--          "view_mode": "tree,form",-->
+        <!--          "res_model": model._name,-->
+        <!--        }-->
+        <!--      </field>-->
+        <!--    </record>-->
+
+        <!--    &lt;!&ndash; Top menu item &ndash;&gt;-->
+        <!--    <menuitem name="Contacts" id="mc_kontak.menu_root"/>-->
+        <!--    &lt;!&ndash; menu categories &ndash;&gt;-->
+        <!--    <menuitem name="Menu 1" id="mc_kontak.menu_1" parent="mc_kontak.menu_root"/>-->
+        <!--    <menuitem name="Menu 2" id="mc_kontak.menu_2" parent="mc_kontak.menu_root"/>-->
+        <!--    &lt;!&ndash; actions &ndash;&gt;-->
+        <!--    <menuitem name="List" id="mc_kontak.menu_1_list" parent="mc_kontak.menu_1"-->
+        <!--              action="mc_kontak.action_window"/>-->
+        <!--    <menuitem name="Server to list" id="mc_kontak" parent="mc_kontak.menu_2"-->
+        <!--              action="mc_kontak.action_server"/>-->
+    </data>
+</odoo>

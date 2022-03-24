@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 {
-    'name': "mc_kontrak",
+    'name': "mc_kontak",
 
     'summary': """
         Short (1 phrase/line) summary of the module's purpose, used as
@@ -20,20 +20,13 @@
     'version': '0.1',
 
     # any module necessary for this one to work correctly
-    'depends': ['base', 'sale', 'sale_subscription', 'contacts'],
+    'depends': ['base', 'contacts', 'sale', 'mc_kontrak'],
 
     # always loaded
     'data': [
         'security/ir.model.access.csv',
         'views/views.xml',
         'views/templates.xml',
-        'views/sequence_data.xml',
-        'views/sales_order_custom.xml',
-        'views/work_order_view.xml',
-        'report/kontrak_report.xml',
-        'report/kontrak_template.xml',
-        'report/wo_report.xml',
-        'report/wo_template.xml',
     ],
     # only loaded in demonstration mode
     'demo': [

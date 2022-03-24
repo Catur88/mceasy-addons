@@ -102,7 +102,6 @@ class mc_kontrak(models.Model):
         self.env.cr.execute(query)
         print("Update kontrak state into Sent")
 
-
     # Total Harga
     @api.depends('product_order_line')
     def total_harga(self):
@@ -526,9 +525,9 @@ class WorkOrder(models.Model):
     partner_id = fields.Many2one('res.partner', related='kontrak_id.mc_cust', store=True)
     product_id = fields.Many2one('product.product')
     work_order_line = fields.One2many('mc_kontrak.work_order_line', 'work_order_id', store=True)
-    device_wo_line = fields.One2many('mc_kontrak.device_wo', 'x_work_order_id', string='Device WO')
+    device_wo_line = fields.One2many('mc_kontrak.device_wo', 'x_work_order_id', string='Device WO', store=True, ondelete='cascade')
 
-    # Relasi sari sale.order
+    # Relasi dari sale.order
     transaction_ids = fields.Many2many('payment.transaction', 'work_order_transaction_rel', 'id',
                                        'transaction_id',
                                        string='Transactions', copy=False, readonly=True)
@@ -545,6 +544,17 @@ class WorkOrder(models.Model):
     def create(self, vals_list):
         vals_list['name'] = self.env['ir.sequence'].next_by_code('mc_kontrak.work_order')
         return super(WorkOrder, self).create(vals_list)
+
+    def write(self, vals):
+        res = super(WorkOrder, self).write(vals)
+        device_wo_line = self.device_wo_line
+        if device_wo_line:
+            for row in device_wo_line:
+                query = """
+                    UPDATE mc_kontrak_device_wo SET x_partner_id = %s
+                """ % row.x_work_order_id.partner_id.id
+                self.env.cr.execute(query)
+        return res
 
     # Auto fill Order Line
     def insert_so_line(self):
@@ -631,25 +641,8 @@ class WorkOrder(models.Model):
                         "WHERE id = %s" % (total_terpasang, total_terpasang, row.sale_order_line_id.id)
                 self.env.cr.execute(query)
 
-                # Insert into Histori
-                # query = """
-                #     SELECT mc_period, mc_period_info FROM mc_kontrak_product_order_line
-                #     WHERE kontrak_id = %s
-                # """ % self.kontrak_id.id
-                #
-                # self.env.cr.execute(query)
-                # getPeriod = self.env.cr.dictfetchone()
-                # periode = str(getPeriod['mc_period']) + " " + str(getPeriod['mc_period_info'])
-
-                # query = """
-                #             UPDATE mc_kontrak_histori_so SET x_qty_terpasang = x_qty_terpasang + %s WHERE x_order_id = %s
-                #             AND x_kontrak_id = %s AND id = %s
-                #         """ % (row.qty_delivered, row.order_id.id, row.kontrak_id.id, row.kontrak_id.histori_so_line.id)
-                # self.env.cr.execute(query)
-
-                # if query:
-                #     print('oke, qty dikurangi')
                 i = i + 1
+
             query = """
                             update sale_order set
                             x_mc_isopen = False
