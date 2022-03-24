@@ -59,7 +59,7 @@ class McSubscriptionWizard(models.TransientModel):
             self.env.cr.execute(query)
 
             query = """
-                UPDATE sale_order_line SET x_mc_qty_kontrak = %s,
+                UPDATE sale_order_line SET x_mc_qty_kontrak = %s
                 WHERE order_id = %s
             """ % (res['product_uom_qty'], res['order_id'])
             self.env.cr.execute(query)
