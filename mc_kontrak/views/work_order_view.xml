@@ -42,7 +42,7 @@
                                 attrs="{'invisible': [('state', 'not in', ['sent'])]}"/>
                         <button name="action_cancel" id="action_confirm" data-hotkey="v"
                                 string="Cancel WO" class="btn-secondary" type="object"
-                                attrs="{'invisible': [('state', 'in', ['done','cancel'])]}"/>
+                                attrs="{'invisible': [('state', 'in', ['draft','cancel'])]}"/>
 
                         <field name="state" widget="statusbar" statusbar_visible="draft,sent,done,cancel"/>
                     </header>

@@ -597,11 +597,13 @@ class WorkOrder(models.Model):
     def action_cancel(self):
         print('test cancel work order')
         query = """
-            SELECT qty_delivered, kontrak_line_id  FROM mc_kontrak_work_order_line wol 
-            WHERE wol.order_id  = %s
+            SELECT qty_delivered, sale_order_line_id  FROM mc_kontrak_work_order_line wol 
+            WHERE wol.work_order_id  = %s
         """ % self.id
         self.env.cr.execute(query)
+        print(query)
         arrQuery = self.env.cr.dictfetchall()
+        print(arrQuery)
 
         if arrQuery:
             query = """
@@ -611,13 +613,19 @@ class WorkOrder(models.Model):
             for row in arrQuery:
                 query = """
                     update sale_order_line set
-                    qty_delivered = qty_delivered - %s,
+                    qty_delivered = qty_delivered - %s
                     where id = %s 
                 """ % (row['qty_delivered'], row['sale_order_line_id'])
+                print(query)
                 self.env.cr.execute(query)
 
         query = """
-                UPDATE mc_kontrak_work_order SET state = 'cancel' WHERE id = %s 
+            DELETE FROM mc_kontrak_histori_wo WHERE x_work_order_id = %s
+        """ % self.id
+        self.env.cr.execute(query)
+
+        query = """
+                UPDATE mc_kontrak_work_order SET state = 'cancel' WHERE id = %s
         """ % self.id
         self.env.cr.execute(query)
 
