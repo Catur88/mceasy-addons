@@ -513,10 +513,10 @@ class WorkOrder(models.Model):
 
     # Field
     name = fields.Char(string='No WO', readonly=True, default='New')
-    x_teknisi_1 = fields.Char(string='Teknisi 1')
-    x_teknisi_2 = fields.Char(string='Teknisi 2')
-    # x_teknisi_1 = fields.Many2one('contacts')
-    # x_teknisi_2 = fields.Char(string='Teknisi 2')
+    x_teknisi_1 = fields.Many2one('res.partner',
+                                  domain="[('function', '=', 'Teknisi McEasy')]", string="Teknisi 1")
+    x_teknisi_2 = fields.Many2one('res.partner',
+                                  domain="[('function', '=', 'Teknisi McEasy')]", string='Teknisi 2')
 
     x_created_date = fields.Date(default=fields.Datetime.now(), string='Created Date')
     x_sales = fields.Many2one('res.users', string='Salesperson', default=lambda self: self.env.user)
@@ -530,7 +530,8 @@ class WorkOrder(models.Model):
     partner_id = fields.Many2one('res.partner', related='kontrak_id.mc_cust', store=True)
     product_id = fields.Many2one('product.product')
     work_order_line = fields.One2many('mc_kontrak.work_order_line', 'work_order_id', store=True)
-    device_wo_line = fields.One2many('mc_kontrak.device_wo', 'x_work_order_id', string='Device WO', store=True, ondelete='cascade')
+    device_wo_line = fields.One2many('mc_kontrak.device_wo', 'x_work_order_id', string='Device WO', store=True,
+                                     ondelete='cascade')
 
     # Relasi dari sale.order
     transaction_ids = fields.Many2many('payment.transaction', 'work_order_transaction_rel', 'id',

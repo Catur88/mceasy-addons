@@ -87,7 +87,7 @@
                                 </field>
                             </page>
 
-                            <page string="Device Terpasang">
+                            <page string="Device Terpasang" attrs="{'invisible': [('state', 'in', ['draft','cancel'])]}">
                                 <field name="device_wo_line" mode="tree,kanban" nolabel="1">
                                     <tree editable="bottom" create="1">
                                         <field name="x_jenis_kendaraan"/>
