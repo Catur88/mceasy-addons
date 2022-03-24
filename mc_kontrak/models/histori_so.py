@@ -5,6 +5,7 @@ from odoo import models, fields, api, _
 
 class HistoriSO(models.Model):
     _name = 'mc_kontrak.histori_so'
+    _description = 'Modul berisi data SO yang akan berelasi dengan kontrak'
 
     x_kontrak_id = fields.Many2one('mc_kontrak.mc_kontrak')
     x_order_id = fields.Many2one('sale.order')

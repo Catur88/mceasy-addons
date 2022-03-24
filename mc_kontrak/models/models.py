@@ -5,6 +5,7 @@ from odoo import models, fields, api, _
 
 class mc_kontrak(models.Model):
     _name = 'mc_kontrak.mc_kontrak'
+    _description = 'Custom module untuk data kontrak'
 
     # Field
     name = fields.Char(string='No Kontrak', readonly=True, default='New')
@@ -184,6 +185,7 @@ class mc_kontrak(models.Model):
 
 class ProductOrderLine(models.Model):
     _name = 'mc_kontrak.product_order_line'
+    _description = 'Order line dari data kontrak'
 
     # Relasi
     kontrak_id = fields.Many2one('mc_kontrak.mc_kontrak', string='No Kontrak', required=True, ondelete='cascade')
@@ -273,6 +275,7 @@ class ProductOrderLine(models.Model):
 class CustomSalesOrder(models.Model):
     _inherit = 'sale.order'
     _order = 'kontrak_id DESC'
+    _description = 'Modul yang mengcustom module sale.order'
 
     # Relasi
     kontrak_id = fields.Many2one('mc_kontrak.mc_kontrak', string='No Kontrak', ondelete='cascade')
@@ -473,6 +476,7 @@ class CustomSalesOrder(models.Model):
 
 class CustomSalesOrderLine(models.Model):
     _inherit = 'sale.order.line'
+    _description = 'Modul yang mengcustom module sale.order.line'
 
     product_id = fields.Many2one('product.product')
     order_id = fields.Many2one('sale.order', required=True, Store=True, Index=True)
@@ -505,6 +509,7 @@ class CustomSalesOrderLine(models.Model):
 class WorkOrder(models.Model):
     _name = 'mc_kontrak.work_order'
     _inherit = 'sale.order'
+    _description = 'Modul Work Order yang menginherit sale.order'
 
     # Field
     name = fields.Char(string='No WO', readonly=True, default='New')
@@ -675,6 +680,7 @@ class WorkOrder(models.Model):
 class WorkOrderLine(models.Model):
     _name = 'mc_kontrak.work_order_line'
     _inherit = 'sale.order.line'
+    _description = 'Modul Work Order Line yang menginherit sale.order.line'
 
     # Relasi
     order_id = fields.Many2one('sale.order', required=True, Store=True, Index=True)

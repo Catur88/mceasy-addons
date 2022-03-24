@@ -2,6 +2,7 @@ from odoo import models, fields, api, _
 
 class DeviceWO(models.Model):
     _name = 'mc_kontrak.device_wo'
+    _description = 'Modul yang berisi pemasangan dari WO dan berelasi ke Contact'
 
     x_jenis_kendaraan = fields.Char(string='Jenis Kendaraan')
     x_nopol = fields.Char(string='Nopol')

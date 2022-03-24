@@ -3,6 +3,7 @@ from odoo import models, fields, api, _
 
 class CustomSalesSubscription(models.Model):
     _inherit = 'sale.order'
+    _description = 'Modul Subscription Sale Order yang menginherit sale.order'
 
     def create_subscriptions(self):
         res = super(CustomSalesSubscription, self).create_subscriptions()
@@ -17,12 +18,14 @@ class CustomSalesSubscription(models.Model):
 
 class McSubscription(models.Model):
     _inherit = 'sale.subscription'
+    _description = 'Modul yang menginherit sale.subscription'
 
     x_kontrak_id = fields.Many2one('mc_kontrak.mc_kontrak', string="No Kontrak", store=True)
 
 
 class McSubscriptionWizard(models.TransientModel):
     _inherit = 'sale.subscription.wizard'
+    _description = 'Modul yang menginherit sale.subscription.wizard'
 
     x_kontrak_id = fields.Many2one('mc_kontrak.mc_kontrak', string="No Kontrak", store=True)
 
