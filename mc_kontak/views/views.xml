@@ -10,16 +10,16 @@
                 </xpath>
                 <xpath expr="//page[@name='contact_addresses']" position='after'>
                     <page string='Device Terpasang'>
-                            <field name="x_device_wo" mode="tree,kanban" nolabel="1">
-                                <tree editable="bottom" create="1" >
-                                    <field name="x_jenis_kendaraan"/>
-                                    <field name="x_nopol"/>
-                                    <field name="x_imei"/>
-                                    <field name="x_tahun"/>
-                                    <field name="x_simcard"/>
-                                    <field name="x_work_order_id" string="Nomor WO"/>
-                                </tree>
-                            </field>
+                        <field name="x_device_wo" mode="tree,kanban" nolabel="1">
+                            <tree editable="bottom" create="1">
+                                <field name="x_jenis_kendaraan"/>
+                                <field name="x_nopol"/>
+                                <field name="x_imei"/>
+                                <field name="x_tahun"/>
+                                <field name="x_simcard"/>
+                                <field name="x_work_order_id" string="Nomor WO"/>
+                            </tree>
+                        </field>
                     </page>
                 </xpath>
             </field>

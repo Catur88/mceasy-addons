@@ -280,6 +280,7 @@ class CustomSalesOrder(models.Model):
     # Relasi
     kontrak_id = fields.Many2one('mc_kontrak.mc_kontrak', string='No Kontrak', ondelete='cascade')
     kontrak_product_line = fields.Many2one('mc_kontrak.product_order_line')
+    histori_wo_line = fields.One2many('mc_kontrak.histori_wo', 'x_order_id')
 
     wo_count = fields.Integer(string='WO', compute='_count_wo')
 
@@ -340,7 +341,7 @@ class CustomSalesOrder(models.Model):
         query = """
             SELECT product_uom_qty, kontrak_line_id  FROM sale_order_line sol 
             WHERE sol.order_id  = %s
-        """ % (self.id)
+        """ % self.id
 
         self.env.cr.execute(query)
         arrQuery = self.env.cr.dictfetchall()
@@ -353,14 +354,19 @@ class CustomSalesOrder(models.Model):
             for row in arrQuery:
                 query = """
                     update mc_kontrak_product_order_line set
-                    mc_qty_terpasang = mc_qty_terpasang - %s,
-                    mc_qty_belum_terpasang = mc_qty_belum_terpasang + %s
+                    mc_qty_terpasang = mc_qty_belum_terpasang - %s,
+                    mc_qty_belum_terpasang = mc_qty_belum_terpasang - %s
                     where id = %s 
                 """ % (row['product_uom_qty'], row['product_uom_qty'], row['kontrak_line_id'])
                 self.env.cr.execute(query)
 
         query = """
-                UPDATE sale_order SET state = 'cancel' WHERE id = %s 
+                UPDATE sale_order SET state = 'cancel' WHERE id = %s
+        """ % self.id
+        self.env.cr.execute(query)
+
+        query = """
+            DELETE FROM mc_kontrak_histori_so WHERE x_order_id = %s
         """ % self.id
         self.env.cr.execute(query)
 
@@ -519,7 +525,7 @@ class WorkOrder(models.Model):
                                   domain="[('function', '=', 'Teknisi McEasy')]", string='Teknisi 2')
 
     x_created_date = fields.Date(default=fields.Datetime.now(), string='Created Date')
-    x_sales = fields.Many2one('res.users', string='Salesperson', default=lambda self: self.env.user)
+    x_sales = fields.Many2one('res.users', string='Admin', default=lambda self: self.env.user, readonly=True)
     x_isopen = fields.Boolean(default=True, store=True)
 
     # Relasi
@@ -593,8 +599,7 @@ class WorkOrder(models.Model):
         query = """
             SELECT qty_delivered, kontrak_line_id  FROM mc_kontrak_work_order_line wol 
             WHERE wol.order_id  = %s
-        """ % (self.id)
-
+        """ % self.id
         self.env.cr.execute(query)
         arrQuery = self.env.cr.dictfetchall()
 
@@ -625,9 +630,6 @@ class WorkOrder(models.Model):
         if wo_line:
             i = 0
             for row in wo_line:
-                # if arr_order_line[i][2]['product_uom_qty']:
-                # x_qty_terpasang = arr_order_line[i][2]['product_uom_qty']
-
                 qty_wo = row.qty_delivered
                 print('QTY WO Terpasang = ', qty_wo)
 
@@ -646,6 +648,21 @@ class WorkOrder(models.Model):
                         "x_mc_qty_terpasang = %s " \
                         "WHERE id = %s" % (total_terpasang, total_terpasang, row.sale_order_line_id.id)
                 self.env.cr.execute(query)
+
+                print(self.x_teknisi_2.id)
+                print(self.x_teknisi_2.id if self.x_teknisi_2.id is not None else 'lakslaklas')
+
+                query = """
+                    INSERT INTO mc_kontrak_histori_wo(x_qty_terpasang,x_date_created,x_work_order_id,x_order_id,
+                    x_teknisi_1,x_teknisi_2,x_admin_sales) VALUES ('%s','%s','%s','%s','%s','%s','%s')
+                """ % (row.qty_delivered, self.x_created_date, row.work_order_id.id, row.order_id.id,
+                       self.x_teknisi_1.id,
+                       self.x_teknisi_2.id if self.x_teknisi_2.id is not False else self.x_teknisi_1.id,
+                       self.x_sales.id)
+                self.env.cr.execute(query)
+
+                print(query)
+                print('Histori WO dimasukkan')
 
                 i = i + 1
 

@@ -33,13 +33,9 @@
                 <field name="validity_date" position="before">
                     <field name="x_no_po"/>
                 </field>
-<!--                <field name="validity_date" position="before">-->
-<!--                    <field name="x_start_date"/>-->
-<!--                </field>-->
                 <!-- Readonly column -->
                 <xpath expr="/form/sheet/notebook/page/field[@name='order_line']/tree/field[@name='product_id']"
                        position="attributes">
-<!--                    <attribute name="readonly">True</attribute>-->
                 </xpath>
                 <xpath expr="/form/sheet/notebook/page/field[@name='order_line']/tree/field[@name='price_unit']"
                        position="attributes">
@@ -47,14 +43,12 @@
                 </xpath>
                 <xpath expr="/form/sheet/notebook/page/field[@name='order_line']/tree/field[@name='discount']"
                        position="attributes">
-                    <!--                    <attribute name="readonly">True</attribute>-->
                     <attribute name="invisible">False</attribute>
                 </xpath>
 
                 <!-- Hidden some column in SO Line -->
                 <xpath expr="/form/sheet/notebook/page/field[@name='order_line']/tree/field[@name='name']"
                        position="attributes">
-<!--                    <attribute name="invisible">True</attribute>-->
                 </xpath>
                 <xpath expr="/form/sheet/notebook/page/field[@name='order_line']/tree/field[@name='qty_invoiced']"
                        position="attributes">
@@ -66,11 +60,25 @@
                        position="attributes">
                     <attribute name="string">QTY SO</attribute>
                 </xpath>
-                <!--                -->
                 <xpath expr="/form/sheet/notebook/page/field[@name='order_line']/tree/field[@name='name']"
                        position="after">
                     <field name="x_mc_qty_kontrak" readonly="1"></field>
-                    <!--                    <field name="x_mc_qty_terpasang"></field>-->
+                </xpath>
+
+                <!--Tambah Page Histori WO-->
+                <xpath expr="//page[@name='order_lines']" position="after">
+                    <page string='Histori WO'>
+                        <field name="histori_wo_line" mode="tree,kanban" nolabel="1">
+                            <tree editable="bottom" create="1">
+                                <field name="x_work_order_id" string="No Work Order"/>
+                                <field name="x_qty_terpasang"/>
+                                <field name="x_teknisi_1" />
+                                <field name="x_teknisi_2" />
+                                <field name="x_admin_sales" />
+                                <field name="x_date_created" />
+                            </tree>
+                        </field>
+                    </page>
                 </xpath>
             </field>
         </record>
