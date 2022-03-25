@@ -22,7 +22,7 @@
 
     ],
     'demo': [],
-    'depends': ['base', 'stock', 'project'],
+    'depends': ['base'],
     'license': 'LGPL-3',
     'application': True,
 }
