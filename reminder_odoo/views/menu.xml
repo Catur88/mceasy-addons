@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+        <menuitem id="reminder_odoo" name="Reminder" web_icon="reminder_odoo,static/description/reminder_ico.png"/>
+
+        <menuitem id="reminder_type" name="Dashboard" parent="reminder_odoo" sequence="0" action="action_view_reminder"/>
+
+        <menuitem name="Configuration" id="menu_config_reminder" parent="reminder_odoo" sequence="10"/>
+        <menuitem name="Reminder Category" id="config_reminder_category" parent="menu_config_reminder"
+                  sequence="11" groups="base.group_system" action="action_view_reminder_category"/>
+        <menuitem name="Reminder Group" id="config_dept_category" parent="menu_config_reminder"
+                  sequence="12" groups="base.group_system" action="action_view_reminder_group"/>
+        <menuitem name="Link Category" id="config_link_category" parent="menu_config_reminder"
+                  sequence="13" groups="base.group_system" action="action_view_link_category"/>
+
+        <menuitem name="Refresh" id="menu_config_reminder_refresh" parent="reminder_odoo" sequence="1" action="action_view_reminder_refresh"/>
+
+    </data>
+</odoo>
