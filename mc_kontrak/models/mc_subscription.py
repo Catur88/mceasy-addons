@@ -10,8 +10,8 @@ class CustomSalesSubscription(models.Model):
         print('Create Subs From Custom Sales Subs')
         print(res[0])
         query = """
-            UPDATE sale_subscription SET x_kontrak_id = %s WHERE id = %s
-        """ % (self.kontrak_id.id, res[0])
+            UPDATE sale_subscription SET x_kontrak_id = %s, x_order_id = %s WHERE id = %s
+        """ % (self.kontrak_id.id, self.id, res[0])
         self.env.cr.execute(query)
         return res
 
@@ -21,6 +21,7 @@ class McSubscription(models.Model):
     _description = 'Modul yang menginherit sale.subscription'
 
     x_kontrak_id = fields.Many2one('mc_kontrak.mc_kontrak', string="No Kontrak", store=True)
+    x_order_id = fields.Many2one('sale.order', store=True, string="No SO", readonly=True)
 
 
 class McSubscriptionWizard(models.TransientModel):

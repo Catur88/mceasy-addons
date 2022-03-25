@@ -1,0 +1,47 @@
+<odoo>
+    <data>
+        <!--        Custom Tree View-->
+        <record id="sale_subscription_list_inherit" model="ir.ui.view">
+            <field name="name">sale.subscription.list.inherit</field>
+            <field name="model">sale.subscription</field>
+            <field name="inherit_id" ref="sale_subscription.sale_subscription_view_list"/>
+            <field name="arch" type="xml">
+                <field name="code" position="before">
+                    <field name="x_kontrak_id" string="No Kontrak"/>
+                </field>
+            </field>
+        </record>
+
+        <!--        Custom Search field-->
+        <record id="sale_subscription_search_inherit" model="ir.ui.view">
+            <field name="name">sale.subscription.search.inherit</field>
+            <field name="model">sale.subscription</field>
+            <field name="inherit_id" ref="sale_subscription.sale_subscription_view_search"/>
+            <field name="arch" type="xml">
+                <field name="name" position="before">
+                    <field name="x_kontrak_id" string="No Kontrak"/>
+                    <field name="x_order_id" string="No SO"/>
+                </field>
+            </field>
+        </record>
+
+        <!--        Custom Form Field-->
+        <record id="sale_subscription_inherit" model="ir.ui.view">
+            <field name="name">sale.subscription.inherit</field>
+            <field name="model">sale.subscription</field>
+            <field name="inherit_id" ref="sale_subscription.sale_subscription_view_form"/>
+            <field name="arch" type="xml">
+                <field name="display_name" position="attributes">
+                    <attribute name="invisible">True</attribute>
+                </field>
+                <field name="display_name" position="after">
+                    <field name="x_kontrak_id"/>
+                </field>
+                <field name="template_id" position="after">
+                    <field name="display_name"/>
+                    <field name="x_order_id"/>
+                </field>
+            </field>
+        </record>
+    </data>
+</odoo>
