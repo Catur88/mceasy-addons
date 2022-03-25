@@ -18,7 +18,6 @@ class reminder_issue(models.Model):
 
 
     # button di form unutk nge link ke form lain
-    @api.multi
     def button_sourcedoc_reminder(self):
         # 1. ambil data categori reminder dan loop
         # 2. cek link_id untuk set di self.env['ir.model.data'] dan returnnya
@@ -99,7 +98,6 @@ class reminder_issue(models.Model):
                         self.email_reminder_flow(categ.id)
 
     # uswa-tambah fungsi send email reminder OK 16/12/2020
-    @api.multi
     def email_reminder_flow(self, vals):
         for row in self.env['x_reminder.category'].search([('id', '=', vals)]):
             template_id = self.env['ir.model.data'].get_object_reference('reminder_odoo','email_template_for_flow')[1]
@@ -120,7 +118,6 @@ class reminder_issue(models.Model):
             return True
 
     # buat ngefilter reminder berdasarkan deptnya
-    @api.multi
     def dept_filter_action(self):
         current_login = self.env.uid
         user_login = self.env['res.users'].search([('id', '=', int(current_login))])
