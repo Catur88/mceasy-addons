@@ -7,7 +7,7 @@
     'company': 'Cybrosys Techno Solutions',
     'website': 'https://www.cybrosys.com',
     'category': 'Reminder',
-    'depends': ['base'],
+    'depends': ['base', 'hr'],
     'license': 'AGPL-3',
     'data': [
 
@@ -22,7 +22,7 @@
 
     ],
     'demo': [],
-    'depends': ['base'],
+    'depends': ['base','mail'],
     'license': 'LGPL-3',
     'application': True,
 }

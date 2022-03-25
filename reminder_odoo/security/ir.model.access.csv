@@ -9,3 +9,9 @@ access_reminder_group_user,x_reminder.group,reminder_odoo.model_x_reminder_group
 access_reminder_group_manager,x_reminder.group,reminder_odoo.model_x_reminder_group,group_reminder_manager,1,1,1,0
 
 
+access_reminder_issue_admin,x_reminder.issue,reminder_odoo.model_x_reminder_issue,base.group_user,1,1,1,1
+access_reminder_category_admin,x_reminder.category,reminder_odoo.model_x_reminder_category,base.group_user,1,1,1,1
+access_reminder_group_admin,x_reminder.group,reminder_odoo.model_x_reminder_group,base.group_user,1,1,1,1
+access_reminder_category_admin,x_reminder_link.category,reminder_odoo.model_x_reminder_category,base.group_user,1,1,1,1
+
+

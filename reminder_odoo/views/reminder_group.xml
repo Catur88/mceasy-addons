@@ -32,7 +32,7 @@
         <record model="ir.actions.act_window" id="action_view_reminder_group">
             <field name="name">Reminder Group</field>
             <field name="res_model">x_reminder.group</field>
-            <field name="view_type">form</field>
+<!--            <field name="view_type">form</field>-->
             <field name="view_mode">tree,form</field>
             <field name="domain">[]</field>
             <field name="help" type="html">
