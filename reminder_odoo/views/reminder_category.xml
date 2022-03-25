@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+        <!--reminder category view-->
+        <record id="view_reminder_category_tree" model="ir.ui.view">
+            <field name="name">reminder.category.tree</field>
+            <field name="model">x_reminder.category</field>
+            <field name="arch" type="xml">
+                <tree string="Reminder Category">
+                    <field name="name" />
+                    <field name="max_due" />
+                    <field name="max_late" />
+                    <field name="note" />
+                    <field name="x_flow"/>
+                </tree>
+            </field>
+        </record>
+        <record id="view_reminder_category_form" model="ir.ui.view">
+            <field name="name">reminder.category.form</field>
+            <field name="model">x_reminder.category</field>
+            <field name="arch" type="xml">
+                <form string="Reminder Category">
+                    <sheet>
+                    <group>
+                        <field name="name" />
+                        <field name="description" />
+                        <field name="max_due" />
+                        <field name="max_late" />
+                        <field name="note" />
+                        <field name="link_view_line"/>
+                        <field name="x_flow"/>
+                    </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record model="ir.actions.act_window" id="action_view_reminder_category">
+            <field name="name">Reminder Category</field>
+            <field name="res_model">x_reminder.category</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="domain">[]</field>
+            <field name="help" type="html">
+                <p class="oe_view_nocontent_create">Create New Reminder Category
+                </p>
+            </field>
+        </record>
+
+        <!--link category view-->
+        <record id="view_link_category_tree" model="ir.ui.view">
+            <field name="name">link.category.tree</field>
+            <field name="model">x_reminder_link.category</field>
+            <field name="arch" type="xml">
+                <tree string="Link Category">
+                    <field name="name" />
+                    <field name="parent_model" />
+                    <field name="view_form" />
+                    <field name="amodel_id" />
+                </tree>
+            </field>
+        </record>
+        <record id="view_link_category_form" model="ir.ui.view">
+            <field name="name">link.category.form</field>
+            <field name="model">x_reminder_link.category</field>
+            <field name="arch" type="xml">
+                <form string="Link Category">
+                    <sheet>
+                    <group>
+                        <field name="name" />
+                        <field name="parent_model" />
+                        <field name="view_form" />
+                        <field name="amodel_id" />
+                    </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record model="ir.actions.act_window" id="action_view_link_category">
+            <field name="name">Link Category</field>
+            <field name="res_model">x_reminder_link.category</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="domain">[]</field>
+            <field name="help" type="html">
+                <p class="oe_view_nocontent_create">Create New Link Category
+                </p>
+            </field>
+        </record>
+
+
+
+    </data>
+</odoo>

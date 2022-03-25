@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+        <!--reminder group view-->
+        <record id="view_reminder_group_tree" model="ir.ui.view">
+            <field name="name">reminder.group.tree</field>
+            <field name="model">x_reminder.group</field>
+            <field name="arch" type="xml">
+                <tree string="Reminder Group">
+                    <field name="group_id" />
+                </tree>
+            </field>
+        </record>
+        <record id="view_reminder_group_form" model="ir.ui.view">
+            <field name="name">reminder.group.form</field>
+            <field name="model">x_reminder.group</field>
+            <field name="arch" type="xml">
+                <form string="Reminder Group">
+                    <sheet>
+                    <group>
+                        <field name="group_id" />
+                        <field name="description" />
+                        <field name="domain_categ" />
+                        <field name="categ_line" />
+
+                    </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record model="ir.actions.act_window" id="action_view_reminder_group">
+            <field name="name">Reminder Group</field>
+            <field name="res_model">x_reminder.group</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="domain">[]</field>
+            <field name="help" type="html">
+                <p class="oe_view_nocontent_create">Create New Reminder Group
+                </p>
+            </field>
+        </record>
+
+    </data>
+</odoo>

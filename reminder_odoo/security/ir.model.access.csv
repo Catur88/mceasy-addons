@@ -1,0 +1,11 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_reminder_issue_user,x_reminder.issue,reminder_odoo.model_x_reminder_issue,group_reminder_user,1,0,0,0
+access_reminder_issue_manager,x_reminder.issue,reminder_odoo.model_x_reminder_issue,group_reminder_manager,1,1,1,0
+
+access_reminder_category_user,x_reminder.category,reminder_odoo.model_x_reminder_category,group_reminder_user,1,0,0,0
+access_reminder_category_manager,x_reminder.category,reminder_odoo.model_x_reminder_category,group_reminder_manager,1,1,1,0
+
+access_reminder_group_user,x_reminder.group,reminder_odoo.model_x_reminder_group,group_reminder_user,1,0,0,0
+access_reminder_group_manager,x_reminder.group,reminder_odoo.model_x_reminder_group,group_reminder_manager,1,1,1,0
+
+

@@ -1,0 +1,22 @@
+<?xml version="1.0" ?>
+<odoo>
+    <data>
+        
+        <record id="email_template_for_flow" model="mail.template">
+            <field name="name">Subject</field>
+            <field name="email_from">PT LAPRINT JAYA &lt;laprint.it@gmail.com&gt;</field>
+            <field name="email_to"></field>
+            <field name="subject"></field>
+            <field name="model_id" ref="reminder_odoo.model_x_reminder_category" />
+            <field name="auto_delete" eval="False" />
+            <field name="body_html"><![CDATA[
+<div>Link Odoo</div>
+% for row in object.issue_line:
+<div>-&#9;[${row.source_doc}](http://192.168.1.15:8010/web#id=${row.link_id}&view_type=form&model=mrp.production&menu_id=144&action=212)</div>
+% endfor
+
+]]>
+            </field>
+        </record>
+    </data>
+</odoo>

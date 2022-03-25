@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+        <record id="view_reminder_tree" model="ir.ui.view">
+            <field name="name">reminder.issue.tree</field>
+            <field name="model">x_reminder.issue</field>
+            <field name="arch" type="xml">
+                <tree string="Reminder Issue">
+                    <field name="source_doc" />
+                    <field name="trigger_date" />
+                    <field name="description" />
+                    <field name="refference" />
+                    <field name="name" />
+                    <field name="day_count"/>
+                </tree>
+            </field>
+        </record>
+        <record id="view_reminder_form" model="ir.ui.view">
+            <field name="name">reminder.issue.form</field>
+            <field name="model">x_reminder.issue</field>
+            <field name="arch" type="xml">
+                <form string="Reminder Issue" create="false" readonly="1">
+                    <sheet>
+                         <group>
+                            <label for="source_doc"></label>
+                            <div class="o_row">
+                                <field name="source_doc"></field>
+                                <button
+                                     class="oe_stat_button"
+                                     name="button_sourcedoc_reminder"
+                                     string="Source Document Link"
+                                     attrs="{'invisible':[('source_doc', '=', False)]}"
+                                     type="object"
+                                     help="calls python function">
+                                </button>
+                            </div>
+                            <field name="trigger_date" />
+                            <field name="description" />
+                            <field name="refference" />
+                        </group>
+                        <group>
+                            <field name="name" />
+                            <field name="day_count" />
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+
+        <record id="view_reminder_filter" model="ir.ui.view">
+            <field name="name">reminder.issue.search.view</field>
+            <field name="model">x_reminder.issue</field>
+            <field name="arch" type="xml">
+                <search string="Reminder Issue Search">
+                    <field name="name"/>
+                    <field name="source_doc"/>
+                    <field name="trigger_date"/>
+                    <field name="description"/>
+                    <field name="refference"/>
+                    <field name="day_count"/>
+                    <group expand="0" string="Group By" >
+                        <filter string="Source Doc" name="Responsible" context="{'group_by':'source_doc'}" />
+                        <filter string="Name" context="{'group_by':'name'}"/>
+                        <filter string="Description" context="{'group_by':'description'}" />
+                        <filter string="Refference" context="{'group_by':'refference'}" /> </group>
+                </search>
+            </field>
+        </record>
+
+        <!--<record model="ir.actions.act_window" id="action_view_reminder">-->
+            <!--<field name="name">Reminder Issue</field>-->
+            <!--<field name="res_model">x_reminder.issue</field>-->
+            <!--<field name="view_type">form</field>-->
+            <!--<field name="domain">[('is_group', '=', 1)]</field>-->
+            <!--<field name="view_mode">tree,form,pivot,graph</field>-->
+            <!--<field name="view_id" eval="False"/>-->
+            <!--<field name="domain" eval=""/>-->
+            <!--<field name="context">{-->
+                    <!--'group_by': ['name']}</field>-->
+            <!--<field name="search_view_id" ref="view_reminder_filter"/>-->
+            <!--<field name="help" type="html">-->
+                <!--<p class="oe_view_nocontent_create">Your Reminder Issue is Empty-->
+                <!--</p>-->
+            <!--</field>-->
+        <!--</record>-->
+
+         <record id="action_view_reminder" model="ir.actions.server">
+            <field name="name">Reminder Issue</field>
+            <field name="type">ir.actions.server</field>
+            <field name="model_id" ref="model_x_reminder_issue"/>
+            <field name="state">code</field>
+             <field name="code">
+                 action = env['x_reminder.issue'].dept_filter_action()
+             </field>
+         </record>
+
+        <record model="ir.actions.server" id="action_view_reminder_refresh">
+            <field name="name">Refresh</field>
+            <field name="model_id" ref="model_x_reminder_issue"/>
+            <field name="type">ir.actions.server</field>
+            <field name="state">code</field>
+            <field name="code">
+                action = env['x_reminder.issue'].get_reminder_issue_record(2)
+            </field>
+
+        </record>
+
+    </data>
+</odoo>
