@@ -23,6 +23,7 @@ class mc_kontrak(models.Model):
 
     x_subtotal_otf = fields.Monetary(string='Subtotal One Time Fee')
     x_subtotal_sub = fields.Monetary(string='Subtotal Subscription')
+    mc_qty_kontrak = fields.Integer(default=0, store=True)
 
     mc_state = fields.Selection([
         ('draft', 'Draft'),
@@ -299,6 +300,7 @@ class CustomSalesOrder(models.Model):
     x_mc_isopen = fields.Boolean(default=True, store=True)
     x_start_date = fields.Date(string='Start Date')
     x_no_po = fields.Char(string='No PO Customer')
+    x_qty_terpasang = fields.Integer(default=0, store=True)
 
     def write(self, vals):
         print('method write diakses')
@@ -405,6 +407,11 @@ class CustomSalesOrder(models.Model):
                 self.env.cr.execute(query)
 
                 query = """
+                    UPDATE mc_kontrak_mc_kontrak SET mc_qty_kontrak = %s WHERE id = %s
+                """ % (row.x_mc_qty_kontrak, row.kontrak_id.id)
+                self.env.cr.execute(query)
+
+                query = """
                     SELECT mc_period, mc_period_info FROM mc_kontrak_product_order_line 
                     WHERE kontrak_id = %s 
                 """ % self.kontrak_id.id
@@ -427,21 +434,22 @@ class CustomSalesOrder(models.Model):
                     print('oke, qty dikurangi, histori so dimasukkan')
                 i = i + 1
             query = """
-                            update mc_kontrak_mc_kontrak set
-                            mc_isopen = False
-                            where id = %s
-                            and 0 = (
-                                select SUM(mkpol.mc_qty_belum_terpasang) as mc_qty_belum_terpasang
-                                from mc_kontrak_mc_kontrak mkmk
-                                join mc_kontrak_product_order_line mkpol on mkpol.kontrak_id = mkmk.id
-                                where mkmk.id = %s
-                            )
-                        """ % (self.kontrak_id.id, self.kontrak_id.id)
+                update mc_kontrak_mc_kontrak set
+                mc_isopen = False
+                where id = %s
+                and mc_qty_kontrak = (
+                    select SUM(mkpol.mc_qty_terpasang) as mc_qty_terpasang
+                    from mc_kontrak_mc_kontrak mkmk
+                    join mc_kontrak_product_order_line mkpol on mkpol.kontrak_id = mkmk.id
+                    where mkmk.id = %s
+                )
+            """ % (self.kontrak_id.id, self.kontrak_id.id)
+            print(query)
             self.env.cr.execute(query)
 
             query = """
-                            UPDATE sale_order SET state = 'sale' WHERE id = %s
-                    """ % self.id
+                    UPDATE sale_order SET state = 'sale' WHERE id = %s
+            """ % self.id
             self.env.cr.execute(query)
 
             res = super(CustomSalesOrder, self).action_confirm()
@@ -491,7 +499,7 @@ class CustomSalesOrderLine(models.Model):
 
     # Field
     x_mc_qty_kontrak = fields.Integer(string='QTY Kontrak', store=True)
-    x_mc_qty_terpasang = fields.Integer(string='QTY Terpasang', readonly=True, store=True)
+    x_mc_qty_terpasang = fields.Integer(readonly=True, store=True)
     x_mc_harga_produk = fields.Monetary(string='Standard Price')
     x_mc_harga_diskon = fields.Monetary()
     x_mc_isopen = fields.Boolean(default=True, store=True)
@@ -657,9 +665,12 @@ class WorkOrder(models.Model):
                         "WHERE id = %s" % (total_terpasang, total_terpasang, row.sale_order_line_id.id)
                 self.env.cr.execute(query)
 
-                print(self.x_teknisi_2.id)
-                print(self.x_teknisi_2.id if self.x_teknisi_2.id is not None else 'lakslaklas')
+                query = """
+                    UPDATE sale_order SET x_qty_terpasang = %s WHERE id = %s
+                """ % (row.product_uom_qty, row.order_id.id)
+                self.env.cr.execute(query)
 
+                # Memasukkan Histori WO
                 query = """
                     INSERT INTO mc_kontrak_histori_wo(x_qty_terpasang,x_date_created,x_work_order_id,x_order_id,
                     x_teknisi_1,x_teknisi_2,x_admin_sales) VALUES ('%s','%s','%s','%s','%s','%s','%s')
@@ -675,21 +686,22 @@ class WorkOrder(models.Model):
                 i = i + 1
 
             query = """
-                            update sale_order set
-                            x_mc_isopen = False
-                            where id = %s
-                            and x_mc_qty_kontrak = (
-                                select SUM(sol.qty_delivered) as terpasang
-                                from sale_order so
-                                join sale_order_line sol on sol.order_id = so.id
-                                where so.id = %s
-                            )
-                        """ % (self.order_id.id, self.order_id.id)
+                update sale_order set
+                x_mc_isopen = False
+                where id = %s
+                and x_qty_terpasang = (
+                    select SUM(sol.qty_delivered) as terpasang
+                    from sale_order so
+                    join sale_order_line sol on sol.order_id = so.id
+                    where so.id = %s
+                )
+            """ % (self.order_id.id, self.order_id.id)
+            print(query)
             self.env.cr.execute(query)
 
             query = """
-                            UPDATE mc_kontrak_work_order SET state = 'done' WHERE id = %s
-                    """ % self.id
+                    UPDATE mc_kontrak_work_order SET state = 'done' WHERE id = %s
+            """ % self.id
             self.env.cr.execute(query)
 
             res = super(WorkOrder, self).action_confirm()

@@ -11,7 +11,7 @@
                             type="object"
                             class="oe_stat_button"
                             string="Cetak WO"
-                            attrs="{'invisible': [('state', 'not in', ('sale','done'))]}"
+                            attrs="{'invisible': ['|', ('state', 'not in', ('sale','done')), ('x_mc_isopen', '=', False)]}"
                             icon="fa-cog">
                     </button>
                     <button
@@ -21,6 +21,7 @@
                             icon="fa-list-alt">
                         <field string="WO" name="wo_count" widget="statinfo"/>
                     </button>
+                    <field name="x_mc_isopen" invisible="1"/>
                 </div>
                 <field name="partner_id" position="after">
                     <field name="kontrak_id" domain="[('mc_cust','=', partner_id), ('mc_isopen','=','true')]"/>
@@ -60,6 +61,10 @@
                        position="attributes">
                     <attribute name="string">QTY SO</attribute>
                 </xpath>
+                <xpath expr="/form/sheet/notebook/page/field[@name='order_line']/tree/field[@name='qty_delivered']"
+                       position="attributes">
+                    <attribute name="string">QTY WO</attribute>
+                </xpath>
                 <xpath expr="/form/sheet/notebook/page/field[@name='order_line']/tree/field[@name='name']"
                        position="after">
                     <field name="x_mc_qty_kontrak" readonly="1"></field>
@@ -72,10 +77,10 @@
                             <tree editable="bottom" create="1">
                                 <field name="x_work_order_id" string="No Work Order"/>
                                 <field name="x_qty_terpasang"/>
-                                <field name="x_teknisi_1" />
-                                <field name="x_teknisi_2" />
-                                <field name="x_admin_sales" />
-                                <field name="x_date_created" />
+                                <field name="x_teknisi_1"/>
+                                <field name="x_teknisi_2"/>
+                                <field name="x_admin_sales"/>
+                                <field name="x_date_created"/>
                             </tree>
                         </field>
                     </page>
