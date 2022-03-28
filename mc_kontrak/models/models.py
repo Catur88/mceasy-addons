@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from odoo import models, fields, api, _
+from odoo.tools import is_html_empty
 
 
 class mc_kontrak(models.Model):
@@ -27,7 +28,7 @@ class mc_kontrak(models.Model):
 
     mc_state = fields.Selection([
         ('draft', 'Draft'),
-        ('sent', 'Quotation Sent'),
+        # ('sent', 'Quotation Sent'),
         ('done', 'Confirmed'),
         ('cancel', 'Cancelled'),
     ], string='Status', readonly=True, copy=False, index=True, tracking=3, default='draft')
@@ -97,12 +98,12 @@ class mc_kontrak(models.Model):
 
         return super(mc_kontrak, self).write(vals)
 
-    def action_sent(self):
-        query = """
-            UPDATE mc_kontrak_mc_kontrak SET mc_state = 'sent' WHERE id = %s
-        """ % self.id
-        self.env.cr.execute(query)
-        print("Update kontrak state into Sent")
+    # def action_sent(self):
+    #     query = """
+    #         UPDATE mc_kontrak_mc_kontrak SET mc_state = 'sent' WHERE id = %s
+    #     """ % self.id
+    #     self.env.cr.execute(query)
+    #     print("Update kontrak state into Sent")
 
     # Total Harga
     @api.depends('product_order_line')
@@ -285,13 +286,13 @@ class CustomSalesOrder(models.Model):
 
     wo_count = fields.Integer(string='WO', compute='_count_wo')
 
-    state = fields.Selection([
-        ('draft', 'Quotation'),
-        ('sent', 'Terima DP'),
-        ('sale', 'Progress'),
-        ('done', 'Done'),
-        ('cancel', 'Cancelled'),
-    ], string='Status', readonly=True, copy=False, index=True, tracking=3, default='draft')
+    # state = fields.Selection([
+    #     ('draft', 'Quotation'),
+    #     ('sent', 'Terima DP'),
+    #     ('sale', 'Progress'),
+    #     ('done', 'Done'),
+    #     ('cancel', 'Cancelled'),
+    # ], string='Status', readonly=True, copy=False, index=True, tracking=3, default='draft')
 
     x_order_line = fields.One2many('sale.order.line', 'order_id')
     x_mc_qty_kontrak = fields.Integer(string='Quantity Kontrak')
@@ -385,6 +386,19 @@ class CustomSalesOrder(models.Model):
             for row in so_line:
                 # if arr_order_line[i][2]['product_uom_qty']:
                 # x_qty_terpasang = arr_order_line[i][2]['product_uom_qty']
+                id_sol = 0
+                if row.kontrak_line_id.id is False:
+                    query = """
+                        INSERT INTO mc_kontrak_product_order_line(kontrak_id, product_id, currency_id, 
+                        mc_qty_kontrak, mc_qty_terpasang, mc_harga_produk, mc_harga_diskon, mc_payment, 
+                        mc_total, mc_unit_price) VALUES ('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s') RETURNING id
+                    """ % (row.kontrak_id.id, row.product_id.id, row.currency_id.id,
+                           row.order_id.kontrak_id.mc_qty_kontrak, int(row.product_uom_qty), row.price_unit,
+                           row.price_unit, row.price_total, row.price_total, row.price_unit)
+                    print(query)
+                    self.env.cr.execute(query)
+                    result = self.env.cr.dictfetchone()
+                    id_sol = result['id']
 
                 x_qty_terpasang = row.product_uom_qty
                 print('product_uom_qty = ', x_qty_terpasang)
@@ -394,7 +408,7 @@ class CustomSalesOrder(models.Model):
                         "ON sol.order_id = so.id " \
                         "WHERE so.state NOT IN('cancel') AND " \
                         "sol.kontrak_line_id = %s AND " \
-                        "sol.id != %s" % (row.kontrak_line_id.id, row.id)
+                        "sol.id != %s" % (id_sol if row.kontrak_line_id.id is False else row.kontrak_line_id.id, row.id)
                 self.env.cr.execute(query)
                 print(query)
                 x_qty_terpasang2 = self.env.cr.fetchone()[0]
@@ -402,7 +416,8 @@ class CustomSalesOrder(models.Model):
 
                 query = "UPDATE public.mc_kontrak_product_order_line SET mc_qty_terpasang = %s, " \
                         "mc_qty_belum_terpasang = (mc_qty_kontrak - %s) " \
-                        "WHERE id = %s" % (total_terpasang, total_terpasang, row.kontrak_line_id.id)
+                        "WHERE id = %s" % (total_terpasang, total_terpasang, id_sol if row.kontrak_line_id.id is False
+                else row.kontrak_line_id.id)
                 print(query)
                 self.env.cr.execute(query)
 
@@ -552,6 +567,24 @@ class WorkOrder(models.Model):
                                        'transaction_id',
                                        string='Transactions', copy=False, readonly=True)
     tag_ids = fields.Many2many('crm.tag', 'work_order_tag_rel', 'id', 'tag_id', string='Tags')
+
+    # Hitung jumlah subs tiap WO
+    subscription_count = fields.Integer(compute='_compute_subscription_count')
+
+    def _compute_subscription_count(self):
+        """Compute the number of distinct subscriptions linked to the order."""
+        for order in self:
+            sub_count = len(
+                self.env['mc_kontrak.work_order_line'].read_group(
+                    [('work_order_id', '=', order.id), ('subscription_id', '!=', False)],
+                    ['subscription_id'], ['subscription_id']))
+            order.subscription_count = sub_count
+
+    def action_open_subscriptions(self):
+        action = self.env.ref('sale_subscription.sale_subscription_action').read()[0]
+        action['domain'] = [('x_kontrak_id', '=', self.kontrak_id.id)]
+        action['context'] = {}
+        return action
 
     state = fields.Selection([
         ('draft', 'Draft'),
@@ -704,6 +737,13 @@ class WorkOrder(models.Model):
             """ % self.id
             self.env.cr.execute(query)
 
+            subs_id = self.create_subscriptions()
+            query = """
+                        UPDATE sale_subscription SET x_kontrak_id = %s, x_order_id = %s WHERE id = %s
+                    """ % (self.kontrak_id.id, self.order_id.id, subs_id[0])
+            print(query)
+            self.env.cr.execute(query)
+
             res = super(WorkOrder, self).action_confirm()
             return res
 
@@ -713,6 +753,123 @@ class WorkOrder(models.Model):
         """ % self.id
         self.env.cr.execute(query)
         print('Update Work Order state to Sent')
+
+    def _prepare_subscription_data(self, template):
+        """Prepare a dictionnary of values to create a subscription from a template."""
+        self.ensure_one()
+        date_today = fields.Date.context_today(self)
+        recurring_invoice_day = date_today.day
+        recurring_next_date = self.env['sale.subscription']._get_recurring_next_date(
+            template.recurring_rule_type, template.recurring_interval,
+            date_today, recurring_invoice_day
+        )
+        values = {
+            'name': template.name,
+            'template_id': template.id,
+            'partner_id': self.partner_id.id,
+            'partner_invoice_id': self.partner_invoice_id.id,
+            'partner_shipping_id': self.partner_shipping_id.id,
+            'user_id': self.user_id.id,
+            'team_id': self.team_id.id,
+            'payment_term_id': self.payment_term_id.id,
+            'date_start': fields.Date.context_today(self),
+            'description': self.note if not is_html_empty(self.note) else template.description,
+            'pricelist_id': self.pricelist_id.id,
+            'company_id': self.company_id.id,
+            'analytic_account_id': self.analytic_account_id.id,
+            'recurring_next_date': recurring_next_date,
+            'recurring_invoice_day': recurring_invoice_day,
+            'payment_token_id': self.transaction_ids._get_last().token_id.id if template.payment_mode == 'success_payment' else False,
+            'campaign_id': self.campaign_id.id,
+            'medium_id': self.medium_id.id,
+            'source_id': self.source_id.id,
+        }
+        default_stage = self.env['sale.subscription.stage'].search([('category', '=', 'progress')], limit=1)
+        if default_stage:
+            values['stage_id'] = default_stage.id
+        return values
+
+    def update_existing_subscriptions(self):
+        """
+        Update subscriptions already linked to the order by updating or creating lines.
+
+        :rtype: list(integer)
+        :return: ids of modified subscriptions
+        """
+        res = []
+        deleted_product_ids = None
+        for order in self:
+            subscriptions = order.work_order_line.mapped('subscription_id').sudo()
+            if subscriptions and order.subscription_management != 'renew':
+                order.subscription_management = 'upsell'
+            res.append(subscriptions.ids)
+            if order.subscription_management == 'renew':
+                subscriptions.wipe()
+                subscriptions.increment_period(renew=True)
+                subscriptions.payment_term_id = order.payment_term_id
+                subscriptions.set_open()
+                # Some products of the subscription may be missing from the SO: they can be archived or manually removed from the SO.
+                # we delete the recurring line of these subscriptions
+                deleted_product_ids = subscriptions.mapped(
+                    'recurring_invoice_line_ids.product_id') - order.work_order_line.mapped('product_id')
+            for subscription in subscriptions:
+                subscription_lines = order.work_order_line.filtered(
+                    lambda l: l.subscription_id == subscription and l.product_id.recurring_invoice)
+                line_values = subscription_lines._update_subscription_line_data(subscription)
+                subscription.write({'recurring_invoice_line_ids': line_values})
+        return res
+
+    def create_subscriptions(self):
+        """
+        Create subscriptions based on the products' subscription template.
+
+        Create subscriptions based on the templates found on order lines' products. Note that only
+        lines not already linked to a subscription are processed; one subscription is created per
+        distinct subscription template found.
+
+        :rtype: list(integer)
+        :return: ids of newly create subscriptions
+        """
+        res = []
+        for order in self:
+            to_create = order._split_subscription_lines()
+            # create a subscription for each template with all the necessary lines
+            for template in to_create:
+                values = order._prepare_subscription_data(template)
+                values['recurring_invoice_line_ids'] = to_create[template]._prepare_subscription_line_data()
+                subscription = self.env['sale.subscription'].sudo().create(values)
+                subscription.onchange_date_start()
+                res.append(subscription.id)
+                to_create[template].write({'subscription_id': subscription.id})
+                subscription.message_post_with_view(
+                    'mail.message_origin_link', values={'self': subscription, 'origin': order},
+                    subtype_id=self.env.ref('mail.mt_note').id, author_id=self.env.user.partner_id.id
+                )
+                self.env['sale.subscription.log'].sudo().create({
+                    'subscription_id': subscription.id,
+                    'event_date': fields.Date.context_today(self),
+                    'event_type': '0_creation',
+                    'amount_signed': subscription.recurring_monthly,
+                    'recurring_monthly': subscription.recurring_monthly,
+                    'currency_id': subscription.currency_id.id,
+                    'category': subscription.stage_category,
+                    'user_id': order.user_id.id,
+                    'team_id': order.team_id.id,
+                })
+        return res
+
+    def _split_subscription_lines(self):
+        """Split the order line according to subscription templates that must be created."""
+        self.ensure_one()
+        res = dict()
+        new_sub_lines = self.work_order_line.filtered(lambda
+                                                          l: not l.subscription_id and l.product_id.subscription_template_id and l.product_id.recurring_invoice)
+        templates = new_sub_lines.mapped('product_id').mapped('subscription_template_id')
+        for template in templates:
+            lines = self.work_order_line.filtered(
+                lambda l: l.product_id.subscription_template_id == template and l.product_id.recurring_invoice)
+            res[template] = lines
+        return res
 
 
 class WorkOrderLine(models.Model):

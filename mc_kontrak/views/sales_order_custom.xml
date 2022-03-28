@@ -5,6 +5,7 @@
             <field name="model">sale.order</field>
             <field name="inherit_id" ref="sale.view_order_form"/>
             <field name="arch" type="xml">
+                <field name="state" widget="statusbar" statusbar_visible="draft,sent,sale,done,cancel"/>
                 <div class="oe_button_box" name="button_box">
                     <button
                             name="action_report_wo_spk"
@@ -40,7 +41,7 @@
                 </xpath>
                 <xpath expr="/form/sheet/notebook/page/field[@name='order_line']/tree/field[@name='price_unit']"
                        position="attributes">
-                    <attribute name="readonly">True</attribute>
+                    <attribute name="readonly">False</attribute>
                 </xpath>
                 <xpath expr="/form/sheet/notebook/page/field[@name='order_line']/tree/field[@name='discount']"
                        position="attributes">
@@ -67,7 +68,7 @@
                 </xpath>
                 <xpath expr="/form/sheet/notebook/page/field[@name='order_line']/tree/field[@name='name']"
                        position="after">
-                    <field name="x_mc_qty_kontrak" readonly="1"></field>
+                    <field name="x_mc_qty_kontrak"></field>
                 </xpath>
 
                 <!--Tambah Page Histori WO-->

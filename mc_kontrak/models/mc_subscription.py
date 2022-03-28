@@ -6,14 +6,15 @@ class CustomSalesSubscription(models.Model):
     _description = 'Modul Subscription Sale Order yang menginherit sale.order'
 
     def create_subscriptions(self):
-        res = super(CustomSalesSubscription, self).create_subscriptions()
+        # res = super(CustomSalesSubscription, self).create_subscriptions()
         print('Create Subs From Custom Sales Subs')
-        print(res[0])
-        query = """
-            UPDATE sale_subscription SET x_kontrak_id = %s, x_order_id = %s WHERE id = %s
-        """ % (self.kontrak_id.id, self.id, res[0])
-        self.env.cr.execute(query)
-        return res
+        # print(res)
+        # print(res[0])
+        # query = """
+        #     UPDATE sale_subscription SET x_kontrak_id = %s, x_order_id = %s WHERE id = %s
+        # """ % (self.kontrak_id.id, self.id, res[0])
+        # self.env.cr.execute(query)
+        # return res
 
 
 class McSubscription(models.Model):

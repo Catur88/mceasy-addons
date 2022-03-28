@@ -47,6 +47,13 @@
                         <field name="state" widget="statusbar" statusbar_visible="draft,sent,done,cancel"/>
                     </header>
                     <sheet>
+                        <div class="oe_button_box" name="button_box">
+                            <button class="oe_stat_button" name="action_open_subscriptions" type="object" icon="fa-book"
+                                    attrs="{'invisible': [('subscription_count', '=', 0)]}">
+                                <field name="subscription_count" widget="statinfo" string="Subscriptions"/>
+                            </button>
+                        </div>
+
                         <div class="oe_title">
                             <span style="font-size: 25px; font-weight: bold;">
                                 <field name="name" readonly="1"/>
@@ -87,7 +94,8 @@
                                 </field>
                             </page>
 
-                            <page string="Device Terpasang" attrs="{'invisible': [('state', 'in', ['draft','cancel'])]}">
+                            <page string="Device Terpasang"
+                                  attrs="{'invisible': [('state', 'in', ['draft','cancel'])]}">
                                 <field name="device_wo_line" mode="tree,kanban" nolabel="1">
                                     <tree editable="bottom" create="1">
                                         <field name="x_jenis_kendaraan"/>

@@ -34,13 +34,13 @@
             <field name="arch" type="xml">
                 <form string="Form Kontrak">
                     <header>
-                        <button name="action_sent" id="action_sent" data-hotkey="v"
-                                string="Sent Contract" class="btn-primary" type="object"
-                                attrs="{'invisible': [('mc_state', 'not in', ['draft'])]}"/>
+<!--                        <button name="action_sent" id="action_sent" data-hotkey="v"-->
+<!--                                string="Sent Contract" class="btn-primary" type="object"-->
+<!--                                attrs="{'invisible': [('mc_state', 'not in', ['draft'])]}"/>-->
 
                         <button name="action_confirm" id="action_confirm" data-hotkey="v"
                                 string="Confirm Contract" class="btn-primary" type="object"
-                                attrs="{'invisible': [('mc_state', 'in', ['draft', 'done', 'cancel'])]}"/>
+                                attrs="{'invisible': [('mc_state', 'in', ['done', 'cancel'])]}"/>
 
                         <button name="action_cancel" id="action_confirm" data-hotkey="v"
                                 string="Cancel Contract" class="btn-secondary" type="object"
