@@ -25,6 +25,13 @@ class McSubscription(models.Model):
     x_order_id = fields.Many2one('sale.order', store=True, string="No SO", readonly=True)
 
 
+class McSubscriptionLines(models.Model):
+    _inherit = 'sale.subscription.line'
+    _description = 'Modul yang menginherit sale.subscription.line'
+
+    x_order_id = fields.Many2one('sale.order', store=True, string="No SO", readonly=True)
+
+
 class McSubscriptionWizard(models.TransientModel):
     _inherit = 'sale.subscription.wizard'
     _description = 'Modul yang menginherit sale.subscription.wizard'

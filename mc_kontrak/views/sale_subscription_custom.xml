@@ -39,8 +39,13 @@
                 </field>
                 <field name="template_id" position="after">
                     <field name="display_name"/>
-                    <field name="x_order_id"/>
                 </field>
+
+                <xpath expr="/form/sheet/div/notebook/page/div/field[@name='recurring_invoice_line_ids']/tree/field[@name='product_id']"
+                       position="before">
+                    <field name="x_order_id" string="No SO"/>
+                </xpath>
+
             </field>
         </record>
     </data>

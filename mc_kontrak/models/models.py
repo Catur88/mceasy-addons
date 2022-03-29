@@ -10,7 +10,7 @@ class mc_kontrak(models.Model):
 
     # Field
     name = fields.Char(string='No Kontrak', readonly=True, default='New')
-    mc_cust = fields.Many2one('res.partner', string='Customer')
+    mc_cust = fields.Many2one('res.partner', string='Customer', domain=[("is_company", '=', True)])
     mc_pic_cust = fields.Char(string='PIC Customer')
     mc_create_date = fields.Date(string='Created Date', readonly=True, store=True, default=fields.Datetime.now())
     mc_confirm_date = fields.Date(string='Confirm Date', readonly=True, copy=False)
@@ -60,15 +60,15 @@ class mc_kontrak(models.Model):
             print(query)
             print(self.env.cr.fetchone())
             if self.env.cr.fetchone() is None:
-                idSection = 0
+                id_section = 0
             else:
-                idSection = self.env.cr.fetchone()[0]
+                id_section = self.env.cr.fetchone()[0]
 
-            if idSection != 0:
+            if id_section != 0:
                 query = """
                     SELECT SUM(mc_payment) as subtotal_sub FROM mc_kontrak_product_order_line
                     WHERE id < %s
-                """ % idSection
+                """ % id_section
                 self.env.cr.execute(query)
                 print(query)
                 subtotal_sub = self.env.cr.fetchone()[0]
@@ -80,7 +80,7 @@ class mc_kontrak(models.Model):
                 query = """
                     SELECT SUM(mc_payment) as subtotal_sub FROM mc_kontrak_product_order_line
                     WHERE id > %s
-                """ % idSection
+                """ % id_section
                 self.env.cr.execute(query)
                 print(query)
                 subtotal_otf = self.env.cr.fetchone()[0]
@@ -474,7 +474,8 @@ class CustomSalesOrder(models.Model):
                             "ON sol.order_id = so.id " \
                             "WHERE so.state NOT IN('cancel') AND " \
                             "sol.kontrak_line_id = %s AND " \
-                            "sol.id != %s" % (id_sol if row.kontrak_line_id.id is False else row.kontrak_line_id.id, row.id)
+                            "sol.id != %s" % (
+                                id_sol if row.kontrak_line_id.id is False else row.kontrak_line_id.id, row.id)
                     self.env.cr.execute(query)
                     print(query)
                     x_qty_terpasang2 = self.env.cr.fetchone()[0]
@@ -482,8 +483,9 @@ class CustomSalesOrder(models.Model):
 
                     query = "UPDATE public.mc_kontrak_product_order_line SET mc_qty_terpasang = %s, " \
                             "mc_qty_belum_terpasang = (mc_qty_kontrak - %s) " \
-                            "WHERE id = %s" % (total_terpasang, total_terpasang, id_sol if row.kontrak_line_id.id is False
-                    else row.kontrak_line_id.id)
+                            "WHERE id = %s" % (
+                                total_terpasang, total_terpasang, id_sol if row.kontrak_line_id.id is False
+                                else row.kontrak_line_id.id)
                     print(query)
                     self.env.cr.execute(query)
 
@@ -536,7 +538,6 @@ class CustomSalesOrder(models.Model):
 
         res = super(CustomSalesOrder, self).action_confirm()
         return res
-
 
     # Button untuk membuat WO baru dari SO
     def action_report_wo_spk(self):
@@ -804,12 +805,29 @@ class WorkOrder(models.Model):
             """ % self.id
             self.env.cr.execute(query)
 
-            subs_id = self.create_subscriptions()
-            query = """
-                        UPDATE sale_subscription SET x_kontrak_id = %s, x_order_id = %s WHERE id = %s
-                    """ % (self.kontrak_id.id, self.order_id.id, subs_id[0])
-            print(query)
-            self.env.cr.execute(query)
+            self.env.cr.execute("""
+                SELECT COUNT(id) FROM sale_subscription WHERE x_kontrak_id = %s
+            """ % self.kontrak_id.id)
+            count_kontrak_on_sub = self.env.cr.fetchone()[0]
+            if count_kontrak_on_sub < 1:
+                subs_id = self.create_subscriptions()
+                query = """
+                    UPDATE sale_subscription SET x_kontrak_id = %s, x_order_id = %s WHERE id = %s
+                """ % (self.kontrak_id.id, self.order_id.id, subs_id[0])
+                self.env.cr.execute(query)
+
+                query = """
+                    UPDATE sale_subscription_line SET x_order_id = %s WHERE analytic_account_id = %s
+                """ % (self.order_id.id, subs_id[0])
+                print(query)
+                self.env.cr.execute(query)
+            else:
+                self.env.cr.execute("""
+                    SELECT * FROM sale_subscription WHERE x_kontrak_id = %s
+                """ % self.kontrak_id.id)
+                subs_data = self.env.cr.dictfetchone()
+                print(subs_data)
+                self.create_line_subscriptions(subs_data, row)
 
             res = super(WorkOrder, self).action_confirm()
             return res
@@ -855,6 +873,39 @@ class WorkOrder(models.Model):
         if default_stage:
             values['stage_id'] = default_stage.id
         return values
+
+    def create_line_subscriptions(self, subs_data, wo_line):
+        for order in self:
+            to_create = order._bagi_sub_line()
+            for template in to_create:
+                values = order._siapkan_subs_data(template)
+                values['recurring_invoice_line_ids'] = to_create[template]._siapkan_subs_line_data()
+                to_create[template].write({'subscription_id': subs_data['id']})
+
+                self.env['sale.subscription.log'].sudo().create({
+                    'subscription_id': subs_data['id'],
+                    'event_date': fields.Date.context_today(self),
+                    'event_type': '0_creation',
+                    'amount_signed': wo_line.price_unit * wo_line.qty_delivered,
+                    'recurring_monthly': wo_line.price_unit * wo_line.qty_delivered,
+                    'currency_id': 12,
+                    'category': subs_data['stage_category'],
+                    'user_id': order.user_id.id,
+                    'team_id': order.team_id.id,
+                })
+
+                self.env['sale.subscription.line'].sudo().create({
+                    'product_id': wo_line.product_id.id,
+                    'analytic_account_id': subs_data['id'],
+                    'company_id': wo_line.company_id.id,
+                    'name': wo_line.name,
+                    'quantity': wo_line.qty_delivered,
+                    'uom_id': wo_line.product_id.product_tmpl_id.uom_id.id,
+                    'price_unit': wo_line.price_unit,
+                    'price_subtotal': wo_line.price_unit * wo_line.qty_delivered,
+                    'currency_id': wo_line.currency_id.id,
+                    'x_order_id': wo_line.order_id.id
+                })
 
     def create_subscriptions(self):
         """
