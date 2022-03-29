@@ -128,8 +128,6 @@
                                 <group>
                                     <field name="histori_so_line" mode="tree,kanban" nolabel="1">
                                         <tree>
-                                            <field name="x_tgl_start" string="Tanggal Start"/>
-                                            <field name="x_tgl_end" string="Tanggal End"/>
                                             <field name="x_order_id" string="Nomor SO"/>
                                             <field name="x_qty_so" string="QTY SO"/>
                                             <field name="x_item" string="Item"/>

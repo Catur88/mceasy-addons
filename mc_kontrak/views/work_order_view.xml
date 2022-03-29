@@ -44,7 +44,7 @@
                                 string="Cancel WO" class="btn-secondary" type="object"
                                 attrs="{'invisible': [('state', 'in', ['draft','cancel'])]}"/>
 
-                        <field name="state" widget="statusbar" statusbar_visible="draft,sent,done,cancel"/>
+                        <field name="state" widget="statusbar" statusbar_visible="draft,sent,sale,cancel"/>
                     </header>
                     <sheet>
                         <div class="oe_button_box" name="button_box">

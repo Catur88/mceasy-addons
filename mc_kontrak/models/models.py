@@ -66,9 +66,9 @@ class mc_kontrak(models.Model):
 
             if idSection != 0:
                 query = """
-                                SELECT SUM(mc_payment) as subtotal_sub FROM mc_kontrak_product_order_line
-                                WHERE id < %s
-                            """ % idSection
+                    SELECT SUM(mc_payment) as subtotal_sub FROM mc_kontrak_product_order_line
+                    WHERE id < %s
+                """ % idSection
                 self.env.cr.execute(query)
                 print(query)
                 subtotal_sub = self.env.cr.fetchone()[0]
@@ -78,9 +78,9 @@ class mc_kontrak(models.Model):
                 print(subtotal_sub)
 
                 query = """
-                                SELECT SUM(mc_payment) as subtotal_sub FROM mc_kontrak_product_order_line
-                                WHERE id > %s
-                            """ % idSection
+                    SELECT SUM(mc_payment) as subtotal_sub FROM mc_kontrak_product_order_line
+                    WHERE id > %s
+                """ % idSection
                 self.env.cr.execute(query)
                 print(query)
                 subtotal_otf = self.env.cr.fetchone()[0]
@@ -303,12 +303,18 @@ class CustomSalesOrder(models.Model):
     x_no_po = fields.Char(string='No PO Customer')
     x_qty_terpasang = fields.Integer(default=0, store=True)
 
+    # @api.model
+    # def create(self, vals_list):
+    #     print('Akses Method Create Custom Sale Order')
+
     def write(self, vals):
         print('method write diakses')
         res = super(CustomSalesOrder, self).write(vals)
+        print(self.kontrak_id.id)
         if ('order_line' in vals):
             arr_order_line = vals['order_line']
             print(arr_order_line)
+
         return res
 
     # Auto fill Order Line
@@ -381,94 +387,156 @@ class CustomSalesOrder(models.Model):
         print(self.id)
         print(self.x_order_line)
         so_line = self.x_order_line
-        if so_line:
-            i = 0
-            for row in so_line:
-                # if arr_order_line[i][2]['product_uom_qty']:
-                # x_qty_terpasang = arr_order_line[i][2]['product_uom_qty']
-                id_sol = 0
-                if row.kontrak_line_id.id is False:
+        qty_so = 0
+
+        if self.kontrak_id.id is False:
+            # Buat Kontrak Baru dan Ambil IDnya
+            contract_name = self.env['ir.sequence'].next_by_code('mc_kontrak.mc_kontrak')
+            query = """
+                INSERT INTO mc_kontrak_mc_kontrak(mc_cust, name, mc_create_date, mc_isopen, mc_state,
+                mc_sales, mc_admin_sales) VALUES ('%s', '%s', now(), true, 'done', '%s', '%s') RETURNING id
+            """ % (self.partner_id.id, contract_name, self.env.user.id, self.env.user.id)
+            self.env.cr.execute(query)
+            print(query)
+            kontrak_id = self.env.cr.fetchone()[0]
+
+            # Cek order_line, masukkan ke product_order_line Kontrak
+            if self.x_order_line:
+                for row in self.x_order_line:
+                    self.env.cr.execute("""SELECT * FROM product_template WHERE id = %s""" % row.product_id.id)
+                    product_id = self.env.cr.dictfetchone()
                     query = """
-                        INSERT INTO mc_kontrak_product_order_line(kontrak_id, product_id, currency_id, 
-                        mc_qty_kontrak, mc_qty_terpasang, mc_harga_produk, mc_harga_diskon, mc_payment, 
-                        mc_total, mc_unit_price) VALUES ('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s') RETURNING id
-                    """ % (row.kontrak_id.id, row.product_id.id, row.currency_id.id,
-                           row.order_id.kontrak_id.mc_qty_kontrak, int(row.product_uom_qty), row.price_unit,
-                           row.price_unit, row.price_total, row.price_total, row.price_unit)
+                        INSERT INTO mc_kontrak_product_order_line(kontrak_id, product_id, mc_qty_kontrak, mc_qty_terpasang,
+                        mc_harga_produk, mc_harga_diskon, mc_period, mc_period_info) 
+                        VALUES ('%s','%s','%s','%s','%s','%s', '1', 'bulan')
+                    """ % (kontrak_id, row.product_id.id, row.x_mc_qty_kontrak, int(row.product_uom_qty),
+                           product_id['list_price'], row.price_unit)
                     print(query)
                     self.env.cr.execute(query)
-                    result = self.env.cr.dictfetchone()
-                    id_sol = result['id']
 
-                x_qty_terpasang = row.product_uom_qty
-                print('product_uom_qty = ', x_qty_terpasang)
+                    # Masukkan Sales Order ke histori SO
+                    query = """
+                        INSERT INTO mc_kontrak_histori_so(x_kontrak_id,
+                        x_tgl_start, x_item, x_period, x_status_pembayaran,
+                        x_note, x_qty_so) VALUES ('%s',now(),'%s','%s','%s','','%s' )
+                    """ % (kontrak_id, row.product_id.id, '1 - bulan', self.state, int(row.product_uom_qty))
+                    print(query)
+                    self.env.cr.execute(query)
 
-                query = "SELECT coalesce(SUM(sol.product_uom_qty), 0) FROM public.sale_order so " \
-                        "JOIN public.sale_order_line sol " \
-                        "ON sol.order_id = so.id " \
-                        "WHERE so.state NOT IN('cancel') AND " \
-                        "sol.kontrak_line_id = %s AND " \
-                        "sol.id != %s" % (id_sol if row.kontrak_line_id.id is False else row.kontrak_line_id.id, row.id)
-                self.env.cr.execute(query)
-                print(query)
-                x_qty_terpasang2 = self.env.cr.fetchone()[0]
-                total_terpasang = x_qty_terpasang + x_qty_terpasang2
+            # Update Sales Order, agar berelasi dengan Kontrak yang baru dibuat
+            self.env.cr.execute("SELECT id FROM sale_order ORDER BY id DESC LIMIT 1")
+            order_id = self.env.cr.fetchone()[0]
+            print(order_id)
 
-                query = "UPDATE public.mc_kontrak_product_order_line SET mc_qty_terpasang = %s, " \
-                        "mc_qty_belum_terpasang = (mc_qty_kontrak - %s) " \
-                        "WHERE id = %s" % (total_terpasang, total_terpasang, id_sol if row.kontrak_line_id.id is False
-                else row.kontrak_line_id.id)
-                print(query)
-                self.env.cr.execute(query)
-
-                query = """
-                    UPDATE mc_kontrak_mc_kontrak SET mc_qty_kontrak = %s WHERE id = %s
-                """ % (row.x_mc_qty_kontrak, row.kontrak_id.id)
-                self.env.cr.execute(query)
-
-                query = """
-                    SELECT mc_period, mc_period_info FROM mc_kontrak_product_order_line 
-                    WHERE kontrak_id = %s 
-                """ % self.kontrak_id.id
-                print(query)
-                self.env.cr.execute(query)
-                getPeriod = self.env.cr.dictfetchone()
-                periode = str(getPeriod['mc_period']) + " " + str(getPeriod['mc_period_info'])
-
-                query = """
-                            INSERT INTO mc_kontrak_histori_so(x_kontrak_id,
-                            x_order_id, x_tgl_start, x_item, x_period, x_status_pembayaran,
-                            x_note, x_qty_so) VALUES ('%s','%s',now(),'%s','%s','%s','','%s' )
-                        """ % (
-                    self.kontrak_id.id, row.order_id.id, row.product_id.id,
-                    periode, self.state, int(row.product_uom_qty))
-                print(query)
-                self.env.cr.execute(query)
-
-                if query:
-                    print('oke, qty dikurangi, histori so dimasukkan')
-                i = i + 1
             query = """
-                update mc_kontrak_mc_kontrak set
-                mc_isopen = False
-                where id = %s
-                and mc_qty_kontrak = (
-                    select SUM(mkpol.mc_qty_terpasang) as mc_qty_terpasang
-                    from mc_kontrak_mc_kontrak mkmk
-                    join mc_kontrak_product_order_line mkpol on mkpol.kontrak_id = mkmk.id
-                    where mkmk.id = %s
-                )
-            """ % (self.kontrak_id.id, self.kontrak_id.id)
+                UPDATE sale_order SET kontrak_id = %s WHERE id = %s
+            """ % (kontrak_id, order_id)
             print(query)
             self.env.cr.execute(query)
 
+            # Update histori SO agar nyambung Sales Order Id
             query = """
-                    UPDATE sale_order SET state = 'sale' WHERE id = %s
-            """ % self.id
+                UPDATE mc_kontrak_histori_so SET x_order_id = %s WHERE x_kontrak_id = %s
+            """ % (order_id, kontrak_id)
             self.env.cr.execute(query)
 
-            res = super(CustomSalesOrder, self).action_confirm()
-            return res
+            # Update Sale Order Line set Kontrak ID
+            self.env.cr.execute("""UPDATE sale_order_line SET kontrak_id = %s WHERE order_id = %s""" % (kontrak_id,
+                                                                                                        order_id))
+        else:
+            if so_line:
+                i = 0
+                for row in so_line:
+                    # if arr_order_line[i][2]['product_uom_qty']:
+                    # x_qty_terpasang = arr_order_line[i][2]['product_uom_qty']
+                    id_sol = 0
+                    if row.kontrak_line_id.id is False:
+                        print(row.order_id.kontrak_id.mc_qty_kontrak)
+                        print(int(row.order_id.kontrak_id.mc_qty_kontrak))
+
+                        query = """
+                            INSERT INTO mc_kontrak_product_order_line(kontrak_id, product_id, currency_id, 
+                            mc_qty_kontrak, mc_qty_terpasang, mc_harga_produk, mc_harga_diskon, mc_payment, 
+                            mc_total, mc_unit_price) VALUES ('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s') RETURNING id
+                        """ % (row.kontrak_id.id, row.product_id.id, row.currency_id.id,
+                               int(row.order_id.kontrak_id.mc_qty_kontrak), int(row.product_uom_qty), row.price_unit,
+                               row.price_unit, row.price_total, row.price_total, row.price_unit)
+                        print(query)
+                        self.env.cr.execute(query)
+                        result = self.env.cr.dictfetchone()
+                        id_sol = result['id']
+
+                    x_qty_terpasang = row.product_uom_qty
+                    print('product_uom_qty = ', x_qty_terpasang)
+
+                    query = "SELECT coalesce(SUM(sol.product_uom_qty), 0) FROM public.sale_order so " \
+                            "JOIN public.sale_order_line sol " \
+                            "ON sol.order_id = so.id " \
+                            "WHERE so.state NOT IN('cancel') AND " \
+                            "sol.kontrak_line_id = %s AND " \
+                            "sol.id != %s" % (id_sol if row.kontrak_line_id.id is False else row.kontrak_line_id.id, row.id)
+                    self.env.cr.execute(query)
+                    print(query)
+                    x_qty_terpasang2 = self.env.cr.fetchone()[0]
+                    total_terpasang = x_qty_terpasang + x_qty_terpasang2
+
+                    query = "UPDATE public.mc_kontrak_product_order_line SET mc_qty_terpasang = %s, " \
+                            "mc_qty_belum_terpasang = (mc_qty_kontrak - %s) " \
+                            "WHERE id = %s" % (total_terpasang, total_terpasang, id_sol if row.kontrak_line_id.id is False
+                    else row.kontrak_line_id.id)
+                    print(query)
+                    self.env.cr.execute(query)
+
+                    query = """
+                        UPDATE mc_kontrak_mc_kontrak SET mc_qty_kontrak = %s WHERE id = %s
+                    """ % (row.x_mc_qty_kontrak, row.kontrak_id.id)
+                    self.env.cr.execute(query)
+
+                    query = """
+                        SELECT mc_period, mc_period_info FROM mc_kontrak_product_order_line 
+                        WHERE kontrak_id = %s 
+                    """ % self.kontrak_id.id
+                    print(query)
+                    self.env.cr.execute(query)
+                    getPeriod = self.env.cr.dictfetchone()
+                    periode = str(getPeriod['mc_period']) + " " + str(getPeriod['mc_period_info'])
+
+                    query = """
+                                INSERT INTO mc_kontrak_histori_so(x_kontrak_id,
+                                x_order_id, x_tgl_start, x_item, x_period, x_status_pembayaran,
+                                x_note, x_qty_so) VALUES ('%s','%s',now(),'%s','%s','%s','','%s' )
+                            """ % (
+                        self.kontrak_id.id, row.order_id.id, row.product_id.id,
+                        periode, self.state, int(row.product_uom_qty))
+                    print(query)
+                    self.env.cr.execute(query)
+
+                    if query:
+                        print('oke, qty dikurangi, histori so dimasukkan')
+                    i = i + 1
+
+                query = """
+                    update mc_kontrak_mc_kontrak set
+                    mc_isopen = False
+                    where id = %s
+                    and mc_qty_kontrak = (
+                        select SUM(mkpol.mc_qty_terpasang) as mc_qty_terpasang
+                        from mc_kontrak_mc_kontrak mkmk
+                        join mc_kontrak_product_order_line mkpol on mkpol.kontrak_id = mkmk.id
+                        where mkmk.id = %s
+                    )
+                """ % (self.kontrak_id.id, self.kontrak_id.id)
+                print(query)
+                self.env.cr.execute(query)
+
+        query = """
+                UPDATE sale_order SET state = 'sale' WHERE id = %s
+        """ % self.id
+        self.env.cr.execute(query)
+
+        res = super(CustomSalesOrder, self).action_confirm()
+        return res
+
 
     # Button untuk membuat WO baru dari SO
     def action_report_wo_spk(self):
@@ -568,6 +636,13 @@ class WorkOrder(models.Model):
                                        string='Transactions', copy=False, readonly=True)
     tag_ids = fields.Many2many('crm.tag', 'work_order_tag_rel', 'id', 'tag_id', string='Tags')
 
+    state = fields.Selection([
+        ('draft', 'Draft'),
+        ('sent', 'In Progress'),
+        ('sale', 'Done'),
+        ('cancel', 'Cancelled'),
+    ], string='Status', copy=False, index=True, tracking=3, default='draft')
+
     # Hitung jumlah subs tiap WO
     subscription_count = fields.Integer(compute='_compute_subscription_count')
 
@@ -585,13 +660,6 @@ class WorkOrder(models.Model):
         action['domain'] = [('x_kontrak_id', '=', self.kontrak_id.id)]
         action['context'] = {}
         return action
-
-    state = fields.Selection([
-        ('draft', 'Draft'),
-        ('sent', 'In Progress'),
-        ('done', 'Done'),
-        ('cancel', 'Cancelled'),
-    ], string='Status', copy=False, index=True, tracking=3, default='draft')
 
     @api.model
     def create(self, vals_list):
@@ -623,13 +691,14 @@ class WorkOrder(models.Model):
                 values = {}
                 print(row.id)
 
-                # Cek jika status produk open, masukkan ke SO
+                # Cek jika status produk open, masukkan ke WO Line
                 values['product_id'] = row.product_id.id
                 values['order_id'] = row.order_id.id
                 values['product_uom_qty'] = row.product_uom_qty
                 values['qty_delivered'] = row.product_uom_qty
                 values['x_end_date'] = row.order_id.validity_date
                 values['sale_order_line_id'] = row.id
+                values['price_unit'] = row.price_unit
 
                 terms.append((0, 0, values))
 
@@ -754,7 +823,7 @@ class WorkOrder(models.Model):
         self.env.cr.execute(query)
         print('Update Work Order state to Sent')
 
-    def _prepare_subscription_data(self, template):
+    def _siapkan_subs_data(self, template):
         """Prepare a dictionnary of values to create a subscription from a template."""
         self.ensure_one()
         date_today = fields.Date.context_today(self)
@@ -789,36 +858,6 @@ class WorkOrder(models.Model):
             values['stage_id'] = default_stage.id
         return values
 
-    def update_existing_subscriptions(self):
-        """
-        Update subscriptions already linked to the order by updating or creating lines.
-
-        :rtype: list(integer)
-        :return: ids of modified subscriptions
-        """
-        res = []
-        deleted_product_ids = None
-        for order in self:
-            subscriptions = order.work_order_line.mapped('subscription_id').sudo()
-            if subscriptions and order.subscription_management != 'renew':
-                order.subscription_management = 'upsell'
-            res.append(subscriptions.ids)
-            if order.subscription_management == 'renew':
-                subscriptions.wipe()
-                subscriptions.increment_period(renew=True)
-                subscriptions.payment_term_id = order.payment_term_id
-                subscriptions.set_open()
-                # Some products of the subscription may be missing from the SO: they can be archived or manually removed from the SO.
-                # we delete the recurring line of these subscriptions
-                deleted_product_ids = subscriptions.mapped(
-                    'recurring_invoice_line_ids.product_id') - order.work_order_line.mapped('product_id')
-            for subscription in subscriptions:
-                subscription_lines = order.work_order_line.filtered(
-                    lambda l: l.subscription_id == subscription and l.product_id.recurring_invoice)
-                line_values = subscription_lines._update_subscription_line_data(subscription)
-                subscription.write({'recurring_invoice_line_ids': line_values})
-        return res
-
     def create_subscriptions(self):
         """
         Create subscriptions based on the products' subscription template.
@@ -832,11 +871,11 @@ class WorkOrder(models.Model):
         """
         res = []
         for order in self:
-            to_create = order._split_subscription_lines()
+            to_create = order._bagi_sub_line()
             # create a subscription for each template with all the necessary lines
             for template in to_create:
-                values = order._prepare_subscription_data(template)
-                values['recurring_invoice_line_ids'] = to_create[template]._prepare_subscription_line_data()
+                values = order._siapkan_subs_data(template)
+                values['recurring_invoice_line_ids'] = to_create[template]._siapkan_subs_line_data()
                 subscription = self.env['sale.subscription'].sudo().create(values)
                 subscription.onchange_date_start()
                 res.append(subscription.id)
@@ -858,7 +897,7 @@ class WorkOrder(models.Model):
                 })
         return res
 
-    def _split_subscription_lines(self):
+    def _bagi_sub_line(self):
         """Split the order line according to subscription templates that must be created."""
         self.ensure_one()
         res = dict()
@@ -891,3 +930,17 @@ class WorkOrderLine(models.Model):
     x_end_date = fields.Date(string='Plan End Date', store=True)
     x_start_date_real = fields.Date(string='Real Start Date', store=True)
     x_end_date_real = fields.Date(string='Real End Date', store=True)
+
+    def _siapkan_subs_line_data(self):
+        """Prepare a dictionnary of values to add lines to a subscription."""
+        values = list()
+        for line in self:
+            values.append((0, False, {
+                'product_id': line.product_id.id,
+                'name': line.name,
+                'quantity': line.qty_delivered,
+                'uom_id': line.product_uom.id,
+                'price_unit': line.price_unit,
+                'discount': line.discount if line.order_id.subscription_management != 'upsell' else False,
+            }))
+        return values
