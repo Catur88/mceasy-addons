@@ -564,9 +564,7 @@ class CustomSalesOrder(models.Model):
 
     # Hitung berapa SO di Kontrak ini
     def _count_wo(self):
-        query = "SELECT COUNT(0) FROM public.mc_kontrak_work_order where order_id = %s " % self.id
-        print(query)
-        self.env.cr.execute(query)
+        self.env.cr.execute("SELECT COUNT(0) FROM public.mc_kontrak_work_order where order_id = %s " % self.id)
         result = self.env.cr.fetchone()
         self.wo_count = result[0]
 
