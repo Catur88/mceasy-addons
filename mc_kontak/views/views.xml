@@ -7,6 +7,7 @@
             <field name="arch" type="xml">
                 <xpath expr="//field[@name='vat']" position='before'>
                     <field name="x_pic"/>
+                    <field name="x_isteknisi"/>
                 </xpath>
                 <xpath expr="//page[@name='contact_addresses']" position='after'>
                     <page string='Device Terpasang'>

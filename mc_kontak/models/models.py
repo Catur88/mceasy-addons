@@ -8,7 +8,8 @@ class CustomContact(models.Model):
     _description = 'Modul yang menginherit res.partner untuk menambah kolom baru'
 
     # Fields
-    x_pic = fields.Char(string='PIC Customer', required=True, store=True)
+    x_pic = fields.Char(string='PIC Customer', store=True)
+    x_isteknisi = fields.Boolean(string='Teknisi McEasy', store=True)
 
     # Relasi
     channel_ids = fields.Many2many('mail.channel', 'mail_channel_profile_partner', 'partner_id', 'channel_id',
@@ -16,3 +17,10 @@ class CustomContact(models.Model):
 
     x_device_wo = fields.One2many('mc_kontrak.device_wo', 'x_partner_id')
 
+    def write(self, vals):
+        print(vals)
+        if 'x_isteknisi' in vals:
+            if vals['x_isteknisi'] is True:
+                self.env.cr.execute("""UPDATE res_partner SET function = 'Teknisi McEasy' WHERE id = %s """ % self.id)
+        res = super(CustomContact, self).write(vals)
+        return res
