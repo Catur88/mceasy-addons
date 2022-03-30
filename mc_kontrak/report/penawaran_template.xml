@@ -1,0 +1,123 @@
+<odoo>
+    <template id="report_penawaran_document">
+        <t t-call="web.external_layout">
+            <t t-set="doc" t-value="doc.with_context(lang=doc.partner_id.lang)"/>
+            <div style="text-align:right">
+                <h2>PT. Otto Menara Globalindo</h2>
+                <p>PT. Otto Menara Globalindo</p>
+                <p>Jl. Pemuda no. 60-70, Surabaya 60271</p>
+            </div>
+            <br/>
+
+
+            <table>
+                <tr>
+                    <td>Quote To</td>
+                </tr>
+                <tr>
+                    <h4><span t-field="doc.kontrak_id.mc_cust.name"/></h4>
+                </tr>
+                <tr>
+                    <td>
+                        <h6><span t-field="doc.kontrak_id.mc_pic_cust"/></h6>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <span t-field="doc.kontrak_id.mc_cust.street"/> <span t-field="doc.kontrak_id.mc_cust.street2"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <span t-field="doc.kontrak_id.mc_cust.city"/>, <span t-field="doc.kontrak_id.mc_cust.state_id.name"/>
+                    </td>
+                </tr>
+            </table>
+
+
+            <center>
+                <p>
+                    <b>Quotation Sewa VSMS</b>
+                </p>
+            </center>
+
+            <table class="table table-sm o_main_table">
+                <thead style="display: table-row-group">
+                    <tr>
+                        <th>Item</th>
+                        <th>Quantity</th>
+                        <th>Standard Price</th>
+                        <th>Discounted Price</th>
+<!--                        <th>Periode</th>-->
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody class="sale_tbody">
+                    <t t-foreach="doc.order_line" t-as="line">
+                        <t t-if="not line.display_type">
+                            <tr>
+                                <td name="td_name">
+                                    <span t-field="line.product_id.name"/>
+                                </td>
+                                <td name="td_qty" class="text-right">
+                                    <span t-field="line.product_uom_qty"/>
+                                </td>
+                                <td name="td_price" class="text-right">
+                                    Rp.
+                                    <span t-esc="line.product_id.product_tmpl_id.list_price"/>
+                                </td>
+                                <td name="td_price_discount" class="text-right">
+                                    Rp.
+                                    <span t-esc="line.price_unit"/> / Bulan
+                                </td>
+<!--                                <td name="td_period">-->
+<!--                                    <span t-field="line.kontrak_line_id.mc_period"/>-->
+<!--                                    - -->
+<!--                                    <span t-field="line.kontrak_line_id.mc_period_info"/>-->
+<!--                                </td>-->
+                                <td name="td_subtotal" class="text-right">
+                                    <span t-field="line.price_subtotal"/>
+                                </td>
+                            </tr>
+                        </t>
+                        <t t-else="">
+                            <tr>
+                                <td colspan="5" class="text-right">
+                                    <b><span t-esc="doc.x_subtotal_sub_so" t-field-options='{"widget": "monetary", "display_currency": "line.currency_id"}'/></b>
+                                </td>
+                            </tr>
+                            <tr>
+
+                                <td name="td_section" colspan="5">
+                                    <b><span t-field="line.name"/></b>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="5" class="text-right">
+                                    <b><span t-esc="doc.x_subtotal_otf_so" t-field-options='{"widget": "monetary", "display_currency": "line.currency_id"}'/></b>
+                                </td>
+                            </tr>
+                        </t>
+                    </t>
+                    <tr>
+                        <td colspan="4" class="text-right">Total</td>
+                        <td name="td_total" class="text-right">
+
+                            <span t-esc="doc.amount_total" t-field-options='{"widget": "monetary", "display_currency": "line.currency_id"}'/>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+        </t>
+    </template>
+
+
+    <template id="report_penawaran">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="mc_kontrak.report_penawaran_document"/>
+            </t>
+        </t>
+    </template>
+</odoo>

@@ -78,7 +78,7 @@ class mc_kontrak(models.Model):
                 print(subtotal_sub)
 
                 query = """
-                    SELECT SUM(mc_payment) as subtotal_sub FROM mc_kontrak_product_order_line
+                    SELECT SUM(mc_payment) as subtotal_otf FROM mc_kontrak_product_order_line
                     WHERE id > %s
                 """ % id_section
                 self.env.cr.execute(query)
@@ -92,7 +92,7 @@ class mc_kontrak(models.Model):
                 query = """
                     UPDATE mc_kontrak_mc_kontrak SET x_subtotal_otf = %s,
                     x_subtotal_sub = %s WHERE id = %s
-                """ % (subtotal_sub, subtotal_otf, self.id)
+                """ % (subtotal_otf, subtotal_sub, self.id)
                 self.env.cr.execute(query)
                 print(query)
 
@@ -303,6 +303,12 @@ class CustomSalesOrder(models.Model):
     x_no_po = fields.Char(string='No PO Customer')
     x_qty_terpasang = fields.Integer(default=0, store=True)
 
+    x_subtotal_otf_so = fields.Monetary(string='Subtotal One Time Fee')
+    x_subtotal_sub_so = fields.Monetary(string='Subtotal Subscription')
+    display_type = fields.Selection([
+        ('line_section', "Section"),
+        ('line_note', "Note")], default=False, help="Technical field for UX purpose.")
+
     # @api.model
     # def create(self, vals_list):
     #     print('Akses Method Create Custom Sale Order')
@@ -314,6 +320,56 @@ class CustomSalesOrder(models.Model):
         if ('order_line' in vals):
             arr_order_line = vals['order_line']
             print(arr_order_line)
+
+            print('hitung subtotal SO by section')
+            subtotal_otf = 0
+            subtotal_sub = 0
+            print(subtotal_sub, subtotal_otf)
+
+            query = """
+                                    SELECT id FROM sale_order_line
+                                    WHERE order_id = %s AND display_type = 'line_section'
+                                """ % self.id
+            self.env.cr.execute(query)
+            print(query)
+            hasil_fetch = self.env.cr.fetchone()
+            if hasil_fetch is None:
+                id_section = 0
+            else:
+                id_section = hasil_fetch[0]
+
+            print(id_section)
+            if id_section != 0:
+                query = """
+                                        SELECT SUM(price_subtotal) as subtotal_sub FROM sale_order_line
+                                        WHERE id < %s AND order_id = %s
+                                    """ % (id_section, self.id)
+                self.env.cr.execute(query)
+                print(query)
+                subtotal_sub = self.env.cr.fetchone()[0]
+                if subtotal_sub is None:
+                    subtotal_sub = 0
+
+                print(subtotal_sub)
+
+                query = """
+                                        SELECT SUM(price_subtotal) as subtotal_otf FROM sale_order_line
+                                        WHERE id > %s AND order_id = %s
+                                    """ % (id_section, self.id)
+                self.env.cr.execute(query)
+                print(query)
+                subtotal_otf = self.env.cr.fetchone()[0]
+                if subtotal_otf is None:
+                    subtotal_otf = 0
+
+                print(subtotal_otf)
+
+                query = """
+                                        UPDATE sale_order SET x_subtotal_otf_so = %s,
+                                        x_subtotal_sub_so = %s WHERE id = %s
+                                    """ % (subtotal_otf, subtotal_sub, self.id)
+                self.env.cr.execute(query)
+                print(query)
 
         return res
 
@@ -617,6 +673,8 @@ class WorkOrder(models.Model):
     x_created_date = fields.Date(default=fields.Datetime.now(), string='Created Date')
     x_sales = fields.Many2one('res.users', string='Admin', default=lambda self: self.env.user, readonly=True)
     x_isopen = fields.Boolean(default=True, store=True)
+    x_plan_start_date = fields.Datetime(store=True)
+    x_plan_end_date = fields.Datetime(store=True)
 
     # Relasi
     kontrak_id = fields.Many2one('mc_kontrak.mc_kontrak')
@@ -975,10 +1033,11 @@ class WorkOrderLine(models.Model):
 
     # Field
     qty_delivered = fields.Integer(string='QTY Terpasang')
-    x_start_date = fields.Date(string='Plan Start Date', store=True)
-    x_end_date = fields.Date(string='Plan End Date', store=True)
-    x_start_date_real = fields.Date(string='Real Start Date', store=True)
-    x_end_date_real = fields.Date(string='Real End Date', store=True)
+    x_start_date = fields.Datetime(string='Plan Start Date', store=True)
+    x_end_date = fields.Datetime(string='Plan End Date', store=True)
+
+    # x_start_date_real = fields.Date(string='Real Start Date', store=True)
+    # x_end_date_real = fields.Date(string='Real End Date', store=True)
 
     def _siapkan_subs_line_data(self):
         """Prepare a dictionnary of values to add lines to a subscription."""
@@ -993,3 +1052,21 @@ class WorkOrderLine(models.Model):
                 'discount': line.discount if line.order_id.subscription_management != 'upsell' else False,
             }))
         return values
+
+    # @api.model
+    # def create(self, vals):
+    #     print('Action Create dari WO Line')
+    #     for row in self:
+    #         self.env.cr.execute("""UPDATE mc_kontrak_work_order SET x_plan_start_date = '%s', x_plan_end_date = '%s'
+    #                 WHERE id = %s """ % (vals['x_start_date'], vals['x_end_date'], row.work_order_id.id))
+    #     res = super(WorkOrderLine, self).create(vals)
+    #     return res
+
+    def write(self, vals):
+        print('Action Write dari WO Line')
+        if 'x_start_date' in vals:
+            for row in self:
+                self.env.cr.execute("""UPDATE mc_kontrak_work_order SET x_plan_start_date = '%s', x_plan_end_date = '%s'
+                        WHERE id = %s """ % (vals['x_start_date'], vals['x_end_date'], row.work_order_id.id))
+        res = super(WorkOrderLine, self).write(vals)
+        return res

@@ -33,6 +33,7 @@
         'views/work_order_view.xml',
         'report/kontrak_report.xml',
         'report/kontrak_template.xml',
+        'report/penawaran_template.xml',
         'report/wo_report.xml',
         'report/wo_template.xml',
     ],
