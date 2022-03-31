@@ -30,7 +30,9 @@
                 <field name="kontrak_id" position="after">
                     <button name="insert_kontrak"
                             type="object"
-                            string="Insert Kontrak"/>
+                            string="Insert Kontrak"
+                            attrs="{'invisible': [('kontrak_id', '=', False)]}"
+                    />
                 </field>
                 <field name="validity_date" position="before">
                     <field name="x_no_po"/>

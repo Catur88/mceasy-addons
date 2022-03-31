@@ -99,8 +99,8 @@
 <!--                                                <create name="add_note_control" string="Add a note"-->
 <!--                                                        context="{'default_display_type': 'line_note'}"/>-->
                                             </control>
-                                            <field name="name"/>
                                             <field name="product_id"/>
+                                            <field name="name"/>
                                             <field name="mc_qty_kontrak"/>
                                             <field name="mc_qty_terpasang" readonly="1" string="QTY SO"/>
                                             <field name="mc_harga_produk"/>

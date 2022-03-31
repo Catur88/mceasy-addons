@@ -40,6 +40,10 @@ class mc_kontrak(models.Model):
     histori_so_line = fields.One2many('mc_kontrak.histori_so', 'x_kontrak_id', string='Histori SO')
     currency_id = fields.Many2one('res.currency', default=12)
 
+    @api.onchange('mc_cust')
+    def change_pic_cust(self):
+        self.mc_pic_cust = self.mc_cust.x_pic
+
     @api.model
     def create(self, vals_list):
         vals_list['name'] = self.env['ir.sequence'].next_by_code('mc_kontrak.mc_kontrak')
@@ -450,7 +454,8 @@ class CustomSalesOrder(models.Model):
             contract_name = self.env['ir.sequence'].next_by_code('mc_kontrak.mc_kontrak')
             query = """
                 INSERT INTO mc_kontrak_mc_kontrak(mc_cust, name, mc_create_date, mc_isopen, mc_state,
-                mc_sales, mc_admin_sales) VALUES ('%s', '%s', now(), true, 'done', '%s', '%s') RETURNING id
+                mc_sales, mc_admin_sales, mc_confirm_date) VALUES ('%s', '%s', now(), true, 'done', '%s', '%s', now()) 
+                RETURNING id
             """ % (self.partner_id.id, contract_name, self.env.user.id, self.env.user.id)
             self.env.cr.execute(query)
             print(query)
@@ -463,10 +468,10 @@ class CustomSalesOrder(models.Model):
                     product_id = self.env.cr.dictfetchone()
                     query = """
                         INSERT INTO mc_kontrak_product_order_line(kontrak_id, product_id, mc_qty_kontrak, mc_qty_terpasang,
-                        mc_harga_produk, mc_harga_diskon, mc_period, mc_period_info) 
-                        VALUES ('%s','%s','%s','%s','%s','%s', '1', 'bulan')
+                        mc_harga_produk, mc_harga_diskon, mc_period, mc_period_info, currency_id, tax_id, mc_isopen, name) 
+                        VALUES ('%s','%s','%s','%s','%s','%s', '1', 'bulan', 12, 1, true, '%s')
                     """ % (kontrak_id, row.product_id.id, row.x_mc_qty_kontrak, int(row.product_uom_qty),
-                           product_id['list_price'], row.price_unit)
+                           product_id['list_price'], row.price_unit, row.name)
                     print(query)
                     self.env.cr.execute(query)
 
