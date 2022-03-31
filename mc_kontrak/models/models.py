@@ -159,6 +159,7 @@ class mc_kontrak(models.Model):
         }
 
     def action_confirm(self):
+        # Action Confirm Kontrak
         query = """
             UPDATE mc_kontrak_mc_kontrak SET mc_state = 'done', mc_confirm_date = now()
             WHERE id = %s
@@ -313,6 +314,8 @@ class CustomSalesOrder(models.Model):
         ('line_section', "Section"),
         ('line_note', "Note")], default=False, help="Technical field for UX purpose.")
 
+    x_warning = fields.Boolean(default=False)
+
     # @api.model
     # def create(self, vals_list):
     #     print('Akses Method Create Custom Sale Order')
@@ -443,162 +446,186 @@ class CustomSalesOrder(models.Model):
         return res
 
     def action_confirm(self):
-        print('action confirm tes')
-        print(self.id)
-        print(self.x_order_line)
+        # Action Confirm SO
+        print('action confirm from SO')
         so_line = self.x_order_line
         qty_so = 0
 
-        if self.kontrak_id.id is False:
-            # Buat Kontrak Baru dan Ambil IDnya
-            contract_name = self.env['ir.sequence'].next_by_code('mc_kontrak.mc_kontrak')
-            query = """
-                INSERT INTO mc_kontrak_mc_kontrak(mc_cust, name, mc_create_date, mc_isopen, mc_state,
-                mc_sales, mc_admin_sales, mc_confirm_date) VALUES ('%s', '%s', now(), true, 'done', '%s', '%s', now()) 
-                RETURNING id
-            """ % (self.partner_id.id, contract_name, self.env.user.id, self.env.user.id)
+        query = """
+            SELECT x_islocked FROM res_partner WHERE id = %s
+        """ % self.partner_id.id
+        print(query)
+        self.env.cr.execute(query)
+        is_company_locked = self.env.cr.fetchone()[0]
+
+        if is_company_locked:
+            print('Company is Locked')
+            text = """Tidak dapat mengkonfirmasi SO. Status Company masih di Lock"""
+            query = 'delete from display_dialog_box'
             self.env.cr.execute(query)
-            print(query)
-            kontrak_id = self.env.cr.fetchone()[0]
-
-            # Cek order_line, masukkan ke product_order_line Kontrak
-            if self.x_order_line:
-                for row in self.x_order_line:
-                    self.env.cr.execute("""SELECT * FROM product_template WHERE id = %s""" % row.product_id.id)
-                    product_id = self.env.cr.dictfetchone()
-                    query = """
-                        INSERT INTO mc_kontrak_product_order_line(kontrak_id, product_id, mc_qty_kontrak, mc_qty_terpasang,
-                        mc_harga_produk, mc_harga_diskon, mc_period, mc_period_info, currency_id, tax_id, mc_isopen, name) 
-                        VALUES ('%s','%s','%s','%s','%s','%s', '1', 'bulan', 12, 1, true, '%s')
-                    """ % (kontrak_id, row.product_id.id, row.x_mc_qty_kontrak, int(row.product_uom_qty),
-                           product_id['list_price'], row.price_unit, row.name)
-                    print(query)
-                    self.env.cr.execute(query)
-
-                    # Masukkan Sales Order ke histori SO
-                    query = """
-                        INSERT INTO mc_kontrak_histori_so(x_kontrak_id,
-                        x_tgl_start, x_item, x_period, x_status_pembayaran,
-                        x_note, x_qty_so) VALUES ('%s',now(),'%s','%s','%s','','%s' )
-                    """ % (kontrak_id, row.product_id.id, '1 - bulan', self.state, int(row.product_uom_qty))
-                    print(query)
-                    self.env.cr.execute(query)
-
-            # Update Sales Order, agar berelasi dengan Kontrak yang baru dibuat
-            self.env.cr.execute("SELECT id FROM sale_order ORDER BY id DESC LIMIT 1")
-            order_id = self.env.cr.fetchone()[0]
-            print(order_id)
-
-            query = """
-                UPDATE sale_order SET kontrak_id = %s WHERE id = %s
-            """ % (kontrak_id, order_id)
-            print(query)
-            self.env.cr.execute(query)
-
-            # Update histori SO agar nyambung Sales Order Id
-            query = """
-                UPDATE mc_kontrak_histori_so SET x_order_id = %s WHERE x_kontrak_id = %s
-            """ % (order_id, kontrak_id)
-            self.env.cr.execute(query)
-
-            # Update Sale Order Line set Kontrak ID
-            self.env.cr.execute("""UPDATE sale_order_line SET kontrak_id = %s WHERE order_id = %s""" % (kontrak_id,
-                                                                                                        order_id))
+            value = self.env['display.dialog.box'].sudo().create({'text': text})
+            return {
+                'name': 'Company di Lock',
+                'type': 'ir.actions.act_window',
+                'res_model': 'display.dialog.box',
+                'view_mode': 'form',
+                'view_type': 'form',
+                'target': 'new',
+                'res_id': value.id,
+                'flags': {'form': {'action_buttons': True}}
+            }
         else:
-            if so_line:
-                i = 0
-                for row in so_line:
-                    # if arr_order_line[i][2]['product_uom_qty']:
-                    # x_qty_terpasang = arr_order_line[i][2]['product_uom_qty']
-                    id_sol = 0
-                    if row.kontrak_line_id.id is False:
-                        print(row.order_id.kontrak_id.mc_qty_kontrak)
-                        print(int(row.order_id.kontrak_id.mc_qty_kontrak))
+            if self.kontrak_id.id is False:
+                # Buat Kontrak Baru dan Ambil IDnya
+                contract_name = self.env['ir.sequence'].next_by_code('mc_kontrak.mc_kontrak')
+                query = """
+                    INSERT INTO mc_kontrak_mc_kontrak(mc_cust, name, mc_create_date, mc_isopen, mc_state,
+                    mc_sales, mc_admin_sales, mc_confirm_date) VALUES ('%s', '%s', now(), true, 'done', '%s', '%s', now())
+                    RETURNING id
+                """ % (self.partner_id.id, contract_name, self.env.user.id, self.env.user.id)
+                self.env.cr.execute(query)
+                print(query)
+                kontrak_id = self.env.cr.fetchone()[0]
 
+                # Cek order_line, masukkan ke product_order_line Kontrak
+                if self.x_order_line:
+                    for row in self.x_order_line:
+                        self.env.cr.execute("""SELECT * FROM product_template WHERE id = %s""" % row.product_id.id)
+                        product_id = self.env.cr.dictfetchone()
                         query = """
-                            INSERT INTO mc_kontrak_product_order_line(kontrak_id, product_id, currency_id, 
-                            mc_qty_kontrak, mc_qty_terpasang, mc_harga_produk, mc_harga_diskon, mc_payment, 
-                            mc_total, mc_unit_price) VALUES ('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s') RETURNING id
-                        """ % (row.kontrak_id.id, row.product_id.id, row.currency_id.id,
-                               int(row.order_id.kontrak_id.mc_qty_kontrak), int(row.product_uom_qty), row.price_unit,
-                               row.price_unit, row.price_total, row.price_total, row.price_unit)
+                            INSERT INTO mc_kontrak_product_order_line(kontrak_id, product_id, mc_qty_kontrak, mc_qty_terpasang,
+                            mc_harga_produk, mc_harga_diskon, mc_period, mc_period_info, currency_id, tax_id, mc_isopen, name)
+                            VALUES ('%s','%s','%s','%s','%s','%s', '1', 'bulan', 12, 1, true, '%s')
+                        """ % (kontrak_id, row.product_id.id, row.x_mc_qty_kontrak, int(row.product_uom_qty),
+                               product_id['list_price'], row.price_unit, row.name)
                         print(query)
                         self.env.cr.execute(query)
-                        result = self.env.cr.dictfetchone()
-                        id_sol = result['id']
 
-                    x_qty_terpasang = row.product_uom_qty
-                    print('product_uom_qty = ', x_qty_terpasang)
+                        # Masukkan Sales Order ke histori SO
+                        query = """
+                            INSERT INTO mc_kontrak_histori_so(x_kontrak_id,
+                            x_tgl_start, x_item, x_period, x_status_pembayaran,
+                            x_note, x_qty_so) VALUES ('%s',now(),'%s','%s','%s','','%s' )
+                        """ % (kontrak_id, row.product_id.id, '1 - bulan', self.state, int(row.product_uom_qty))
+                        print(query)
+                        self.env.cr.execute(query)
 
-                    query = "SELECT coalesce(SUM(sol.product_uom_qty), 0) FROM public.sale_order so " \
-                            "JOIN public.sale_order_line sol " \
-                            "ON sol.order_id = so.id " \
-                            "WHERE so.state NOT IN('cancel') AND " \
-                            "sol.kontrak_line_id = %s AND " \
-                            "sol.id != %s" % (
-                                id_sol if row.kontrak_line_id.id is False else row.kontrak_line_id.id, row.id)
-                    self.env.cr.execute(query)
-                    print(query)
-                    x_qty_terpasang2 = self.env.cr.fetchone()[0]
-                    total_terpasang = x_qty_terpasang + x_qty_terpasang2
-
-                    query = "UPDATE public.mc_kontrak_product_order_line SET mc_qty_terpasang = %s, " \
-                            "mc_qty_belum_terpasang = (mc_qty_kontrak - %s) " \
-                            "WHERE id = %s" % (
-                                total_terpasang, total_terpasang, id_sol if row.kontrak_line_id.id is False
-                                else row.kontrak_line_id.id)
-                    print(query)
-                    self.env.cr.execute(query)
-
-                    query = """
-                        UPDATE mc_kontrak_mc_kontrak SET mc_qty_kontrak = %s WHERE id = %s
-                    """ % (row.x_mc_qty_kontrak, row.kontrak_id.id)
-                    self.env.cr.execute(query)
-
-                    query = """
-                        SELECT mc_period, mc_period_info FROM mc_kontrak_product_order_line 
-                        WHERE kontrak_id = %s 
-                    """ % self.kontrak_id.id
-                    print(query)
-                    self.env.cr.execute(query)
-                    getPeriod = self.env.cr.dictfetchone()
-                    periode = str(getPeriod['mc_period']) + " " + str(getPeriod['mc_period_info'])
-
-                    query = """
-                                INSERT INTO mc_kontrak_histori_so(x_kontrak_id,
-                                x_order_id, x_tgl_start, x_item, x_period, x_status_pembayaran,
-                                x_note, x_qty_so) VALUES ('%s','%s',now(),'%s','%s','%s','','%s' )
-                            """ % (
-                        self.kontrak_id.id, row.order_id.id, row.product_id.id,
-                        periode, self.state, int(row.product_uom_qty))
-                    print(query)
-                    self.env.cr.execute(query)
-
-                    if query:
-                        print('oke, qty dikurangi, histori so dimasukkan')
-                    i = i + 1
+                # Update Sales Order, agar berelasi dengan Kontrak yang baru dibuat
+                self.env.cr.execute("SELECT id FROM sale_order ORDER BY id DESC LIMIT 1")
+                order_id = self.env.cr.fetchone()[0]
+                print(order_id)
 
                 query = """
-                    update mc_kontrak_mc_kontrak set
-                    mc_isopen = False
-                    where id = %s
-                    and mc_qty_kontrak = (
-                        select SUM(mkpol.mc_qty_terpasang) as mc_qty_terpasang
-                        from mc_kontrak_mc_kontrak mkmk
-                        join mc_kontrak_product_order_line mkpol on mkpol.kontrak_id = mkmk.id
-                        where mkmk.id = %s
-                    )
-                """ % (self.kontrak_id.id, self.kontrak_id.id)
+                    UPDATE sale_order SET kontrak_id = %s WHERE id = %s
+                """ % (kontrak_id, order_id)
                 print(query)
                 self.env.cr.execute(query)
 
-        query = """
-                UPDATE sale_order SET state = 'sale' WHERE id = %s
-        """ % self.id
-        self.env.cr.execute(query)
+                # Update histori SO agar nyambung Sales Order Id
+                query = """
+                    UPDATE mc_kontrak_histori_so SET x_order_id = %s WHERE x_kontrak_id = %s
+                """ % (order_id, kontrak_id)
+                self.env.cr.execute(query)
 
-        res = super(CustomSalesOrder, self).action_confirm()
-        return res
+                # Update Sale Order Line set Kontrak ID
+                self.env.cr.execute("""UPDATE sale_order_line SET kontrak_id = %s WHERE order_id = %s""" % (kontrak_id,
+                                                                                                            order_id))
+            else:
+                if so_line:
+                    i = 0
+                    for row in so_line:
+                        # if arr_order_line[i][2]['product_uom_qty']:
+                        # x_qty_terpasang = arr_order_line[i][2]['product_uom_qty']
+                        id_sol = 0
+                        if row.kontrak_line_id.id is False:
+                            print(row.order_id.kontrak_id.mc_qty_kontrak)
+                            print(int(row.order_id.kontrak_id.mc_qty_kontrak))
+
+                            query = """
+                                INSERT INTO mc_kontrak_product_order_line(kontrak_id, product_id, currency_id,
+                                mc_qty_kontrak, mc_qty_terpasang, mc_harga_produk, mc_harga_diskon, mc_payment,
+                                mc_total, mc_unit_price) VALUES ('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s') RETURNING id
+                            """ % (row.kontrak_id.id, row.product_id.id, row.currency_id.id,
+                                   int(row.order_id.kontrak_id.mc_qty_kontrak), int(row.product_uom_qty),
+                                   row.price_unit,
+                                   row.price_unit, row.price_total, row.price_total, row.price_unit)
+                            print(query)
+                            self.env.cr.execute(query)
+                            result = self.env.cr.dictfetchone()
+                            id_sol = result['id']
+
+                        x_qty_terpasang = row.product_uom_qty
+                        print('product_uom_qty = ', x_qty_terpasang)
+
+                        query = "SELECT coalesce(SUM(sol.product_uom_qty), 0) FROM public.sale_order so " \
+                                "JOIN public.sale_order_line sol " \
+                                "ON sol.order_id = so.id " \
+                                "WHERE so.state NOT IN('cancel') AND " \
+                                "sol.kontrak_line_id = %s AND " \
+                                "sol.id != %s" % (
+                                    id_sol if row.kontrak_line_id.id is False else row.kontrak_line_id.id, row.id)
+                        self.env.cr.execute(query)
+                        print(query)
+                        x_qty_terpasang2 = self.env.cr.fetchone()[0]
+                        total_terpasang = x_qty_terpasang + x_qty_terpasang2
+
+                        query = "UPDATE public.mc_kontrak_product_order_line SET mc_qty_terpasang = %s, " \
+                                "mc_qty_belum_terpasang = (mc_qty_kontrak - %s) " \
+                                "WHERE id = %s" % (
+                                    total_terpasang, total_terpasang, id_sol if row.kontrak_line_id.id is False
+                                    else row.kontrak_line_id.id)
+                        print(query)
+                        self.env.cr.execute(query)
+
+                        query = """
+                            UPDATE mc_kontrak_mc_kontrak SET mc_qty_kontrak = %s WHERE id = %s
+                        """ % (row.x_mc_qty_kontrak, row.kontrak_id.id)
+                        self.env.cr.execute(query)
+
+                        query = """
+                            SELECT mc_period, mc_period_info FROM mc_kontrak_product_order_line
+                            WHERE kontrak_id = %s
+                        """ % self.kontrak_id.id
+                        print(query)
+                        self.env.cr.execute(query)
+                        getPeriod = self.env.cr.dictfetchone()
+                        periode = str(getPeriod['mc_period']) + " " + str(getPeriod['mc_period_info'])
+
+                        query = """
+                                    INSERT INTO mc_kontrak_histori_so(x_kontrak_id,
+                                    x_order_id, x_tgl_start, x_item, x_period, x_status_pembayaran,
+                                    x_note, x_qty_so) VALUES ('%s','%s',now(),'%s','%s','%s','','%s' )
+                                """ % (
+                            self.kontrak_id.id, row.order_id.id, row.product_id.id,
+                            periode, self.state, int(row.product_uom_qty))
+                        print(query)
+                        self.env.cr.execute(query)
+
+                        if query:
+                            print('oke, qty dikurangi, histori so dimasukkan')
+                        i = i + 1
+
+                    query = """
+                        update mc_kontrak_mc_kontrak set
+                        mc_isopen = False
+                        where id = %s
+                        and mc_qty_kontrak = (
+                            select SUM(mkpol.mc_qty_terpasang) as mc_qty_terpasang
+                            from mc_kontrak_mc_kontrak mkmk
+                            join mc_kontrak_product_order_line mkpol on mkpol.kontrak_id = mkmk.id
+                            where mkmk.id = %s
+                        )
+                    """ % (self.kontrak_id.id, self.kontrak_id.id)
+                    print(query)
+                    self.env.cr.execute(query)
+
+            query = """
+                    UPDATE sale_order SET state = 'sale' WHERE id = %s
+            """ % self.id
+            self.env.cr.execute(query)
+
+            res = super(CustomSalesOrder, self).action_confirm()
+            return res
 
     # Button untuk membuat WO baru dari SO
     def action_report_wo_spk(self):

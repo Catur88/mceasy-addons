@@ -6,3 +6,4 @@ access_mc_kontrak_work_order,mc_kontrak.work_order,model_mc_kontrak_work_order,b
 access_mc_kontrak_work_order_line,mc_kontrak.work_order_line,model_mc_kontrak_work_order_line,base.group_user,1,1,1,1
 access_mc_kontrak_device_wo,mc_kontrak.device_wo,model_mc_kontrak_device_wo,base.group_user,1,1,1,1
 access_mc_kontrak_histori_wo,mc_kontrak.histori_wo,model_mc_kontrak_histori_wo,base.group_user,1,1,1,1
+access_mc_kontrak_dialog_box,display.dialog.box,model_display_dialog_box,base.group_user,1,1,1,1
