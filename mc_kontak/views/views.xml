@@ -11,7 +11,7 @@
                 </xpath>
                 <xpath expr="//field[@name='category_id']" position='after'>
                     <field name="x_islocked" attrs="{'invisible': [('company_type', '!=', 'company')]}"/>
-                    <field name="x_domain" readonly="1"/>
+                    <field name="x_domain"/>
                 </xpath>
                 <xpath expr="//page[@name='contact_addresses']" position='after'>
                     <page string='Device Terpasang'>
