@@ -101,6 +101,8 @@
                                         <field name="x_tahun"/>
                                         <field name="x_imei"/>
                                         <field name="x_simcard"/>
+                                        <field name="x_tgl_start_pasang"/>
+                                        <field name="x_tgl_end_pasang"/>
                                         <field name="x_work_order_id" invisible="1"/>
                                         <field name="x_partner_id" invisible="1"/>
                                     </tree>

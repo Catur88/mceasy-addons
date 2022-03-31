@@ -698,7 +698,7 @@ class WorkOrder(models.Model):
     # Field
     name = fields.Char(string='No WO', readonly=True, default='New')
     x_teknisi_1 = fields.Many2one('res.partner',
-                                  domain="[('function', '=', 'Teknisi McEasy')]", string="Teknisi 1")
+                                  domain="[('function', '=', 'Teknisi McEasy')]", string="Teknisi 1", required=True)
     x_teknisi_2 = fields.Many2one('res.partner',
                                   domain="[('function', '=', 'Teknisi McEasy')]", string='Teknisi 2')
 
