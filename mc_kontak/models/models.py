@@ -10,6 +10,7 @@ class CustomContact(models.Model):
     # Fields
     x_pic = fields.Char(string='PIC Customer', store=True)
     x_isteknisi = fields.Boolean(string='Teknisi McEasy', store=True)
+    x_islocked = fields.Boolean(string='Lock Customer', store=True, default=False)
 
     # Relasi
     channel_ids = fields.Many2many('mail.channel', 'mail_channel_profile_partner', 'partner_id', 'channel_id',
