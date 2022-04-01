@@ -619,6 +619,14 @@ class CustomSalesOrder(models.Model):
                     print(query)
                     self.env.cr.execute(query)
 
+                    query = """SELECT SUM(x_qty_so) FROM mc_kontrak_histori_so mkhs WHERE x_kontrak_id = %s""" % self.kontrak_id.id
+                    self.env.cr.execute(query)
+                    sum_qty_so = self.env.cr.fetchone()[0]
+
+                    query = """UPDATE mc_kontrak_product_order_line SET mc_qty_terpasang = %s 
+                    WHERE kontrak_id = %s AND id = %s""" % (sum_qty_so, self.kontrak_id.id, self.id)
+                    self.env.cr.execute(query)
+
             query = """
                     UPDATE sale_order SET state = 'sale' WHERE id = %s
             """ % self.id
