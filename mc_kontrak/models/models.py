@@ -412,6 +412,7 @@ class CustomSalesOrder(models.Model):
                     values['x_mc_isopen'] = row.mc_isopen
                     values['product_uom_qty'] = row.mc_qty_kontrak - row.mc_qty_terpasang
                     values['discount'] = 0
+                    values['x_mc_harga_produk'] = row.mc_harga_produk
 
                     terms.append((0, 0, values))
 
@@ -629,11 +630,13 @@ class CustomSalesOrder(models.Model):
                     self.env.cr.execute(query)
 
                     query = """SELECT SUM(x_qty_so) FROM mc_kontrak_histori_so mkhs WHERE x_kontrak_id = %s""" % self.kontrak_id.id
+                    print(query)
                     self.env.cr.execute(query)
                     sum_qty_so = self.env.cr.fetchone()[0]
 
                     query = """UPDATE mc_kontrak_product_order_line SET mc_qty_terpasang = %s 
-                    WHERE kontrak_id = %s AND id = %s""" % (sum_qty_so, self.kontrak_id.id, self.id)
+                    WHERE kontrak_id = %s AND product_id = %s""" % (sum_qty_so, self.kontrak_id.id, row.product_id.id)
+                    print(query)
                     self.env.cr.execute(query)
 
             query = """
@@ -812,7 +815,6 @@ class WorkOrder(models.Model):
                 values['order_id'] = row.order_id.id
                 values['product_uom_qty'] = row.product_uom_qty
                 values['qty_delivered'] = row.product_uom_qty
-                values['x_end_date'] = row.order_id.validity_date
                 values['sale_order_line_id'] = row.id
                 values['price_unit'] = row.price_unit
 

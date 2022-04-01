@@ -63,9 +63,9 @@
                         <group>
                             <group>
                                 <field name="company_id" invisible="1"/>
-                                <field name="partner_id"/>
-                                <field name="kontrak_id"/>
-                                <field name="order_id"/>
+                                <field name="partner_id" domain="[('is_company', '=', True)]"/>
+                                <field name="kontrak_id" domain="[('mc_cust','=', partner_id), ('mc_isopen','=','true')]"/>
+                                <field name="order_id" domain="[('partner_id','=', partner_id), ('x_mc_isopen','=','true')]"/>
                                 <button
                                         name="insert_so_line"
                                         string="Insert SO"

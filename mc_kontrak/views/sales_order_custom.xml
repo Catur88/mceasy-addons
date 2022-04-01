@@ -25,6 +25,9 @@
                     <field name="x_mc_isopen" invisible="1"/>
                 </div>
 
+                <field name="partner_id" position="replace">
+                    <field name="partner_id" domain="[('is_company','=',True)]"/>
+                </field>
                 <field name="partner_id" position="after">
                     <field name="kontrak_id" domain="[('mc_cust','=', partner_id), ('mc_isopen','=','true')]"/>
                 </field>
