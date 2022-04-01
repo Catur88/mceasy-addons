@@ -41,6 +41,13 @@
                         <span t-field="doc.partner_id.city"></span>
                     </td>
                 </tr>
+                <tr>
+                    <td>Domain Customer</td>
+                    <td>:</td>
+                    <td>
+                        <span t-field="doc.partner_id.x_domain"/>
+                    </td>
+                </tr>
             </table>
             <br/>
 
@@ -122,6 +129,8 @@
                 </tr>
 
             </table>
+
+            <p style="page-break-before:always;"></p>
 
             <br/>
             <p>
@@ -234,6 +243,12 @@
                         </tr>
                     </tr>
                 </table>
+
+                <p>
+                    <b>
+                        Domain Customer : <span t-field="doc.partner_id.x_domain"/>
+                    </b>
+                </p>
 
                 <p>
                     <b>1. Gambar Ilustrasi Kendaraan (Letak GPS, Sensor, dan Jalur Kabel)</b>

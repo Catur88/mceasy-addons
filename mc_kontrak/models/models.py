@@ -2,6 +2,7 @@
 
 from odoo import models, fields, api, _
 from odoo.tools import is_html_empty
+from dateutil.relativedelta import relativedelta
 
 
 class mc_kontrak(models.Model):
@@ -26,6 +27,9 @@ class mc_kontrak(models.Model):
     x_subtotal_sub = fields.Monetary(string='Subtotal Subscription')
     mc_qty_kontrak = fields.Integer(default=0, store=True)
 
+    x_kontrak_start_date = fields.Date(string="Kontrak Start Date")
+    x_kontrak_end_date = fields.Date(string="Kontrak End Date")
+
     mc_state = fields.Selection([
         ('draft', 'Draft'),
         # ('sent', 'Quotation Sent'),
@@ -39,6 +43,11 @@ class mc_kontrak(models.Model):
     product_order_line = fields.One2many('mc_kontrak.product_order_line', 'kontrak_id', string='No Kontrak')
     histori_so_line = fields.One2many('mc_kontrak.histori_so', 'x_kontrak_id', string='Histori SO')
     currency_id = fields.Many2one('res.currency', default=12)
+
+    @api.onchange('x_kontrak_start_date')
+    def get_one_year(self):
+        if self.x_kontrak_start_date:
+            self.x_kontrak_end_date = self.x_kontrak_start_date + relativedelta(years=1)
 
     @api.onchange('mc_cust')
     def change_pic_cust(self):
@@ -401,7 +410,7 @@ class CustomSalesOrder(models.Model):
                     values['price_unit'] = row.mc_harga_diskon
                     values['discount'] = (row.mc_harga_produk - row.mc_harga_diskon) / row.mc_harga_produk
                     values['x_mc_isopen'] = row.mc_isopen
-                    values['product_uom_qty'] = row.mc_qty_belum_terpasang
+                    values['product_uom_qty'] = row.mc_qty_kontrak - row.mc_qty_terpasang
                     values['discount'] = 0
 
                     terms.append((0, 0, values))
@@ -678,11 +687,21 @@ class CustomSalesOrderLine(models.Model):
     # Field
     x_mc_qty_kontrak = fields.Integer(string='QTY Kontrak', store=True)
     x_mc_qty_terpasang = fields.Integer(readonly=True, store=True)
-    x_mc_harga_produk = fields.Monetary(string='Standard Price')
+    x_mc_harga_produk = fields.Monetary(string='Standard Price', store=True)
     x_mc_harga_diskon = fields.Monetary()
     x_mc_isopen = fields.Boolean(default=True, store=True)
 
     # price_subtotal = fields.Monetary(compute='_hitung_subtotal_so')
+
+    @api.onchange('product_id')
+    def _get_unit_price(self):
+        if self.product_id:
+            self.env.cr.execute("""SELECT product_tmpl_id FROM product_product WHERE id = %s""" % self.product_id.id)
+            product_tmpl_id = self.env.cr.fetchone()[0]
+            if product_tmpl_id:
+                self.env.cr.execute("""SELECT list_price FROM product_template WHERE id = %s""" % product_tmpl_id)
+                list_price = self.env.cr.fetchone()[0]
+                self.x_mc_harga_produk = list_price
 
     # Total Harga
     @api.depends('x_mc_harga_produk', 'x_mc_harga_diskon', 'x_mc_qty_terpasang')

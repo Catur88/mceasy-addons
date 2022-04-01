@@ -45,6 +45,7 @@
                 <xpath expr="/form/sheet/notebook/page/field[@name='order_line']/tree/field[@name='price_unit']"
                        position="attributes">
                     <attribute name="readonly">False</attribute>
+                    <attribute name="string">Discounted Price</attribute>
                 </xpath>
                 <xpath expr="/form/sheet/notebook/page/field[@name='order_line']/tree/field[@name='discount']"
                        position="attributes">
@@ -69,9 +70,14 @@
                        position="attributes">
                     <attribute name="string">QTY WO</attribute>
                 </xpath>
+<!--                Tambah Kolom-->
                 <xpath expr="/form/sheet/notebook/page/field[@name='order_line']/tree/field[@name='name']"
                        position="after">
                     <field name="x_mc_qty_kontrak"></field>
+                </xpath>
+                <xpath expr="/form/sheet/notebook/page/field[@name='order_line']/tree/field[@name='qty_delivered']"
+                       position="after">
+                    <field name="x_mc_harga_produk" force_save="1"></field>
                 </xpath>
 
                 <!--Tambah Page Histori WO-->

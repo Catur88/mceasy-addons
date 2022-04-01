@@ -34,9 +34,9 @@
             <field name="arch" type="xml">
                 <form string="Form Kontrak">
                     <header>
-<!--                        <button name="action_sent" id="action_sent" data-hotkey="v"-->
-<!--                                string="Sent Contract" class="btn-primary" type="object"-->
-<!--                                attrs="{'invisible': [('mc_state', 'not in', ['draft'])]}"/>-->
+                        <!--                        <button name="action_sent" id="action_sent" data-hotkey="v"-->
+                        <!--                                string="Sent Contract" class="btn-primary" type="object"-->
+                        <!--                                attrs="{'invisible': [('mc_state', 'not in', ['draft'])]}"/>-->
 
                         <button name="action_confirm" id="action_confirm" data-hotkey="v"
                                 string="Confirm Contract" class="btn-primary" type="object"
@@ -77,6 +77,8 @@
                             <group>
                                 <field name="mc_cust"/>
                                 <field name="mc_pic_cust"/>
+                                <field name="x_kontrak_start_date"/>
+                                <field name="x_kontrak_end_date"/>
                             </group>
                             <group>
                                 <field name="mc_create_date"/>
@@ -96,8 +98,8 @@
                                                 <create name="add_product_control" string="Add a product"/>
                                                 <create name="add_section_control" string="Add a section"
                                                         context="{'default_display_type': 'line_section'}"/>
-<!--                                                <create name="add_note_control" string="Add a note"-->
-<!--                                                        context="{'default_display_type': 'line_note'}"/>-->
+                                                <!--                                                <create name="add_note_control" string="Add a note"-->
+                                                <!--                                                        context="{'default_display_type': 'line_note'}"/>-->
                                             </control>
                                             <field name="product_id"/>
                                             <field name="name"/>
