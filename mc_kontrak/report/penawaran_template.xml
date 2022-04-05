@@ -327,9 +327,13 @@
                                 <t t-else="">
                                     <tr>
                                         <td colspan="6" class="text-right">
+<!--                                            <b>-->
+<!--                                                Rp.-->
+<!--                                                <span t-esc="doc.x_subtotal_sub_so"/>-->
+<!--                                            </b>-->
                                             <b>
                                                 Rp.
-                                                <span t-esc="doc.x_subtotal_sub_so"/>
+                                                <span t-esc="subtotal_sub"/>
                                             </b>
                                         </td>
                                     </tr>
@@ -343,9 +347,13 @@
                                     </tr>
                                     <tr>
                                         <td colspan="6" class="text-right">
+<!--                                            <b>-->
+<!--                                                Rp.-->
+<!--                                                <span t-esc="doc.x_subtotal_otf_so"/>-->
+<!--                                            </b>-->
                                             <b>
                                                 Rp.
-                                                <span t-esc="doc.x_subtotal_otf_so"/>
+                                                <span t-esc="subtotal_otf"/>
                                             </b>
                                         </td>
                                     </tr>

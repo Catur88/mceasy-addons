@@ -325,9 +325,11 @@ class CustomSalesOrder(models.Model):
 
     x_warning = fields.Boolean(default=False)
 
-    # @api.model
-    # def create(self, vals_list):
-    #     print('Akses Method Create Custom Sale Order')
+    @api.model
+    def create(self, vals_list):
+        print('Akses Method Create Custom Sale Order')
+        vals_list['name'] = self.env['ir.sequence'].next_by_code('sale.order.new')
+        return super(CustomSalesOrder, self).create(vals_list)
 
     def write(self, vals):
         print('method write diakses')
@@ -343,9 +345,9 @@ class CustomSalesOrder(models.Model):
             print(subtotal_sub, subtotal_otf)
 
             query = """
-                                    SELECT id FROM sale_order_line
-                                    WHERE order_id = %s AND display_type = 'line_section'
-                                """ % self.id
+                SELECT id FROM sale_order_line
+                WHERE order_id = %s AND display_type = 'line_section'
+            """ % self.id
             self.env.cr.execute(query)
             print(query)
             hasil_fetch = self.env.cr.fetchone()
@@ -357,9 +359,9 @@ class CustomSalesOrder(models.Model):
             print(id_section)
             if id_section != 0:
                 query = """
-                                        SELECT SUM(price_subtotal) as subtotal_sub FROM sale_order_line
-                                        WHERE id < %s AND order_id = %s
-                                    """ % (id_section, self.id)
+                    SELECT SUM(price_subtotal) as subtotal_sub FROM sale_order_line
+                    WHERE id < %s AND order_id = %s
+                """ % (id_section, self.id)
                 self.env.cr.execute(query)
                 print(query)
                 subtotal_sub = self.env.cr.fetchone()[0]
@@ -369,9 +371,9 @@ class CustomSalesOrder(models.Model):
                 print(subtotal_sub)
 
                 query = """
-                                        SELECT SUM(price_subtotal) as subtotal_otf FROM sale_order_line
-                                        WHERE id > %s AND order_id = %s
-                                    """ % (id_section, self.id)
+                    SELECT SUM(price_subtotal) as subtotal_otf FROM sale_order_line
+                    WHERE id > %s AND order_id = %s
+                """ % (id_section, self.id)
                 self.env.cr.execute(query)
                 print(query)
                 subtotal_otf = self.env.cr.fetchone()[0]
@@ -381,9 +383,9 @@ class CustomSalesOrder(models.Model):
                 print(subtotal_otf)
 
                 query = """
-                                        UPDATE sale_order SET x_subtotal_otf_so = %s,
-                                        x_subtotal_sub_so = %s WHERE id = %s
-                                    """ % (subtotal_otf, subtotal_sub, self.id)
+                    UPDATE sale_order SET x_subtotal_otf_so = %s,
+                    x_subtotal_sub_so = %s WHERE id = %s
+                """ % (subtotal_otf, subtotal_sub, self.id)
                 self.env.cr.execute(query)
                 print(query)
 
