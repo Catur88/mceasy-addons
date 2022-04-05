@@ -29,5 +29,14 @@
             <field name="company_id" eval="False"/>
         </record>
 
+        <!-- Sequence for mc_kontrak.churn_order-->
+        <record id="seq_churn_order" model="ir.sequence">
+            <field name="name">Churn Order</field>
+            <field name="code">mc_kontrak.churn_order</field>
+            <field name="prefix">CHURN-%(day)s%(month)s%(year)s-</field>
+            <field name="padding">5</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
     </data>
 </odoo>

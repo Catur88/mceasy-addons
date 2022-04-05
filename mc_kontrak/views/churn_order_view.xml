@@ -1,0 +1,101 @@
+<odoo>
+    <data>
+        <!--Tree-->
+        <record model="ir.ui.view" id="churn_order_tree_view">
+            <field name="name">mc_kontrak.churn_order.tree</field>
+            <field name="model">mc_kontrak.churn_order</field>
+            <field name="arch" type="xml">
+                <tree default_order="create_date desc">
+                    <field name="name"/>
+                    <field name="partner_id" string="Customer"/>
+                    <field name="x_created_date" string="Start Date"/>
+                    <field name="state" string="Status" decoration-success="state == 'sale' or state == 'done'"
+                           decoration-info="state == 'draft' or state == 'sent'" widget="badge" optional="show"/>
+                </tree>
+            </field>
+        </record>
+
+        <!--Act-->
+        <record id="churn_order_course_action" model="ir.actions.act_window">
+            <field name="name">Customer Churn Order</field>
+            <field name="res_model">mc_kontrak.churn_order</field>
+            <field name="view_mode">tree,form</field>
+            <field name="help" type="html">
+                <p name="o_view_nocontent_smiling_face">
+                    Buat Churn Order Baru
+                </p>
+            </field>
+        </record>
+
+        <!--Form-->
+        <record id="churn_order_view_form" model="ir.ui.view">
+            <field name="name">mc_kontrak.churn_order.form</field>
+            <field name="model">mc_kontrak.churn_order</field>
+            <field name="arch" type="xml">
+                <form string="Form churn_order">
+                    <header>
+                        <button name="action_sent" id="action_sent" data-hotkey="v"
+                                string="Kirim Churn" class="btn-primary" type="object"
+                                attrs="{'invisible': [('state', 'not in', ['draft'])]}"/>
+                        <button name="action_confirm" id="action_confirm" data-hotkey="v"
+                                string="Done" class="btn-primary" type="object"
+                                attrs="{'invisible': [('state', 'not in', ['sent'])]}"/>
+                        <button name="action_cancel" id="action_confirm" data-hotkey="v"
+                                string="Cancel Churn" class="btn-secondary" type="object"
+                                attrs="{'invisible': [('state', 'in', ['draft','cancel'])]}"/>
+
+                        <field name="state" widget="statusbar" statusbar_visible="draft,sent,sale,cancel"/>
+                    </header>
+                    <sheet>
+<!--                        <div class="oe_button_box" name="button_box">-->
+<!--                            <button class="oe_stat_button" name="action_open_subscriptions" type="object" icon="fa-book"-->
+<!--                                    attrs="{'invisible': [('subscription_count', '=', 0)]}">-->
+<!--                                <field name="subscription_count" widget="statinfo" string="Subscriptions"/>-->
+<!--                            </button>-->
+<!--                        </div>-->
+
+                        <div class="oe_title">
+                            <span style="font-size: 25px; font-weight: bold;">
+                                <field name="name" readonly="1"/>
+                            </span>
+                        </div>
+
+                        <group>
+                            <group>
+                                <field name="company_id" invisible="1"/>
+                                <field name="partner_id" domain="[('is_company', '=', True)]"/>
+                                <field name="x_plan_start_date" string="Plan Date"/>
+                                <field name="x_plan_end_date" string="End Date"/>
+                            </group>
+                            <group>
+                                <field name="x_created_date"/>
+                                <field name="x_teknisi_1"/>
+                                <field name="x_teknisi_2"/>
+                                <field name="x_sales"/>
+                            </group>
+                        </group>
+                        <notebook>
+                            <page string="Device Churn">
+                                <field name="x_device_churn_line" mode="tree,kanban" nolabel="1">
+                                    <tree editable="bottom" create="1">
+                                        <field name="x_imei"/>
+                                        <field name="x_jenis_kendaraan"/>
+                                        <field name="x_nopol"/>
+                                        <field name="x_tahun"/>
+                                        <field name="x_simcard"/>
+                                        <field name="x_tgl_start_lepas"/>
+                                        <field name="x_tgl_end_lepas"/>
+                                        <field name="x_partner_id" invisible="1"/>
+                                    </tree>
+                                </field>
+                            </page>
+                        </notebook>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <menuitem id="churn_order" name="Customer Churn Order" parent="sale.sale_order_menu"
+                  sequence="2" action="churn_order_course_action" groups="base.group_user"/>
+    </data>
+</odoo>

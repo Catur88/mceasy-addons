@@ -8,7 +8,8 @@ class HistoriSO(models.Model):
     _description = 'Modul berisi data SO yang akan berelasi dengan kontrak'
 
     x_kontrak_id = fields.Many2one('mc_kontrak.mc_kontrak')
-    x_order_id = fields.Many2one('sale.order')
+    x_order_id = fields.Many2one('sale.order', ondelete='cascade')
+    x_churn_id = fields.Many2one('mc_kontrak.churn_order', ondelete='cascade')
 
     x_tgl_start = fields.Date(string='Tgl Start')
     x_tgl_end = fields.Date(string='Tgl End')
@@ -18,3 +19,4 @@ class HistoriSO(models.Model):
     x_note = fields.Text(string='Note')
     x_qty_terpasang = fields.Integer(string='QTY Terpasang')
     x_qty_so = fields.Integer(string='QTY SO')
+    x_tipe = fields.Char(string='Tipe')

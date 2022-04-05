@@ -126,14 +126,15 @@
                                     </group>
                                 </group>
                             </page>
-                            <page string="Histori SO" name="histori_so">
+                            <page string="Histori Install/Lepas" name="histori_so">
                                 <group>
                                     <field name="histori_so_line" mode="tree,kanban" nolabel="1">
                                         <tree>
                                             <field name="x_order_id" string="Nomor SO"/>
+                                            <field name="x_churn_id" string="Nomor Churn"/>
                                             <field name="x_qty_so" string="QTY SO"/>
                                             <field name="x_item" string="Item"/>
-                                            <field name="x_period" string="Period"/>
+                                            <field name="x_tgl_start" string="Tanggal"/>
                                             <field name="x_note" string="Note"/>
                                         </tree>
                                     </field>

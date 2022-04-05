@@ -490,9 +490,11 @@ class CustomSalesOrder(models.Model):
                 contract_name = self.env['ir.sequence'].next_by_code('mc_kontrak.mc_kontrak')
                 query = """
                     INSERT INTO mc_kontrak_mc_kontrak(mc_cust, name, mc_create_date, mc_isopen, mc_state,
-                    mc_sales, mc_admin_sales, mc_confirm_date) VALUES ('%s', '%s', now(), true, 'done', '%s', '%s', now())
+                    mc_sales, mc_admin_sales, mc_confirm_date, x_kontrak_start_date, x_kontrak_end_date, mc_pic_cust) VALUES 
+                    ('%s', '%s', now(), true, 'done', '%s', '%s',now(), now(), now() + interval '1 year', (SELECT x_pic
+                    FROM res_partner WHERE id = %s))
                     RETURNING id
-                """ % (self.partner_id.id, contract_name, self.env.user.id, self.env.user.id)
+                """ % (self.partner_id.id, contract_name, self.env.user.id, self.env.user.id, self.partner_id.id)
                 self.env.cr.execute(query)
                 print(query)
                 kontrak_id = self.env.cr.fetchone()[0]
@@ -505,11 +507,13 @@ class CustomSalesOrder(models.Model):
                         query = """
                             INSERT INTO mc_kontrak_product_order_line(kontrak_id, product_id, mc_qty_kontrak, mc_qty_terpasang,
                             mc_harga_produk, mc_harga_diskon, mc_period, mc_period_info, currency_id, tax_id, mc_isopen, name)
-                            VALUES ('%s','%s','%s','%s','%s','%s', '1', 'bulan', 12, 1, true, '%s')
+                            VALUES ('%s','%s','%s','%s','%s','%s', '1', 'bulan', 12, 1, true, '%s') RETURNING id
                         """ % (kontrak_id, row.product_id.id, row.x_mc_qty_kontrak, int(row.product_uom_qty),
                                product_id['list_price'], row.price_unit, row.name)
                         print(query)
                         self.env.cr.execute(query)
+                        result = self.env.cr.dictfetchone()
+                        id_sol = result['id']
 
                         # Masukkan Sales Order ke histori SO
                         query = """
@@ -538,8 +542,8 @@ class CustomSalesOrder(models.Model):
                 self.env.cr.execute(query)
 
                 # Update Sale Order Line set Kontrak ID
-                self.env.cr.execute("""UPDATE sale_order_line SET kontrak_id = %s WHERE order_id = %s""" % (kontrak_id,
-                                                                                                            order_id))
+                self.env.cr.execute("""UPDATE sale_order_line SET kontrak_id = %s, kontrak_line_id = %s 
+                WHERE order_id = %s""" % (kontrak_id, id_sol, order_id))
             else:
                 if so_line:
                     i = 0
@@ -547,6 +551,9 @@ class CustomSalesOrder(models.Model):
                         # if arr_order_line[i][2]['product_uom_qty']:
                         # x_qty_terpasang = arr_order_line[i][2]['product_uom_qty']
                         id_sol = 0
+                        print('row :', row)
+                        print('row kontrak line : ', row.kontrak_line_id.id)
+                        print('row kontrak line 2 : ', row.kontrak_line_id)
                         if row.kontrak_line_id.id is False:
                             print(row.order_id.kontrak_id.mc_qty_kontrak)
                             print(int(row.order_id.kontrak_id.mc_qty_kontrak))
@@ -563,6 +570,25 @@ class CustomSalesOrder(models.Model):
                             self.env.cr.execute(query)
                             result = self.env.cr.dictfetchone()
                             id_sol = result['id']
+
+                        query = """
+                            SELECT mc_period, mc_period_info FROM mc_kontrak_product_order_line
+                            WHERE kontrak_id = %s
+                        """ % self.kontrak_id.id
+                        print(query)
+                        self.env.cr.execute(query)
+                        getPeriod = self.env.cr.dictfetchone()
+                        periode = str(getPeriod['mc_period']) + " " + str(getPeriod['mc_period_info'])
+
+                        query = """
+                            INSERT INTO mc_kontrak_histori_so(x_kontrak_id,
+                            x_order_id, x_tgl_start, x_item, x_period, x_status_pembayaran,
+                            x_note, x_qty_so) VALUES ('%s','%s',now(),'%s','%s','%s','','%s' )
+                        """ % (
+                            self.kontrak_id.id, row.order_id.id, row.product_id.id,
+                            periode, self.state, int(row.product_uom_qty))
+                        print(query)
+                        self.env.cr.execute(query)
 
                         x_qty_terpasang = row.product_uom_qty
                         print('product_uom_qty = ', x_qty_terpasang)
@@ -592,24 +618,6 @@ class CustomSalesOrder(models.Model):
                         """ % (row.x_mc_qty_kontrak, row.kontrak_id.id)
                         self.env.cr.execute(query)
 
-                        query = """
-                            SELECT mc_period, mc_period_info FROM mc_kontrak_product_order_line
-                            WHERE kontrak_id = %s
-                        """ % self.kontrak_id.id
-                        print(query)
-                        self.env.cr.execute(query)
-                        getPeriod = self.env.cr.dictfetchone()
-                        periode = str(getPeriod['mc_period']) + " " + str(getPeriod['mc_period_info'])
-
-                        query = """
-                                    INSERT INTO mc_kontrak_histori_so(x_kontrak_id,
-                                    x_order_id, x_tgl_start, x_item, x_period, x_status_pembayaran,
-                                    x_note, x_qty_so) VALUES ('%s','%s',now(),'%s','%s','%s','','%s' )
-                                """ % (
-                            self.kontrak_id.id, row.order_id.id, row.product_id.id,
-                            periode, self.state, int(row.product_uom_qty))
-                        print(query)
-                        self.env.cr.execute(query)
 
                         if query:
                             print('oke, qty dikurangi, histori so dimasukkan')

@@ -17,10 +17,14 @@ class CustomContact(models.Model):
     channel_ids = fields.Many2many('mail.channel', 'mail_channel_profile_partner', 'partner_id', 'channel_id',
                                    copy=False)
 
-    x_device_wo = fields.One2many('mc_kontrak.device_wo', 'x_partner_id')
+    x_device_wo = fields.One2many('mc_kontrak.device_wo', 'x_partner_id', domain=[('x_isdeleted', '=', False)])
 
     @api.model
     def create(self, vals_list):
+        if 'x_isteknisi' in vals_list:
+            if vals_list['x_isteknisi'] is True:
+                vals_list['function'] = 'Teknisi McEasy'
+
         if 'name' in vals_list:
             comp_name = vals_list['name'].split(' ')
             domain_name = ''
@@ -46,7 +50,6 @@ class CustomContact(models.Model):
         return res
 
     def write(self, vals):
-        print(vals)
         if 'x_isteknisi' in vals:
             if vals['x_isteknisi'] is True:
                 self.env.cr.execute("""UPDATE res_partner SET function = 'Teknisi McEasy' WHERE id = %s """ % self.id)
