@@ -22,6 +22,13 @@
                             icon="fa-list-alt">
                         <field string="WO" name="wo_count" widget="statinfo"/>
                     </button>
+                    <button
+                            name="action_view_subs_button"
+                            type="object"
+                            class="oe_stat_button"
+                            icon="fa-book">
+                        <field string="Subscription" name="subs_count" widget="statinfo"/>
+                    </button>
                     <field name="x_mc_isopen" invisible="1"/>
                 </div>
 
@@ -73,7 +80,7 @@
                        position="attributes">
                     <attribute name="string">QTY WO</attribute>
                 </xpath>
-<!--                Tambah Kolom-->
+                <!--                Tambah Kolom-->
                 <xpath expr="/form/sheet/notebook/page/field[@name='order_line']/tree/field[@name='name']"
                        position="after">
                     <field name="x_mc_qty_kontrak"></field>

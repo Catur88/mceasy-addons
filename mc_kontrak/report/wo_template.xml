@@ -195,6 +195,7 @@
                 </tr>
             </table>
 
+
             <p style="page-break-before:always;"></p>
 
             <t t-foreach="range(doc.work_order_line.qty_delivered)" t-as="i">

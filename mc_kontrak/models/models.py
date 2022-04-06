@@ -38,11 +38,15 @@ class mc_kontrak(models.Model):
     ], string='Status', readonly=True, copy=False, index=True, tracking=3, default='draft')
 
     so_count = fields.Integer(string='SO', compute='_count_so')
+    subs_count = fields.Integer(string='Subscription', compute='_count_subs')
 
     # Relasi
     product_order_line = fields.One2many('mc_kontrak.product_order_line', 'kontrak_id', string='No Kontrak')
     histori_so_line = fields.One2many('mc_kontrak.histori_so', 'x_kontrak_id', string='Histori SO')
     currency_id = fields.Many2one('res.currency', default=12)
+    company_id = fields.Many2one('res.company', string='Company', required=True, readonly=True,
+                                 default=lambda self: self.env.company)
+    partner_id = fields.Many2one('res.partner', domain=[("is_company", '=', True)], store=True)
 
     @api.onchange('x_kontrak_start_date')
     def get_one_year(self):
@@ -56,6 +60,7 @@ class mc_kontrak(models.Model):
     @api.model
     def create(self, vals_list):
         vals_list['name'] = self.env['ir.sequence'].next_by_code('mc_kontrak.mc_kontrak')
+        vals_list['partner_id'] = vals_list['mc_cust']
         return super(mc_kontrak, self).create(vals_list)
 
     def write(self, vals):
@@ -148,6 +153,21 @@ class mc_kontrak(models.Model):
     def action_view_so_button(self):
         action = self.env.ref('sale.action_quotations').read()[0]
         action['domain'] = [('kontrak_id', '=', self.id)]
+        action['context'] = {}
+        return action
+
+    # Hitung berapa SUBS di Kontrak ini
+    def _count_subs(self):
+        query = "SELECT COUNT(0) FROM public.sale_subscription where x_kontrak_id = %s " % self.id
+        print(query)
+        self.env.cr.execute(query)
+        result = self.env.cr.fetchone()
+        self.subs_count = result[0]
+
+    # Button untuk membuka related SUBS
+    def action_view_subs_button(self):
+        action = self.env.ref('sale_subscription.sale_subscription_action').read()[0]
+        action['domain'] = [('x_kontrak_id', '=', self.id)]
         action['context'] = {}
         return action
 
@@ -323,12 +343,17 @@ class CustomSalesOrder(models.Model):
         ('line_section', "Section"),
         ('line_note', "Note")], default=False, help="Technical field for UX purpose.")
 
-    x_warning = fields.Boolean(default=False)
+    note = fields.Html(store=True,
+                       default='<p><span style=font-weight:bolder>Catatan: </span><br><ol><li>PIHAK KEDUA melakukan pembayaran sejumlah nilai diatas setelah penandatanganan PERJANJIAN. Pemasangan PRODUK oleh PIHAK PERTAMA akan dilakukan 5 (lima) hari setelah dilakukan pembayaran oleh PIHAK KEDUA.<li>Nilai nominal pembayaran di atas belum termasuk PPN.<li>Masa aktif PRODUK terhitung sejak tanggal pemasangan sampai dengan JANGKA WAKTU<li>Apabila pada tanggal jatuh tempo tidak terjadi pembayaran, maka:<ol type=a><li>30 (tiga puluh) hari sejak tanggal jatuh tempo, akses ke sistem akan ditutup<li>60 (enam puluh) hari sejak tanggal jatuh tempo, layanan akan ditutup</ol><li>Pembayaran dapat dilakukan melalui transfer kepada:<table><tr><td><h5>PT Otto Menara Globalindo</h5><tr><td>Bank Central Asia (BCA)<tr><td>KCP Kusuma Bangsa<tr><td>No. Rekening 188.212.6689</table><li>Setelah dilakukannya pembayaran, PIHAK KEDUA wajib mengirimkan bukti pembayaran ke surel <a href=mailto:finance@mceasy.co.id target=_blank>finance@mceasy.co.id</a></ol>')
+    subs_count = fields.Integer(string='Subscription', compute='_count_subs')
 
     @api.model
     def create(self, vals_list):
         print('Akses Method Create Custom Sale Order')
-        vals_list['name'] = self.env['ir.sequence'].next_by_code('sale.order.new')
+        if 'device_wo_line' in vals_list:
+            vals_list['name'] = self.env['ir.sequence'].next_by_code('mc_kontrak.work_order')
+        else:
+            vals_list['name'] = self.env['ir.sequence'].next_by_code('sale.order.new')
         return super(CustomSalesOrder, self).create(vals_list)
 
     def write(self, vals):
@@ -492,11 +517,13 @@ class CustomSalesOrder(models.Model):
                 contract_name = self.env['ir.sequence'].next_by_code('mc_kontrak.mc_kontrak')
                 query = """
                     INSERT INTO mc_kontrak_mc_kontrak(mc_cust, name, mc_create_date, mc_isopen, mc_state,
-                    mc_sales, mc_admin_sales, mc_confirm_date, x_kontrak_start_date, x_kontrak_end_date, mc_pic_cust) VALUES 
+                    mc_sales, mc_admin_sales, mc_confirm_date, x_kontrak_start_date, x_kontrak_end_date, mc_pic_cust, 
+                    company_id, partner_id) VALUES 
                     ('%s', '%s', now(), true, 'done', '%s', '%s',now(), now(), now() + interval '1 year', (SELECT x_pic
-                    FROM res_partner WHERE id = %s))
+                    FROM res_partner WHERE id = %s), %s, %s)
                     RETURNING id
-                """ % (self.partner_id.id, contract_name, self.env.user.id, self.env.user.id, self.partner_id.id)
+                """ % (self.partner_id.id, contract_name, self.env.user.id, self.env.user.id, self.partner_id.id,
+                       self.env.company.id, self.partner_id.id)
                 self.env.cr.execute(query)
                 print(query)
                 kontrak_id = self.env.cr.fetchone()[0]
@@ -504,27 +531,40 @@ class CustomSalesOrder(models.Model):
                 # Cek order_line, masukkan ke product_order_line Kontrak
                 if self.x_order_line:
                     for row in self.x_order_line:
-                        self.env.cr.execute("""SELECT * FROM product_template WHERE id = %s""" % row.product_id.id)
-                        product_id = self.env.cr.dictfetchone()
-                        query = """
-                            INSERT INTO mc_kontrak_product_order_line(kontrak_id, product_id, mc_qty_kontrak, mc_qty_terpasang,
-                            mc_harga_produk, mc_harga_diskon, mc_period, mc_period_info, currency_id, tax_id, mc_isopen, name)
-                            VALUES ('%s','%s','%s','%s','%s','%s', '1', 'bulan', 12, 1, true, '%s') RETURNING id
-                        """ % (kontrak_id, row.product_id.id, row.x_mc_qty_kontrak, int(row.product_uom_qty),
-                               product_id['list_price'], row.price_unit, row.name)
-                        print(query)
-                        self.env.cr.execute(query)
-                        result = self.env.cr.dictfetchone()
-                        id_sol = result['id']
+                        if row.product_id.product_tmpl_id.recurring_invoice:
+                            #     If FALSE
+                            #     query = """
+                            #         INSERT INTO mc_kontrak_product_order_line(kontrak_id, name, display_type)
+                            #         VALUES ('%s', '%s', '%s') RETURNING id
+                            #     """ % (kontrak_id, row.name, row.display_type)
+                            #     print(query)
+                            #     self.env.cr.execute(query)
+                            #     result = self.env.cr.dictfetchone()
+                            #     id_sol = result['id']
+                            # else:
+                            self.env.cr.execute("""SELECT * FROM product_template WHERE id = %s""" % row.product_id.id)
+                            product_id = self.env.cr.dictfetchone()
+                            query = """
+                                INSERT INTO mc_kontrak_product_order_line(kontrak_id, product_id, mc_qty_kontrak, mc_qty_terpasang,
+                                mc_harga_produk, mc_harga_diskon, mc_period, mc_period_info, currency_id, tax_id, mc_isopen, name)
+                                VALUES ('%s','%s','%s','%s','%s','%s', '1', 'bulan', 12, 1, true, '%s') RETURNING id
+                            """ % (kontrak_id, row.product_id.id if row.product_id.id else 0, row.x_mc_qty_kontrak,
+                                   int(row.product_uom_qty),
+                                   product_id['list_price'], row.price_unit, row.name)
+                            print(query)
+                            self.env.cr.execute(query)
+                            result = self.env.cr.dictfetchone()
+                            id_sol = result['id']
 
                         # Masukkan Sales Order ke histori SO
-                        query = """
-                            INSERT INTO mc_kontrak_histori_so(x_kontrak_id,
-                            x_tgl_start, x_item, x_period, x_status_pembayaran,
-                            x_note, x_qty_so) VALUES ('%s',now(),'%s','%s','%s','','%s' )
-                        """ % (kontrak_id, row.product_id.id, '1 - bulan', self.state, int(row.product_uom_qty))
-                        print(query)
-                        self.env.cr.execute(query)
+                        if row.product_id.id:
+                            query = """
+                                INSERT INTO mc_kontrak_histori_so(x_kontrak_id,
+                                x_tgl_start, x_item, x_period,
+                                x_note, x_qty_so) VALUES ('%s',now(),'%s','%s','','%s')
+                            """ % (kontrak_id, row.product_id.id, '1 - bulan', int(row.product_uom_qty))
+                            print(query)
+                            self.env.cr.execute(query)
 
                 # Update Sales Order, agar berelasi dengan Kontrak yang baru dibuat
                 self.env.cr.execute("SELECT id FROM sale_order ORDER BY id DESC LIMIT 1")
@@ -582,15 +622,16 @@ class CustomSalesOrder(models.Model):
                         getPeriod = self.env.cr.dictfetchone()
                         periode = str(getPeriod['mc_period']) + " " + str(getPeriod['mc_period_info'])
 
-                        query = """
-                            INSERT INTO mc_kontrak_histori_so(x_kontrak_id,
-                            x_order_id, x_tgl_start, x_item, x_period, x_status_pembayaran,
-                            x_note, x_qty_so) VALUES ('%s','%s',now(),'%s','%s','%s','','%s' )
-                        """ % (
-                            self.kontrak_id.id, row.order_id.id, row.product_id.id,
-                            periode, self.state, int(row.product_uom_qty))
-                        print(query)
-                        self.env.cr.execute(query)
+                        if row.product_id.id:
+                            query = """
+                                INSERT INTO mc_kontrak_histori_so(x_kontrak_id,
+                                x_order_id, x_tgl_start, x_item, x_period, x_status_pembayaran,
+                                x_note, x_qty_so) VALUES ('%s','%s',now(),'%s','%s','%s','','%s' )
+                            """ % (
+                                self.kontrak_id.id, row.order_id.id, row.product_id.id,
+                                periode, self.state, int(row.product_uom_qty))
+                            print(query)
+                            self.env.cr.execute(query)
 
                         x_qty_terpasang = row.product_uom_qty
                         print('product_uom_qty = ', x_qty_terpasang)
@@ -619,7 +660,6 @@ class CustomSalesOrder(models.Model):
                             UPDATE mc_kontrak_mc_kontrak SET mc_qty_kontrak = %s WHERE id = %s
                         """ % (row.x_mc_qty_kontrak, row.kontrak_id.id)
                         self.env.cr.execute(query)
-
 
                         if query:
                             print('oke, qty dikurangi, histori so dimasukkan')
@@ -681,11 +721,26 @@ class CustomSalesOrder(models.Model):
         action['context'] = {}
         return action
 
-    # Hitung berapa SO di Kontrak ini
+    # Hitung berapa WO di SO ini
     def _count_wo(self):
         self.env.cr.execute("SELECT COUNT(0) FROM public.mc_kontrak_work_order where order_id = %s " % self.id)
         result = self.env.cr.fetchone()
         self.wo_count = result[0]
+
+    # Hitung berapa SUBS di SO ini
+    def _count_subs(self):
+        query = "SELECT COUNT(0) FROM public.sale_subscription where x_order_id = %s " % self.id
+        print(query)
+        self.env.cr.execute(query)
+        result = self.env.cr.fetchone()
+        self.subs_count = result[0]
+
+    # Button untuk membuka related SUBS
+    def action_view_subs_button(self):
+        action = self.env.ref('sale_subscription.sale_subscription_action').read()[0]
+        action['domain'] = [('x_order_id', '=', self.id)]
+        action['context'] = {}
+        return action
 
 
 class CustomSalesOrderLine(models.Model):
@@ -700,7 +755,7 @@ class CustomSalesOrderLine(models.Model):
     # Field
     x_mc_qty_kontrak = fields.Integer(string='QTY Kontrak', store=True)
     x_mc_qty_terpasang = fields.Integer(readonly=True, store=True)
-    x_mc_harga_produk = fields.Monetary(string='Standard Price', store=True)
+    x_mc_harga_produk = fields.Float(string='Standard Price', store=True)
     x_mc_harga_diskon = fields.Monetary()
     x_mc_isopen = fields.Boolean(default=True, store=True)
 
@@ -792,8 +847,11 @@ class WorkOrder(models.Model):
 
     @api.model
     def create(self, vals_list):
+        print('Halo dari Work Order')
+        res = super(WorkOrder, self).create(vals_list)
+        print(vals_list)
         vals_list['name'] = self.env['ir.sequence'].next_by_code('mc_kontrak.work_order')
-        return super(WorkOrder, self).create(vals_list)
+        return res
 
     def write(self, vals):
         res = super(WorkOrder, self).write(vals)
@@ -806,7 +864,7 @@ class WorkOrder(models.Model):
                 self.env.cr.execute(query)
         return res
 
-    # Auto fill Order Line
+    # Auto fill Work Order Line
     def insert_so_line(self):
         print('insert SO line func')
         kontrak_id = self.kontrak_id.id
@@ -818,17 +876,21 @@ class WorkOrder(models.Model):
         if so_line:
             for row in so_line.order_line:
                 values = {}
-                print(row.id)
+                if row.product_id.product_tmpl_id.recurring_invoice:
+                    # Cek jika status produk open, masukkan ke WO Line
+                    values['product_id'] = row.product_id.id
+                    values['order_id'] = row.order_id.id
+                    values['product_uom_qty'] = row.product_uom_qty
+                    values['qty_delivered'] = row.product_uom_qty
+                    values['sale_order_line_id'] = row.id
+                    values['price_unit'] = row.price_unit
+                    values['name'] = row.name
+                    # else:
+                    #     values['name'] = row.name
+                    #     values['display_type'] = row.display_type
+                    #     values['sale_order_line_id'] = row.id
 
-                # Cek jika status produk open, masukkan ke WO Line
-                values['product_id'] = row.product_id.id
-                values['order_id'] = row.order_id.id
-                values['product_uom_qty'] = row.product_uom_qty
-                values['qty_delivered'] = row.product_uom_qty
-                values['sale_order_line_id'] = row.id
-                values['price_unit'] = row.price_unit
-
-                terms.append((0, 0, values))
+                    terms.append((0, 0, values))
 
         return self.update({'work_order_line': terms})
 

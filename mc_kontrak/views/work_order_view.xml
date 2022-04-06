@@ -19,11 +19,23 @@
         <record id="work_order_course_action" model="ir.actions.act_window">
             <field name="name">Installation Work Order</field>
             <field name="res_model">mc_kontrak.work_order</field>
-            <field name="view_mode">tree,form</field>
+            <field name="view_mode">tree,form,calendar</field>
             <field name="help" type="html">
                 <p name="o_view_nocontent_smiling_face">
                     Buat Work Order Baru
                 </p>
+            </field>
+        </record>
+
+        <record id="work_order_action_view_calendar" model="ir.ui.view">
+            <field name="name">mc_kontrak.work_order.calendar</field>
+            <field name="model">mc_kontrak.work_order</field>
+            <field eval="2" name="priority"/>
+            <field name="arch" type="xml">
+                <calendar date_start="x_plan_start_date" date_stop="x_plan_end_date" string="Tasks" mode="month"
+                          color="partner_id" event_limit="5"
+                          hide_time="true" js_class="project_calendar" event_open_popup="true" quick_add="false">
+                </calendar>
             </field>
         </record>
 
@@ -64,8 +76,10 @@
                             <group>
                                 <field name="company_id" invisible="1"/>
                                 <field name="partner_id" domain="[('is_company', '=', True)]"/>
-                                <field name="kontrak_id" domain="[('mc_cust','=', partner_id), ('mc_isopen','=','true')]"/>
-                                <field name="order_id" domain="[('partner_id','=', partner_id), ('x_mc_isopen','=','true')]"/>
+                                <field name="kontrak_id"
+                                       domain="[('mc_cust','=', partner_id), ('mc_isopen','=','true')]"/>
+                                <field name="order_id"
+                                       domain="[('partner_id','=', partner_id), ('x_mc_isopen','=','true')]"/>
                                 <button
                                         name="insert_so_line"
                                         string="Insert SO"
@@ -81,8 +95,10 @@
                         </group>
                         <notebook>
                             <page string="Ordered Item">
-                                <field name="work_order_line" mode="tree,kanban" nolabel="1">
+                                <field name="work_order_line" widget="section_and_note_one2many" mode="tree,kanban"
+                                       nolabel="1">
                                     <tree editable="bottom" create="1">
+                                        <field name="display_type" invisible="1"/>
                                         <field name="name" readonly="1"/>
                                         <field name="product_uom_qty" string="QTY SO" readonly="1"/>
                                         <field name="qty_delivered" string="QTY WO" readonly="0"/>
