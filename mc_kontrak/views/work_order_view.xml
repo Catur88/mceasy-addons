@@ -35,6 +35,9 @@
                 <calendar date_start="x_plan_start_date" date_stop="x_plan_end_date" string="Tasks" mode="month"
                           color="partner_id" event_limit="5"
                           hide_time="true" js_class="project_calendar" event_open_popup="true" quick_add="false">
+                    <field name="partner_id"/>
+                    <field name="x_teknisi_1"/>
+                    <field name="x_teknisi_2"/>
                 </calendar>
             </field>
         </record>
