@@ -27,10 +27,10 @@
                                  alt="Logo"/>
                         </div>
                         <div class="col-9 mb4">
-                            <div style="text-align:right">
+                            <div style="text-align:right; margin-top:3%">
                                 <h2 style="color: #282561">PT. Otto Menara Globalindo</h2>
-                                <p>Gd. Sinar Mas Land Plaza Lt 7 Jl. Pemuda No. 60-70, Surabaya,</p>
-                                <p>Jawa Timur, Indonesia, 60271</p>
+                                <span>Gd. Sinar Mas Land Plaza Lt 7 Jl. Pemuda No. 60-70, Surabaya,</span> <br/>
+                                <span>Jawa Timur, Indonesia, 60271</span>
                             </div>
                         </div>
                     </div>
