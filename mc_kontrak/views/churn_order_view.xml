@@ -95,7 +95,9 @@
             </field>
         </record>
 
-        <menuitem id="churn_order" name="Customer Churn Order" parent="sale.sale_order_menu"
+<!--        <menuitem id="churn_order" name="Customer Churn Order" parent="sale.sale_order_menu"-->
+<!--                  sequence="2" action="churn_order_course_action" groups="base.group_user"/>-->
+        <menuitem id="churn_order" name="Customer Churn Order" parent="work_order_menu"
                   sequence="2" action="churn_order_course_action" groups="base.group_user"/>
     </data>
 </odoo>
