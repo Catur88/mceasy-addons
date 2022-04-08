@@ -21,8 +21,8 @@ class McSubscription(models.Model):
     _inherit = 'sale.subscription'
     _description = 'Modul yang menginherit sale.subscription'
 
-    x_kontrak_id = fields.Many2one('mc_kontrak.mc_kontrak', string="No Kontrak", store=True)
-    x_order_id = fields.Many2one('sale.order', store=True, string="No SO", readonly=True)
+    x_kontrak_id = fields.Many2one('mc_kontrak.mc_kontrak', string="No Kontrak", store=True, ondelete='cascade')
+    x_order_id = fields.Many2one('sale.order', store=True, string="No SO", readonly=True, ondelete='cascade')
 
 
 class McSubscriptionLines(models.Model):
@@ -77,3 +77,8 @@ class McSubscriptionWizard(models.TransientModel):
             self.env.cr.execute(query)
 
         return res
+
+
+class McSubscriptionWizardOption(models.TransientModel):
+    _inherit = 'sale.subscription.wizard.option'
+    _description = 'Modul yang menginherit sale.subscription.wizard.option'

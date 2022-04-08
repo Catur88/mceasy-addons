@@ -48,5 +48,17 @@
 
             </field>
         </record>
+
+        <!--        Custom Upsell Form-->
+<!--        <record id="wizard_form_view_inherit" model="ir.ui.view">-->
+<!--            <field name="name">wizard.form</field>-->
+<!--            <field name="model">sale.subscription.wizard</field>-->
+<!--            <field name="inherit_id" ref="sale_subscription.wizard_form_view"/>-->
+<!--            <field name="arch" type="xml">-->
+<!--                <xpath expr="/form/field[@name='option_lines']/tree/field[@name='quantity']" position="after">-->
+<!--                    <field name="x_discounted_price"/>-->
+<!--                </xpath>-->
+<!--            </field>-->
+<!--        </record>-->
     </data>
 </odoo>

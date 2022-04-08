@@ -22,13 +22,13 @@
                             icon="fa-list-alt">
                         <field string="WO" name="wo_count" widget="statinfo"/>
                     </button>
-                    <button
-                            name="action_view_subs_button"
-                            type="object"
-                            class="oe_stat_button"
-                            icon="fa-book">
-                        <field string="Subscription" name="subs_count" widget="statinfo"/>
-                    </button>
+<!--                    <button-->
+<!--                            name="action_view_subs_button"-->
+<!--                            type="object"-->
+<!--                            class="oe_stat_button"-->
+<!--                            icon="fa-book">-->
+<!--                        <field string="Subscription" name="subs_count" widget="statinfo"/>-->
+<!--                    </button>-->
                     <field name="x_mc_isopen" invisible="1"/>
                 </div>
 

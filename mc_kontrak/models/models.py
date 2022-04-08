@@ -166,10 +166,15 @@ class mc_kontrak(models.Model):
 
     # Button untuk membuka related SUBS
     def action_view_subs_button(self):
-        action = self.env.ref('sale_subscription.sale_subscription_action').read()[0]
-        action['domain'] = [('x_kontrak_id', '=', self.id)]
-        action['context'] = {}
-        return action
+        result = {
+            "type": "ir.actions.act_window",
+            "res_model": "sale.subscription",
+            "views": [[False, "tree"], [False, "form"]],
+            "domain": [["x_kontrak_id", "=", self.id]],
+            "context": {"create": False},
+            "name": "Subscriptions",
+        }
+        return result
 
     # Button untuk membuat SO baru dari Kontrak
     def action_create_so_button(self):
@@ -545,12 +550,13 @@ class CustomSalesOrder(models.Model):
                             self.env.cr.execute("""SELECT * FROM product_template WHERE id = %s""" % row.product_id.id)
                             product_id = self.env.cr.dictfetchone()
                             query = """
-                                INSERT INTO mc_kontrak_product_order_line(kontrak_id, product_id, mc_qty_kontrak, mc_qty_terpasang,
-                                mc_harga_produk, mc_harga_diskon, mc_period, mc_period_info, currency_id, tax_id, mc_isopen, name)
-                                VALUES ('%s','%s','%s','%s','%s','%s', '1', 'bulan', 12, 1, true, '%s') RETURNING id
+                                INSERT INTO mc_kontrak_product_order_line(kontrak_id, product_id, mc_qty_kontrak, 
+                                mc_qty_terpasang, mc_harga_produk, mc_harga_diskon, mc_period, mc_period_info, 
+                                currency_id, tax_id, mc_isopen, name, mc_payment, mc_total)
+                                VALUES ('%s','%s','%s','%s','%s','%s', '1', 'bulan', 12, 1, true, '%s', '%s', '%s') RETURNING id
                             """ % (kontrak_id, row.product_id.id if row.product_id.id else 0, row.x_mc_qty_kontrak,
-                                   int(row.product_uom_qty),
-                                   product_id['list_price'], row.price_unit, row.name)
+                                   int(row.product_uom_qty), product_id['list_price'], row.price_unit, row.name,
+                                   row.price_total, row.price_total)
                             print(query)
                             self.env.cr.execute(query)
                             result = self.env.cr.dictfetchone()
@@ -729,7 +735,7 @@ class CustomSalesOrder(models.Model):
 
     # Hitung berapa SUBS di SO ini
     def _count_subs(self):
-        query = "SELECT COUNT(0) FROM public.sale_subscription where x_order_id = %s " % self.id
+        query = "SELECT COUNT(0) FROM public.sale_subscription where x_kontrak_id = %s " % self.kontrak_id.id
         print(query)
         self.env.cr.execute(query)
         result = self.env.cr.fetchone()
@@ -738,7 +744,7 @@ class CustomSalesOrder(models.Model):
     # Button untuk membuka related SUBS
     def action_view_subs_button(self):
         action = self.env.ref('sale_subscription.sale_subscription_action').read()[0]
-        action['domain'] = [('x_order_id', '=', self.id)]
+        action['domain'] = [('x_kontrak_id', '=', self.id)]
         action['context'] = {}
         return action
 
@@ -840,10 +846,15 @@ class WorkOrder(models.Model):
             order.subscription_count = sub_count
 
     def action_open_subscriptions(self):
-        action = self.env.ref('sale_subscription.sale_subscription_action').read()[0]
-        action['domain'] = [('x_kontrak_id', '=', self.kontrak_id.id)]
-        action['context'] = {}
-        return action
+        result = {
+            "type": "ir.actions.act_window",
+            "res_model": "sale.subscription",
+            "views": [[False, "tree"], [False, "form"]],
+            "domain": [["x_kontrak_id", "=", self.kontrak_id.id]],
+            "context": {"create": False},
+            "name": "Subscriptions",
+        }
+        return result
 
     @api.model
     def create(self, vals_list):
@@ -1010,7 +1021,11 @@ class WorkOrder(models.Model):
                 query = """
                     UPDATE sale_subscription_line SET x_order_id = %s WHERE analytic_account_id = %s
                 """ % (self.order_id.id, subs_id[0])
-                print(query)
+                self.env.cr.execute(query)
+
+                query = """
+                    UPDATE sale_order_line SET subscription_id = %s WHERE order_id = %s
+                """ % (subs_id[0], self.order_id.id)
                 self.env.cr.execute(query)
             else:
                 self.env.cr.execute("""
