@@ -352,6 +352,17 @@ class CustomSalesOrder(models.Model):
                        default='<p><span style=font-weight:bolder>Catatan: </span><br><ol><li>PIHAK KEDUA melakukan pembayaran sejumlah nilai diatas setelah penandatanganan PERJANJIAN. Pemasangan PRODUK oleh PIHAK PERTAMA akan dilakukan 5 (lima) hari setelah dilakukan pembayaran oleh PIHAK KEDUA.<li>Nilai nominal pembayaran di atas belum termasuk PPN.<li>Masa aktif PRODUK terhitung sejak tanggal pemasangan sampai dengan JANGKA WAKTU<li>Apabila pada tanggal jatuh tempo tidak terjadi pembayaran, maka:<ol type=a><li>30 (tiga puluh) hari sejak tanggal jatuh tempo, akses ke sistem akan ditutup<li>60 (enam puluh) hari sejak tanggal jatuh tempo, layanan akan ditutup</ol><li>Pembayaran dapat dilakukan melalui transfer kepada:<table><tr><td><h5>PT Otto Menara Globalindo</h5><tr><td>Bank Central Asia (BCA)<tr><td>KCP Kusuma Bangsa<tr><td>No. Rekening 188.212.6689</table><li>Setelah dilakukannya pembayaran, PIHAK KEDUA wajib mengirimkan bukti pembayaran ke surel <a href=mailto:finance@mceasy.co.id target=_blank>finance@mceasy.co.id</a></ol>')
     subs_count = fields.Integer(string='Subscription', compute='_count_subs')
 
+    # Hitung jumlah subs tiap WO
+    subscription_count = fields.Integer(compute='_compute_subscription_count')
+
+    def _compute_subscription_count(self):
+        """Compute the number of distinct subscriptions linked to the order."""
+        for order in self:
+            sub_count = len(
+                self.env['sale.order.line'].read_group([('order_id', '=', order.id), ('subscription_id', '!=', False)],
+                                                       ['subscription_id'], ['subscription_id']))
+            order.subscription_count = sub_count
+
     @api.model
     def create(self, vals_list):
         print('Akses Method Create Custom Sale Order')
@@ -429,6 +440,8 @@ class CustomSalesOrder(models.Model):
         terms = []
 
         kontrak_line = self.env['mc_kontrak.mc_kontrak'].search([('id', '=', kontrak_id.id)])
+        subs_id = self.env['sale.subscription'].search([('x_kontrak_id', '=', kontrak_id.id)])
+
         if kontrak_line:
             for row in kontrak_line.product_order_line:
                 values = {}
@@ -445,6 +458,8 @@ class CustomSalesOrder(models.Model):
                     values['product_uom_qty'] = row.mc_qty_kontrak - row.mc_qty_terpasang
                     values['discount'] = 0
                     values['x_mc_harga_produk'] = row.mc_harga_produk
+                    if subs_id.id:
+                        values['subscription_id'] = subs_id.id
 
                     terms.append((0, 0, values))
 
