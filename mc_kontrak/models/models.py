@@ -888,6 +888,18 @@ class WorkOrder(models.Model):
                     UPDATE mc_kontrak_device_wo SET x_partner_id = %s
                 """ % row.x_work_order_id.partner_id.id
                 self.env.cr.execute(query)
+
+                query = """
+                    SELECT COUNT(id) FROM mc_kontrak_device_wo WHERE x_work_order_id = %s 
+                """ % self.id
+                self.env.cr.execute(query)
+                count_device_terpasang = self.env.cr.fetchone()[0]
+
+                query = """
+                    UPDATE mc_kontrak_work_order_line SET qty_delivered = %s WHERE work_order_id = %s
+                """ % (count_device_terpasang, self.id)
+                self.env.cr.execute(query)
+
         return res
 
     # Auto fill Work Order Line
@@ -907,7 +919,7 @@ class WorkOrder(models.Model):
                     values['product_id'] = row.product_id.id
                     values['order_id'] = row.order_id.id
                     values['product_uom_qty'] = row.product_uom_qty
-                    values['qty_delivered'] = row.product_uom_qty
+                    values['x_qty_plan'] = row.product_uom_qty
                     values['sale_order_line_id'] = row.id
                     values['price_unit'] = row.price_unit
                     values['name'] = row.name
@@ -1198,6 +1210,7 @@ class WorkOrderLine(models.Model):
     qty_delivered = fields.Integer(string='QTY Terpasang')
     x_start_date = fields.Datetime(string='Plan Start Date', store=True)
     x_end_date = fields.Datetime(string='Plan End Date', store=True)
+    x_qty_plan = fields.Integer(string="QTY Plan Pasang", store=True)
 
     # x_start_date_real = fields.Date(string='Real Start Date', store=True)
     # x_end_date_real = fields.Date(string='Real End Date', store=True)
