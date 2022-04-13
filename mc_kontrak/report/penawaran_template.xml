@@ -56,7 +56,7 @@
                         <t t-call="web.address_layout"/>
                     </div>
                     <div>
-                        <h2 style="color:#282561; float:left">Quotation Sewa</h2>
+                        <h2 style="color:#282561; float:left">Quotation</h2>
                         <h2 t-field="doc.name" style="color:#282561; float:right"></h2>
                     </div>
 
