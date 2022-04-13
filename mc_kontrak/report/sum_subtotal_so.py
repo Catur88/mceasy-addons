@@ -13,7 +13,7 @@ class CustomSaleOrderSumReport(models.AbstractModel):
         id_section = 0
         arr_items = []
         for line in order_line:
-            if line.display_type == 'line_section':
+            if line.display_type == 'line_section' or line.display_type == 'line_note':
                 id_section = line.id
             vals = {
                 'id': line.id,

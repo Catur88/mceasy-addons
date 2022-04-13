@@ -570,7 +570,7 @@ class CustomSalesOrder(models.Model):
                                 currency_id, tax_id, mc_isopen, name, mc_payment, mc_total)
                                 VALUES ('%s','%s','%s','%s','%s','%s', '1', 'bulan', 12, 1, true, '%s', '%s', '%s') RETURNING id
                             """ % (kontrak_id, row.product_id.id if row.product_id.id else 0, row.x_mc_qty_kontrak,
-                                   int(row.product_uom_qty), product_id['list_price'], row.price_unit, row.name,
+                                   int(row.product_uom_qty), row.x_mc_harga_produk, row.price_unit, row.name,
                                    row.price_total, row.price_total)
                             print(query)
                             self.env.cr.execute(query)

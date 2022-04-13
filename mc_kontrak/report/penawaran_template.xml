@@ -29,7 +29,8 @@
                         <div class="col-9 mb4">
                             <div style="text-align:right; margin-top:3%">
                                 <h2 style="color: #282561">PT. Otto Menara Globalindo</h2>
-                                <span>Gd. Sinar Mas Land Plaza Lt 7 Jl. Pemuda No. 60-70, Surabaya,</span> <br/>
+                                <span>Gd. Sinar Mas Land Plaza Lt 7 Jl. Pemuda No. 60-70, Surabaya,</span>
+                                <br/>
                                 <span>Jawa Timur, Indonesia, 60271</span>
                             </div>
                         </div>
@@ -161,45 +162,50 @@
                                         </tr>
                                     </t>
                                     <t t-else="">
-                                        <tr>
-                                            <td colspan="6" class="text-right">
-                                                <!--                                            <b>-->
-                                                <!--                                                Rp.-->
-                                                <!--                                                <span t-esc="doc.x_subtotal_sub_so"/>-->
-                                                <!--                                            </b>-->
-                                                <b>
+                                        <t t-set="hasSection" t-value="true"/>
+                                        <tr class="is-subtotal text-right" style="font-size:18px">
+                                            <th colspan="5">
+                                                Subtotal
+                                            </th>
+                                            <td>
+                                                <strong>
                                                     Rp.
                                                     <span t-esc="subtotal_sub"/>
-                                                </b>
+                                                </strong>
                                             </td>
                                         </tr>
                                         <tr>
                                             <td colspan="6" name="td_section"
                                                 style="border: 1px solid black; background-color:#282561; color:#ffffff">
-                                                <b>
+                                                <strong>
                                                     <span t-field="line.name"/>
-                                                </b>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td colspan="6" class="text-right">
-                                                <!--                                            <b>-->
-                                                <!--                                                Rp.-->
-                                                <!--                                                <span t-esc="doc.x_subtotal_otf_so"/>-->
-                                                <!--                                            </b>-->
-                                                <b>
-                                                    Rp.
-                                                    <span t-esc="subtotal_otf"/>
-                                                </b>
+                                                </strong>
                                             </td>
                                         </tr>
                                     </t>
+
+
                                 </t>
-                                <tr>
-                                    <td colspan="5" class="text-right">Total</td>
+                                <t t-if="hasSection">
+                                    <tr style="font-size:18px">
+                                        <th colspan="5" class="text-right">
+                                            Subtotal
+                                        </th>
+                                        <td class="text-right">
+                                            <strong>
+                                                Rp.
+                                                <span t-esc="subtotal_otf"/>
+                                            </strong>
+                                        </td>
+                                    </tr>
+                                </t>
+                                <tr style="font-size:18px">
+                                    <th colspan="5" class="text-right">Total</th>
                                     <td name="td_total" class="text-right">
-                                        Rp.
-                                        <span t-esc="doc.amount_untaxed"/>
+                                        <strong>
+                                            Rp.
+                                            <span t-esc="doc.amount_untaxed"/>
+                                        </strong>
                                     </td>
                                 </tr>
                             </tbody>

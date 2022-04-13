@@ -21,11 +21,12 @@ class CustomContact(models.Model):
 
     @api.model
     def create(self, vals_list):
+        print(vals_list)
         if 'x_isteknisi' in vals_list:
             if vals_list['x_isteknisi'] is True:
                 vals_list['function'] = 'Teknisi McEasy'
 
-        if 'name' in vals_list:
+        if 'name' in vals_list and vals_list['x_domain'] is False:
             comp_name = vals_list['name'].split(' ')
             domain_name = ''
             print(comp_name)
