@@ -14,7 +14,8 @@
                         <div class="col-9 mb4">
                             <div style="text-align:right; margin-top:3%">
                                 <h2 style="color: #282561">PT. Otto Menara Globalindo</h2>
-                                <span>Gd. Sinar Mas Land Plaza Lt 7 Jl. Pemuda No. 60-70, Surabaya,</span> <br/>
+                                <span>Gd. Sinar Mas Land Plaza Lt 7 Jl. Pemuda No. 60-70, Surabaya,</span>
+                                <br/>
                                 <span>Jawa Timur, Indonesia, 60271</span>
                             </div>
                         </div>
@@ -870,85 +871,143 @@
                         </p>
                     </center>
 
-                    <table class="table table-bordered" style="border: 1px solid black;">
-                        <thead style="display: table-row-group">
-                            <tr>
-                                <th style="border: 1px solid black; background-color:#282561; color:#ffffff">Item</th>
-                                <th style="border: 1px solid black; background-color:#282561; color:#ffffff">Quantity
-                                </th>
-                                <th style="border: 1px solid black; background-color:#282561; color:#ffffff">Standard
-                                    Price
-                                </th>
-                                <th style="border: 1px solid black; background-color:#282561; color:#ffffff">Discounted
-                                    Price
-                                </th>
-                                <th style="border: 1px solid black; background-color:#282561; color:#ffffff">Periode
-                                </th>
-                                <th style="border: 1px solid black; background-color:#282561; color:#ffffff">Total</th>
-                            </tr>
-                        </thead>
-                        <tbody class="sale_tbody">
-                            <t t-foreach="doc.product_order_line" t-as="line">
-                                <t t-if="not line.display_type">
-                                    <tr>
-                                        <td name="td_name">
-                                            <span t-field="line.product_id.name"/>
-                                        </td>
-                                        <td name="td_qty" class="text-right">
-                                            <span t-field="line.mc_qty_kontrak"/>
-                                        </td>
-                                        <td name="td_price" class="text-right">
-                                            Rp.
-                                            <span t-esc="line.mc_harga_produk"/>
-                                        </td>
-                                        <td name="td_price_discount" class="text-right">
-                                            Rp.
-                                            <span t-esc="line.mc_harga_diskon"/>
-                                        </td>
-                                        <td name="td_period">
-                                            <span t-field="line.mc_period"/>
-                                            -
-                                            <span t-field="line.mc_period_info"/>
-                                        </td>
-                                        <td name="td_subtotal" class="text-right">
-                                            <span t-field="line.mc_payment"/>
+                    <div style="margin-top:100px">
+                        <table class="table table-bordered" style="border: 1px solid black">
+                            <thead style="display: table-row-group">
+                                <tr>
+                                    <th
+                                            style="
+					border: 1px solid black;
+					background-color: #282561;
+					color: #ffffff;
+				"
+                                    >
+                                        Item
+                                    </th>
+                                    <th
+                                            style="
+					border: 1px solid black;
+					background-color: #282561;
+					color: #ffffff;
+				"
+                                    >
+                                        Quantity
+                                    </th>
+                                    <th
+                                            style="
+					border: 1px solid black;
+					background-color: #282561;
+					color: #ffffff;
+				"
+                                    >
+                                        Standard Price
+                                    </th>
+                                    <th
+                                            style="
+					border: 1px solid black;
+					background-color: #282561;
+					color: #ffffff;
+				"
+                                    >
+                                        Discounted Price
+                                    </th>
+                                    <th
+                                            style="
+					border: 1px solid black;
+					background-color: #282561;
+					color: #ffffff;
+				"
+                                    >
+                                        Periode
+                                    </th>
+                                    <th
+                                            style="
+					border: 1px solid black;
+					background-color: #282561;
+					color: #ffffff;
+				"
+                                    >
+                                        Total
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody class="sale_tbody">
+                                <t t-foreach="doc.product_order_line" t-as="line">
+                                    <t t-if="not line.display_type">
+                                        <tr>
+                                            <td name="td_name">
+                                                <span t-field="line.product_id.name"/>
+                                            </td>
+                                            <td name="td_qty" class="text-right">
+                                                <span t-field="line.mc_qty_kontrak"/>
+                                            </td>
+                                            <td name="td_price" class="text-right">
+                                                Rp.
+                                                <span t-esc="line.mc_harga_produk"/>
+                                            </td>
+                                            <td name="td_price_discount" class="text-right">
+                                                Rp.
+                                                <span t-esc="line.mc_harga_diskon"/>
+                                            </td>
+                                            <td name="td_period">
+                                                <span t-field="line.mc_period"/>
+                                                -
+                                                <span t-field="line.mc_period_info"/>
+                                            </td>
+                                            <td name="td_subtotal" class="text-right">
+                                                <span t-field="line.mc_payment"/>
+                                            </td>
+                                        </tr>
+                                    </t>
+                                    <t t-else="">
+                                        <t t-set="hasSection" t-value="true"/>
+                                        <tr class="is-subtotal text-right" style="font-size: 18px">
+                                            <th colspan="5">Subtotal</th>
+                                            <td>
+                                                <strong>
+                                                    Rp.
+                                                    <span t-esc="subtotal_sub"/>
+                                                </strong>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td
+                                                    colspan="6"
+                                                    name="td_section"
+                                                    style="
+							border: 1px solid black;
+							background-color: #282561;
+							color: #ffffff;
+						"
+                                            >
+                                                <strong>
+                                                    <span t-field="line.name"/>
+                                                </strong>
+                                            </td>
+                                        </tr>
+                                    </t>
+                                </t>
+                                <t t-if="hasSection">
+                                    <tr style="font-size: 18px">
+                                        <th colspan="5" class="text-right">Subtotal</th>
+                                        <td class="text-right">
+                                            <strong>
+                                                Rp.
+                                                <span t-esc="subtotal_otf"/>
+                                            </strong>
                                         </td>
                                     </tr>
                                 </t>
-                                <t t-else="">
-                                    <tr>
-                                        <td colspan="6" class="text-right">
-                                            <b>
-                                                <span t-esc="doc.x_subtotal_otf"/>
-                                            </b>
-                                        </td>
-                                    </tr>
-                                    <tr>
-
-                                        <td name="td_section" colspan="6">
-                                            <b>
-                                                <span t-field="line.name"/>
-                                            </b>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td colspan="6" class="text-right">
-                                            <b>
-                                                <span t-esc="doc.x_subtotal_sub"/>
-                                            </b>
-                                        </td>
-                                    </tr>
-                                </t>
-                            </t>
-                            <tr>
-                                <td colspan="5" class="text-right">Total</td>
-                                <td name="td_total" class="text-right">
-                                    Rp.
-                                    <span t-esc="doc.mc_total"/>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                                <tr style="font-size: 18px">
+                                    <td colspan="5" class="text-right">Total</td>
+                                    <td name="td_total" class="text-right">
+                                        Rp.
+                                        <span t-esc="doc.mc_total"/>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
 
 
                     <p>
@@ -981,59 +1040,143 @@
                         </p>
                     </center>
 
-                    <table class="table table-bordered" style="border: 1px solid black;">
-                        <thead style="display: table-row-group">
-                            <tr>
-                                <th style="border: 1px solid black; background-color:#282561; color:#ffffff">Item</th>
-                                <th style="border: 1px solid black; background-color:#282561; color:#ffffff">Quantity
-                                </th>
-                                <th style="border: 1px solid black; background-color:#282561; color:#ffffff">Standard
-                                    Price
-                                </th>
-                                <th style="border: 1px solid black; background-color:#282561; color:#ffffff">Discounted
-                                    Price
-                                </th>
-                                <th style="border: 1px solid black; background-color:#282561; color:#ffffff">Periode
-                                </th>
-                                <th style="border: 1px solid black; background-color:#282561; color:#ffffff">Total</th>
-                            </tr>
-                        </thead>
-                        <tbody class="sale_tbody">
-                            <t t-foreach="doc.product_order_line" t-as="line">
+                    <div style="margin-top:100px">
+                        <table class="table table-bordered" style="border: 1px solid black">
+                            <thead style="display: table-row-group">
                                 <tr>
-                                    <td name="td_name">
-                                        <span t-field="line.product_id.name"/>
-                                    </td>
-                                    <td name="td_qty" class="text-right">
-                                        <span t-field="line.mc_qty_kontrak"/>
-                                    </td>
-                                    <td name="td_price" class="text-right">
+                                    <th
+                                            style="
+					border: 1px solid black;
+					background-color: #282561;
+					color: #ffffff;
+				"
+                                    >
+                                        Item
+                                    </th>
+                                    <th
+                                            style="
+					border: 1px solid black;
+					background-color: #282561;
+					color: #ffffff;
+				"
+                                    >
+                                        Quantity
+                                    </th>
+                                    <th
+                                            style="
+					border: 1px solid black;
+					background-color: #282561;
+					color: #ffffff;
+				"
+                                    >
+                                        Standard Price
+                                    </th>
+                                    <th
+                                            style="
+					border: 1px solid black;
+					background-color: #282561;
+					color: #ffffff;
+				"
+                                    >
+                                        Discounted Price
+                                    </th>
+                                    <th
+                                            style="
+					border: 1px solid black;
+					background-color: #282561;
+					color: #ffffff;
+				"
+                                    >
+                                        Periode
+                                    </th>
+                                    <th
+                                            style="
+					border: 1px solid black;
+					background-color: #282561;
+					color: #ffffff;
+				"
+                                    >
+                                        Total
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody class="sale_tbody">
+                                <t t-foreach="doc.product_order_line" t-as="line">
+                                    <t t-if="not line.display_type">
+                                        <tr>
+                                            <td name="td_name">
+                                                <span t-field="line.product_id.name"/>
+                                            </td>
+                                            <td name="td_qty" class="text-right">
+                                                <span t-field="line.mc_qty_kontrak"/>
+                                            </td>
+                                            <td name="td_price" class="text-right">
+                                                Rp.
+                                                <span t-esc="line.mc_harga_produk"/>
+                                            </td>
+                                            <td name="td_price_discount" class="text-right">
+                                                Rp.
+                                                <span t-esc="line.mc_harga_diskon"/>
+                                            </td>
+                                            <td name="td_period">
+                                                <span t-field="line.mc_period"/>
+                                                -
+                                                <span t-field="line.mc_period_info"/>
+                                            </td>
+                                            <td name="td_subtotal" class="text-right">
+                                                <span t-field="line.mc_payment"/>
+                                            </td>
+                                        </tr>
+                                    </t>
+                                    <t t-else="">
+                                        <t t-set="hasSection" t-value="true"/>
+                                        <tr class="is-subtotal text-right" style="font-size: 18px">
+                                            <th colspan="5">Subtotal</th>
+                                            <td>
+                                                <strong>
+                                                    Rp.
+                                                    <span t-esc="subtotal_sub"/>
+                                                </strong>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td
+                                                    colspan="6"
+                                                    name="td_section"
+                                                    style="
+							border: 1px solid black;
+							background-color: #282561;
+							color: #ffffff;
+						"
+                                            >
+                                                <strong>
+                                                    <span t-field="line.name"/>
+                                                </strong>
+                                            </td>
+                                        </tr>
+                                    </t>
+                                </t>
+                                <t t-if="hasSection">
+                                    <tr style="font-size: 18px">
+                                        <th colspan="5" class="text-right">Subtotal</th>
+                                        <td class="text-right">
+                                            <strong>
+                                                Rp.
+                                                <span t-esc="subtotal_otf"/>
+                                            </strong>
+                                        </td>
+                                    </tr>
+                                </t>
+                                <tr style="font-size: 18px">
+                                    <td colspan="5" class="text-right">Total</td>
+                                    <td name="td_total" class="text-right">
                                         Rp.
-                                        <span t-esc="line.mc_harga_produk"/>
-                                    </td>
-                                    <td name="td_price_discount" class="text-right">
-                                        Rp.
-                                        <span t-esc="line.mc_harga_diskon"/>
-                                    </td>
-                                    <td name="td_period">
-                                        <span t-field="line.mc_period"/>
-                                        -
-                                        <span t-field="line.mc_period_info"/>
-                                    </td>
-                                    <td name="td_subtotal" class="text-right">
-                                        <span t-field="line.mc_payment"/>
+                                        <span t-esc="doc.mc_total"/>
                                     </td>
                                 </tr>
-                            </t>
-                            <tr>
-                                <td colspan="5" class="text-right">Total</td>
-                                <td name="td_total" class="text-right">
-                                    Rp.
-                                    <span t-esc="doc.mc_total"/>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                            </tbody>
+                        </table>
+                    </div>
 
                     <br/>
                     <br/>

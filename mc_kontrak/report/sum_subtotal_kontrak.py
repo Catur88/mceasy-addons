@@ -1,15 +1,15 @@
 from odoo import fields, models, api
 
 
-class CustomSaleOrderSumReport(models.AbstractModel):
-    _name = 'report.mc_kontrak.report_penawaran'
-    _description = 'Hitung subtotal di Custom Quotation'
+class KontrakSumReport(models.AbstractModel):
+    _name = 'report.mc_kontrak.report_kontrak'
+    _description = 'Hitung subtotal di Kontrak'
 
     @api.model
     def _get_report_values(self, docids, data=None):
-        print('test from report values SO')
-        docs = self.env['sale.order'].browse(docids[0])
-        order_line = self.env['sale.order.line'].search([('order_id', '=', docids[0])])
+        print('test from report values Kontrak')
+        docs = self.env['mc_kontrak.mc_kontrak'].browse(docids[0])
+        order_line = self.env['mc_kontrak.product_order_line'].search([('kontrak_id', '=', docids[0])])
         id_section = 0
         arr_items = []
         for idx, line in enumerate(order_line):
@@ -19,7 +19,7 @@ class CustomSaleOrderSumReport(models.AbstractModel):
                 'id': line.id,
                 'name': line.name,
                 'display_type': line.display_type,
-                'price_subtotal': line.price_subtotal,
+                'price_subtotal': line.mc_payment,
             }
             arr_items.append(vals)
 
@@ -36,7 +36,7 @@ class CustomSaleOrderSumReport(models.AbstractModel):
         print('subtotal otf : ', subtotal_otf)
 
         return {
-            'doc_model': 'sale.order',
+            'doc_model': 'mc_kontrak.mc_kontrak',
             'data': data,
             'docs': docs,
             'subtotal_sub': subtotal_sub,

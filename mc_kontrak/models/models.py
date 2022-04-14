@@ -264,7 +264,7 @@ class ProductOrderLine(models.Model):
         ('line_section', "Section"),
         ('line_note', "Note")], default=False, help="Technical field for UX purpose.")
 
-    name = fields.Char(string='Description')
+    name = fields.Char(string='Description', related="product_id.product_tmpl_id.name", store=True)
 
     @api.depends('mc_qty_kontrak', 'mc_harga_diskon', 'mc_period', 'mc_period_info', 'tax_id')
     def _hitung_subtotal(self):
@@ -448,20 +448,22 @@ class CustomSalesOrder(models.Model):
 
                 # Cek jika status produk open, masukkan ke SO
                 if row.mc_isopen:
-                    values['product_id'] = row.product_id.id
-                    values['kontrak_line_id'] = row.id
-                    values['x_mc_qty_kontrak'] = row.mc_qty_kontrak
-                    values['kontrak_id'] = kontrak_id.id
-                    values['price_unit'] = row.mc_harga_diskon
-                    values['discount'] = (row.mc_harga_produk - row.mc_harga_diskon) / row.mc_harga_produk
-                    values['x_mc_isopen'] = row.mc_isopen
-                    values['product_uom_qty'] = row.mc_qty_kontrak - row.mc_qty_terpasang
-                    values['discount'] = 0
-                    values['x_mc_harga_produk'] = row.mc_harga_produk
-                    if subs_id.id:
-                        values['subscription_id'] = subs_id.id
+                    if row.product_id.id:
+                        values['product_id'] = row.product_id.id
+                        values['name'] = row.name
+                        values['kontrak_line_id'] = row.id
+                        values['x_mc_qty_kontrak'] = row.mc_qty_kontrak
+                        values['kontrak_id'] = kontrak_id.id
+                        values['price_unit'] = row.mc_harga_diskon
+                        values['discount'] = (row.mc_harga_produk - row.mc_harga_diskon) / row.mc_harga_produk
+                        values['x_mc_isopen'] = row.mc_isopen
+                        values['product_uom_qty'] = row.mc_qty_kontrak - row.mc_qty_terpasang
+                        values['discount'] = 0
+                        values['x_mc_harga_produk'] = row.mc_harga_produk
+                        if subs_id.id:
+                            values['subscription_id'] = subs_id.id
 
-                    terms.append((0, 0, values))
+                        terms.append((0, 0, values))
 
         return self.update({'order_line': terms})
 
