@@ -619,7 +619,7 @@ class CustomSalesOrder(models.Model):
                         print('row :', row)
                         print('row kontrak line : ', row.kontrak_line_id.id)
                         print('row kontrak line 2 : ', row.kontrak_line_id)
-                        if row.kontrak_line_id.id is False:
+                        if row.kontrak_line_id.id is False and row.product_id.id:
                             print(row.order_id.kontrak_id.mc_qty_kontrak)
                             print(int(row.order_id.kontrak_id.mc_qty_kontrak))
 
