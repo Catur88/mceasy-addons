@@ -40,7 +40,8 @@
 
                         <button name="action_confirm" id="action_confirm" data-hotkey="v"
                                 string="Confirm Contract" class="btn-primary" type="object"
-                                attrs="{'invisible': [('mc_state', 'in', ['done', 'cancel'])]}"/>
+                                attrs="{'invisible': [('mc_state', 'in', ['done', 'cancel'])]}"
+                                groups="account.group_account_manager"/>
 
                         <button name="action_cancel" id="action_confirm" data-hotkey="v"
                                 string="Cancel Contract" class="btn-secondary" type="object"
@@ -120,17 +121,37 @@
                                             <field name="mc_payment" widget="Monetary"/>
                                         </tree>
                                     </field>
-                                    <group name="note_group" class="mt-2 mt-md-0 e_subtotal_footer oe_right">
-
-                                        <group class="oe_subtotal_footer oe_right" name="contract_total">
-                                            <field name="mc_tak_pajak" widget="Monetary" string="Amount Untaxed"/>
+                                    <group name="note_group" col="12" class="mt-2 mt-md-0" style="width:100%">
+                                        <group colspan="8">
+                                            <field name="x_note" class="oe-bordered-editor" nolabel="1"
+                                                   placeholder="Isi Kontrak" attrs="{'readonly': [('mc_state', 'in', ['done'])]}"/>
+                                        </group>
+                                        <group class="oe_subtotal_footer oe_right" colspan="4" name="sale_total">
+                                            <field name="mc_tak_pajak" widget="Monetary" string="Amount Untaxed"
+                                                   colspan="4"/>
                                             <field name="mc_pajak" widget="Monetary"
                                                    attrs="{'invisible': [('mc_pajak', '=', '0')]}"
-                                                   string="Amount Taxed"/>
-                                            <field name="mc_total" widget="Monetary"/>
+                                                   string="Amount Taxed"
+                                                   colspan="4"/>
+                                            <field name="mc_total" widget="Monetary" colspan="4"/>
                                         </group>
                                         <div class="oe_clear"/>
                                     </group>
+                                    <!--                                    <group name="note_group" col="12" class="mt-2 mt-md-0">-->
+                                    <!--                                        <group colspan="8">-->
+                                    <!--                                            <field name="x_note" class="oe-bordered-editor" nolabel="1"-->
+                                    <!--                                                   placeholder="Terms and conditions..."/>-->
+                                    <!--                                        </group>-->
+
+                                    <!--                                        <group class="oe_subtotal_footer oe_right" colspan="4" name="contract_total">-->
+                                    <!--                                            <field name="mc_tak_pajak" widget="Monetary" string="Amount Untaxed"/>-->
+                                    <!--                                            <field name="mc_pajak" widget="Monetary"-->
+                                    <!--                                                   attrs="{'invisible': [('mc_pajak', '=', '0')]}"-->
+                                    <!--                                                   string="Amount Taxed"/>-->
+                                    <!--                                            <field name="mc_total" widget="Monetary"/>-->
+                                    <!--                                        </group>-->
+                                    <!--                                        <div class="oe_clear"/>-->
+                                    <!--                                    </group>-->
                                 </group>
                             </page>
                             <page string="Histori Install/Lepas" name="histori_so">

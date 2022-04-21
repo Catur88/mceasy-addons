@@ -24,6 +24,53 @@ class McSubscription(models.Model):
     x_kontrak_id = fields.Many2one('mc_kontrak.mc_kontrak', string="No Kontrak", store=True, ondelete='cascade')
     x_order_id = fields.Many2one('sale.order', store=True, string="No SO", readonly=True, ondelete='cascade')
 
+    def _compute_invoice_count(self):
+        can_read = self.env['account.move'].check_access_rights('read', raise_exception=False)
+        if not can_read:
+            self.update({'invoice_count': 0})
+            return
+        res = self.env['account.move.line'].read_group(
+            [('subscription_id', 'in', self.ids)], ['move_id:count_distinct'], ['subscription_id'])
+        invoice_count_dict = {r['subscription_id'][0]: r['move_id'] for r in res}
+
+        query = """
+                    select sol.id from sale_order_line sol
+                    inner join sale_order so 
+                    on sol.order_id = so.id
+                    inner join sale_subscription_line ssl 
+                    on ssl.x_order_id = so.id 
+                    where sol.order_id = ssl.x_order_id
+                """
+        self.env.cr.execute(query)
+        order_line_id = self.env.cr.fetchone()[0]
+
+        query = """SELECT COUNT(invoice_line_id) FROM sale_order_line_invoice_rel WHERE order_line_id = %s """ % order_line_id
+        self.env.cr.execute(query)
+        count_inv = self.env.cr.fetchone()[0]
+        for subscription in self:
+            subscription.invoice_count = invoice_count_dict.get(subscription.id, 0) + count_inv
+
+    # Button untuk membuka related Invoices
+    def action_subscription_invoice(self):
+        invoices = self.env['account.move'].search([('invoice_origin', '=', self.x_order_id.name)])
+        action = self.env["ir.actions.actions"]._for_xml_id("account.action_move_out_invoice_type")
+        action["context"] = {
+            "create": False,
+            "default_move_type": "out_invoice"
+        }
+        if len(invoices) > 1:
+            action['domain'] = [('id', 'in', invoices.ids)]
+        elif len(invoices) == 1:
+            form_view = [(self.env.ref('account.view_move_form').id, 'form')]
+            if 'views' in action:
+                action['views'] = form_view + [(state, view) for state, view in action['views'] if view != 'form']
+            else:
+                action['views'] = form_view
+            action['res_id'] = invoices.ids[0]
+        else:
+            action = {'type': 'ir.actions.act_window_close'}
+        return action
+
 
 class McSubscriptionLines(models.Model):
     _inherit = 'sale.subscription.line'

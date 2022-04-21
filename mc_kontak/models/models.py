@@ -26,6 +26,10 @@ class CustomContact(models.Model):
             if vals_list['x_isteknisi'] is True:
                 vals_list['function'] = 'Teknisi McEasy'
 
+        if 'x_domain' not in vals_list:
+            res = super(CustomContact, self).create(vals_list)
+            return res
+
         if 'name' in vals_list and vals_list['x_domain'] is False:
             comp_name = vals_list['name'].split(' ')
             domain_name = ''
