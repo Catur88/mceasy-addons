@@ -60,7 +60,7 @@ class ChurnOrder(models.Model):
         # Masukkan ke Histori
         query = """
             INSERT INTO mc_kontrak_histori_so(x_kontrak_id, x_churn_id, x_item, x_tgl_start, x_qty_so, x_tipe) VALUES
-            ('%s', '%s', '%s', '%s', 'churn')
+            ('%s', '%s', '%s', '%s', '%s', 'churn')
         """ % (kontrak_id, self.id, product_id, self.x_plan_start_date, count_hapus * -1)
         self.env.cr.execute(query)
 
