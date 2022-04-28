@@ -553,6 +553,7 @@ class CustomSalesOrder(models.Model):
 
                 # Cek order_line, masukkan ke product_order_line Kontrak
                 if self.x_order_line:
+
                     for row in self.x_order_line:
                         if row.product_id.product_tmpl_id.recurring_invoice:
                             #     If FALSE
@@ -608,8 +609,8 @@ class CustomSalesOrder(models.Model):
                 self.env.cr.execute(query)
 
                 # Update Sale Order Line set Kontrak ID
-                self.env.cr.execute("""UPDATE sale_order_line SET kontrak_id = %s, kontrak_line_id = %s 
-                WHERE order_id = %s""" % (kontrak_id, id_sol, order_id))
+                self.env.cr.execute("""UPDATE sale_order_line SET kontrak_id = %s
+                WHERE order_id = %s""" % (kontrak_id, order_id))
             else:
                 if so_line:
                     i = 0
