@@ -98,7 +98,7 @@
                             <td>IMEI</td>
                             <td>No Simcard</td>
                         </tr>
-                        <t t-foreach="range(doc.work_order_line.qty_delivered)" t-as="i">
+                        <t t-foreach="range(doc.work_order_line.x_qty_plan)" t-as="i">
                             <tr>
                                 <td>
                                     <t t-esc="i + 1"/>
@@ -233,7 +233,7 @@
 
                     <p style="page-break-before:always;"></p>
 
-                    <t t-foreach="range(doc.work_order_line.qty_delivered)" t-as="i">
+                    <t t-foreach="range(doc.work_order_line.x_qty_plan)" t-as="i">
                         <center>
                             <h4>Detail Instalasi Setiap Kendaraan</h4>
                         </center>

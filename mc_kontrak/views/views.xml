@@ -11,6 +11,8 @@
                     <field name="mc_total"/>
                     <field name="mc_state" string="Status" decoration-success="mc_state == 'sale' or mc_state == 'done'"
                            decoration-info="mc_state == 'draft' or mc_state == 'sent'" widget="badge" optional="show"/>
+                    <field name="x_status_open" decoration-success="x_status_open == 'closed'"
+                           decoration-info="x_status_open == 'open'" widget="badge"/>
                 </tree>
             </field>
         </record>
