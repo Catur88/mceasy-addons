@@ -1,5 +1,20 @@
 <odoo>
     <data>
+
+        <!--        Tree-->
+        <record id="view_quotation_tree_custom" model="ir.ui.view">
+            <field name="name">sale.order.tree.custom</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale.view_quotation_tree"/>
+            <field name="arch" type="xml">
+                <tree string="Quotation" class="o_sale_order" sample="1" decoration-info="state in ['draft', 'sent']" decoration-muted="state == 'cancel'">
+                    <field name="x_status_open" decoration-success="x_status_open == 'closed'"
+                           decoration-info="x_status_open == 'open'" widget="badge"/>
+                </tree>
+            </field>
+        </record>
+        <!--        End Tree-->
+
         <record id="saleorder_inherit" model="ir.ui.view">
             <field name="name">sale.order.inherit</field>
             <field name="model">sale.order</field>
@@ -47,6 +62,10 @@
                 </field>
                 <field name="validity_date" position="before">
                     <field name="x_no_po"/>
+                </field>
+                <field name="payment_term_id" position="after">
+                    <field name="x_status_open" decoration-success="x_status_open == 'closed'"
+                           decoration-info="x_status_open == 'open'" widget="badge"/>
                 </field>
                 <!-- Readonly column -->
                 <xpath expr="/form/sheet/notebook/page/field[@name='order_line']/tree/field[@name='product_id']"
