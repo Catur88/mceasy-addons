@@ -2,12 +2,12 @@
     <data>
 
         <!--        Tree-->
-        <record id="view_quotation_tree_custom" model="ir.ui.view">
+        <record id="view_order_tree_custom" model="ir.ui.view">
             <field name="name">sale.order.tree.custom</field>
             <field name="model">sale.order</field>
-            <field name="inherit_id" ref="sale.view_quotation_tree"/>
+            <field name="inherit_id" ref="sale.view_order_tree"/>
             <field name="arch" type="xml">
-                <tree string="Quotation" class="o_sale_order" sample="1" decoration-info="state in ['draft', 'sent']" decoration-muted="state == 'cancel'">
+                <tree string="Sales Orders" sample="1" decoration-info="invoice_status == 'to invoice'" decoration-muted="state == 'cancel'">
                     <field name="x_status_open" decoration-success="x_status_open == 'closed'"
                            decoration-info="x_status_open == 'open'" widget="badge"/>
                 </tree>

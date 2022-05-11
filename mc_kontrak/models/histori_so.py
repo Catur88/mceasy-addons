@@ -7,6 +7,10 @@ class HistoriSO(models.Model):
     _name = 'mc_kontrak.histori_so'
     _description = 'Modul berisi data SO yang akan berelasi dengan kontrak'
 
+    _sql_constraints = [
+        ('no_so_unique', 'unique(x_order_id)', 'Tidak boleh duplikasi')
+    ]
+
     x_kontrak_id = fields.Many2one('mc_kontrak.mc_kontrak')
     x_order_id = fields.Many2one('sale.order', ondelete='cascade')
     x_churn_id = fields.Many2one('mc_kontrak.churn_order', ondelete='cascade')
