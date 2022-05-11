@@ -638,13 +638,15 @@ class CustomSalesOrder(models.Model):
                             print(int(row.order_id.kontrak_id.mc_qty_kontrak))
 
                             query = """
-                                INSERT INTO mc_kontrak_product_order_line(kontrak_id, product_id, currency_id,
-                                mc_qty_kontrak, mc_qty_terpasang, mc_harga_produk, mc_harga_diskon, mc_payment,
-                                mc_total, mc_unit_price) VALUES ('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s') RETURNING id
-                            """ % (row.kontrak_id.id, row.product_id.id, row.currency_id.id,
-                                   int(row.order_id.kontrak_id.mc_qty_kontrak), int(row.product_uom_qty),
-                                   row.price_unit,
-                                   row.price_unit, row.price_total, row.price_total, row.price_unit)
+                                SELECT id FROM mc_kontrak_product_order_line WHERE kontrak_id = %s AND product_id = %s 
+                            """ % (row.kontrak_id.id, row.product_id.id)
+                            #     INSERT INTO mc_kontrak_product_order_line(kontrak_id, product_id, currency_id,
+                            #     mc_qty_kontrak, mc_qty_terpasang, mc_harga_produk, mc_harga_diskon, mc_payment,
+                            #     mc_total, mc_unit_price) VALUES ('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s') RETURNING id
+                            # """ % (row.kontrak_id.id, row.product_id.id, row.currency_id.id,
+                            #        int(row.order_id.kontrak_id.mc_qty_kontrak), int(row.product_uom_qty),
+                            #        row.price_unit,
+                            #        row.price_unit, row.price_total, row.price_total, row.price_unit)
                             print(query)
                             self.env.cr.execute(query)
                             result = self.env.cr.dictfetchone()
@@ -659,7 +661,7 @@ class CustomSalesOrder(models.Model):
                         getPeriod = self.env.cr.dictfetchone()
                         periode = str(getPeriod['mc_period']) + " " + str(getPeriod['mc_period_info'])
 
-                        if row.product_id.id and row.order_id.id == self.id:
+                        if row.product_id.id and row.order_id.id != self.id:
                             query = """
                                 INSERT INTO mc_kontrak_histori_so(x_kontrak_id,
                                 x_order_id, x_tgl_start, x_item, x_period, x_status_pembayaran,
@@ -726,23 +728,23 @@ class CustomSalesOrder(models.Model):
                     print(query)
                     self.env.cr.execute(query)
 
-            # Ubah status
-            query = """
-                    SELECT mc_qty_kontrak, mc_qty_terpasang FROM product_order_line WHERE kontrak_id = %s 
-                """ % self.kontrak_id.id
-            self.env.cr.execute(query)
-            arr_list_so = self.env.cr.dictfetchall()
-            print(arr_list_so)
-            masihBelumDone = 0
-            for arrdata in arr_list_so:
-                if arrdata['mc_qty_kontrak'] != arrdata['mc_qty_terpasang']:
-                    masihBelumDone += 1
+                    # Ubah status
+                    query = """
+                            SELECT mc_qty_kontrak, mc_qty_terpasang FROM mc_kontrak_product_order_line WHERE kontrak_id = %s 
+                        """ % self.kontrak_id.id
+                    self.env.cr.execute(query)
+                    arr_list_so = self.env.cr.dictfetchall()
+                    print(arr_list_so)
+                    masihBelumDone = 0
+                    for arrdata in arr_list_so:
+                        if arrdata['mc_qty_kontrak'] != arrdata['mc_qty_terpasang']:
+                            masihBelumDone += 1
 
-            if masihBelumDone == 0:
-                query = """
-                        UPDATE mc_kontrak_mc_kontrak SET x_status_open = 'closed' WHERE id = %s
-                    """ % self.kontrak_id.id
-                self.env.cr.execute(query)
+                    if masihBelumDone == 0:
+                        query = """
+                                UPDATE mc_kontrak_mc_kontrak SET x_status_open = 'closed' WHERE id = %s
+                            """ % self.kontrak_id.id
+                        self.env.cr.execute(query)
 
             query = """
                     UPDATE sale_order SET state = 'sale' WHERE id = %s

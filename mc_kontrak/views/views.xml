@@ -95,6 +95,8 @@
                                 <field name="mc_confirm_date"/>
                                 <field name="mc_sales"/>
                                 <field name="mc_admin_sales"/>
+                                <field name="x_status_open" decoration-success="x_status_open == 'closed'"
+                                       decoration-info="x_status_open == 'open'" widget="badge"/>
                             </group>
                         </group>
                         <notebook>
@@ -126,7 +128,8 @@
                                     <group name="note_group" col="12" class="mt-2 mt-md-0" style="width:100%">
                                         <group colspan="8">
                                             <field name="x_note" class="oe-bordered-editor" nolabel="1"
-                                                   placeholder="Isi Kontrak" attrs="{'readonly': [('mc_state', 'in', ['done'])]}"/>
+                                                   placeholder="Isi Kontrak"
+                                                   attrs="{'readonly': [('mc_state', 'in', ['done'])]}"/>
                                         </group>
                                         <group class="oe_subtotal_footer oe_right" colspan="4" name="sale_total">
                                             <field name="mc_tak_pajak" widget="Monetary" string="Amount Untaxed"
