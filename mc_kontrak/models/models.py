@@ -748,8 +748,8 @@ class CustomSalesOrder(models.Model):
             """ % self.id
             self.env.cr.execute(query)
 
-            res = super(CustomSalesOrder, self).action_confirm()
-            return res
+            # res = super(CustomSalesOrder, self).action_confirm()
+            # return res
 
     # Button untuk membuat WO baru dari SO
     def action_report_wo_spk(self):

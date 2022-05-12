@@ -8,6 +8,7 @@ class CustomSalesSubscription(models.Model):
     def create_subscriptions(self):
         # res = super(CustomSalesSubscription, self).create_subscriptions()
         print('Create Subs From Custom Sales Subs')
+        pass
         # print(res)
         # print(res[0])
         # query = """
