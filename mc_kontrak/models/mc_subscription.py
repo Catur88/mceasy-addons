@@ -53,7 +53,7 @@ class McSubscription(models.Model):
 
     # Button untuk membuka related Invoices
     def action_subscription_invoice(self):
-        invoices = self.env['account.move'].search([('invoice_origin', '=', self.x_order_id.name)])
+        invoices = self.env['account.move'].search([('invoice_line_ids.subscription_id', 'in', self.ids)])
         action = self.env["ir.actions.actions"]._for_xml_id("account.action_move_out_invoice_type")
         action["context"] = {
             "create": False,
