@@ -121,6 +121,7 @@ class mc_kontrak(models.Model):
                 self.env.cr.execute(query)
                 print(query)
 
+
         return super(mc_kontrak, self).write(vals)
 
     # def action_sent(self):
@@ -328,7 +329,7 @@ class CustomSalesOrder(models.Model):
 
     # Relasi
     kontrak_id = fields.Many2one('mc_kontrak.mc_kontrak', string='No Kontrak', ondelete='cascade')
-    kontrak_product_line = fields.Many2one('mc_kontrak.product_order_line')
+    kontrak_product_line = fields.Many2one('mc_kontrak.product_order_line', ondelete='cascade')
     histori_wo_line = fields.One2many('mc_kontrak.histori_wo', 'x_order_id')
 
     wo_count = fields.Integer(string='WO', compute='_count_wo')
@@ -567,7 +568,7 @@ class CustomSalesOrder(models.Model):
                 if self.x_order_line:
 
                     for row in self.x_order_line:
-                        if row.product_id:
+                        if row.product_id.product_tmpl_id.recurring_invoice:
                             self.env.cr.execute("""SELECT * FROM product_template WHERE id = %s""" % row.product_id.id)
                             product_id = self.env.cr.dictfetchone()
                             query = """
@@ -854,13 +855,13 @@ class WorkOrder(models.Model):
     x_plan_end_date = fields.Datetime(store=True)
 
     # Relasi
-    kontrak_id = fields.Many2one('mc_kontrak.mc_kontrak')
+    kontrak_id = fields.Many2one('mc_kontrak.mc_kontrak', ondelete='cascade')
     order_id = fields.Many2one('sale.order', store=True)
     company_id = fields.Many2one('res.company', 'Company', required=True, index=True,
                                  default=lambda self: self.env.company)
     partner_id = fields.Many2one('res.partner', related='kontrak_id.mc_cust', store=True)
     product_id = fields.Many2one('product.product')
-    work_order_line = fields.One2many('mc_kontrak.work_order_line', 'work_order_id', store=True)
+    work_order_line = fields.One2many('mc_kontrak.work_order_line', 'work_order_id', store=True, ondelete='cascade')
     device_wo_line = fields.One2many('mc_kontrak.device_wo', 'x_work_order_id', string='Device WO', store=True,
                                      ondelete='cascade')
 
@@ -949,8 +950,7 @@ class WorkOrder(models.Model):
         if so_line:
             for row in so_line.order_line:
                 values = {}
-                # if row.product_id.product_tmpl_id.recurring_invoice:
-                if row.product_id:
+                if row.product_id.product_tmpl_id.recurring_invoice:
                     # Cek jika status produk open, masukkan ke WO Line
                     values['product_id'] = row.product_id.id
                     values['order_id'] = row.order_id.id
@@ -959,6 +959,10 @@ class WorkOrder(models.Model):
                     values['sale_order_line_id'] = row.id
                     values['price_unit'] = row.price_unit
                     values['name'] = row.name
+                    values['product_uom'] = row.product_uom.id
+                    values['discount'] = row.discount
+                    values['company_id'] = row.company_id.id
+                    values['currency_id'] = row.currency_id.id
 
                     terms.append((0, 0, values))
 
@@ -1090,6 +1094,7 @@ class WorkOrder(models.Model):
             count_kontrak_on_sub = self.env.cr.fetchone()[0]
             if count_kontrak_on_sub < 1:
                 subs_id = self.create_subscriptions()
+                print('subs_id', subs_id)
                 query = """
                     UPDATE sale_subscription SET x_kontrak_id = %s, x_order_id = %s WHERE id = %s
                 """ % (self.kontrak_id.id, self.order_id.id, subs_id[0])
@@ -1112,8 +1117,8 @@ class WorkOrder(models.Model):
                 print(subs_data)
                 self.create_line_subscriptions(subs_data, row)
 
-            res = super(WorkOrder, self).action_confirm()
-            return res
+            # res = super(WorkOrder, self).action_confirm()
+            # return res
 
     def action_sent(self):
         query = """
@@ -1177,6 +1182,8 @@ class WorkOrder(models.Model):
                     'team_id': order.team_id.id,
                 })
 
+                print('product id', wo_line.product_id.id)
+                print('uom id', wo_line.product_id.product_tmpl_id.uom_id.id)
                 self.env['sale.subscription.line'].sudo().create({
                     'product_id': wo_line.product_id.id,
                     'analytic_account_id': subs_data['id'],
@@ -1245,22 +1252,36 @@ class WorkOrder(models.Model):
 
 class WorkOrderLine(models.Model):
     _name = 'mc_kontrak.work_order_line'
-    _inherit = 'sale.order.line'
-    _description = 'Modul Work Order Line yang menginherit sale.order.line'
+    # _inherit = 'sale.order.line'
+    _description = 'Modul Work Order Line'
 
     # Relasi
     order_id = fields.Many2one('sale.order', required=True, Store=True, Index=True)
     product_id = fields.Many2one('product.product', readonly=True, store=True)
     invoice_lines = fields.Many2many('account.move.line', 'work_order_line_invoice_rel', 'order_line_id',
                                      'invoice_line_id', string='Invoice Lines', copy=False)
-    work_order_id = fields.Many2one('mc_kontrak.work_order', readonly=True, store=True)
-    sale_order_line_id = fields.Many2one('sale.order.line', store=True)
+    work_order_id = fields.Many2one('mc_kontrak.work_order', readonly=True, store=True, ondelete='cascade')
+    sale_order_line_id = fields.Many2one('sale.order.line', store=True, ondelete='cascade')
 
     # Field
     qty_delivered = fields.Integer(string='QTY Terpasang')
     x_start_date = fields.Datetime(string='Plan Start Date', store=True)
     x_end_date = fields.Datetime(string='Plan End Date', store=True)
     x_qty_plan = fields.Integer(string="QTY Plan Pasang", store=True)
+
+    display_type = fields.Selection([
+        ('line_section', "Section"),
+        ('line_note', "Note")], default=False, help="Technical field for UX purpose.")
+    name = fields.Text(string='Description', required=True)
+    product_uom_qty = fields.Float(string='Quantity', digits='Product Unit of Measure', required=True, default=1.0)
+    subscription_id = fields.Many2one('sale.subscription', 'Subscription', copy=False, check_company=True)
+    price_unit = fields.Float('Unit Price', required=True, digits='Product Price', default=0.0)
+    product_uom = fields.Many2one('uom.uom', string='Unit of Measure',
+                                  domain="[('category_id', '=', product_uom_category_id)]", ondelete="restrict")
+    product_uom_category_id = fields.Many2one(related='product_id.uom_id.category_id')
+    discount = fields.Float(string='Discount (%)', digits='Discount', default=0.0)
+    company_id = fields.Many2one('res.company', store=True, index=True)
+    currency_id = fields.Many2one('res.currency', 'Currency', store=True)
 
     # x_start_date_real = fields.Date(string='Real Start Date', store=True)
     # x_end_date_real = fields.Date(string='Real End Date', store=True)

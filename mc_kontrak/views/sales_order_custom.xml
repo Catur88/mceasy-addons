@@ -57,7 +57,8 @@
                     <button name="insert_kontrak"
                             type="object"
                             string="Insert Kontrak"
-                            attrs="{'invisible': [('kontrak_id', '=', False)]}"
+                            states="draft"
+                            attrs="{'invisible': ['|',('kontrak_id', '=', False)]}"
                     />
                 </field>
                 <field name="validity_date" position="before">

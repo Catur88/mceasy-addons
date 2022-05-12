@@ -15,6 +15,25 @@
             </field>
         </record>
 
+        <!--Search-->
+        <record model="ir.ui.view" id="work_order_tree_search_view">
+            <field name="name">mc_kontrak.work_order.tree.search</field>
+            <field name="model">mc_kontrak.work_order</field>
+            <field name="arch" type="xml">
+                <search string="Work Order">
+                    <field name="name" string="No WO"/>
+                    <field name="kontrak_id" string="No Kontrak"/>
+                    <field name="order_id" string="No SO"/>
+                    <field name="partner_id" string="Partner"/>
+                    <field name="x_teknisi_1" string="Teknisi 1"/>
+                    <field name="x_teknisi_2" string="Teknisi 2"/>
+                    <group expand="0" string="Group By">
+                        <filter string="Teknisi 1" name="x_teknisi_1" context="{'group_by': 'x_teknisi_1'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
         <!--Act-->
         <record id="work_order_course_action" model="ir.actions.act_window">
             <field name="name">Installation Work Order</field>
@@ -27,6 +46,7 @@
             </field>
         </record>
 
+        <!--Calendar View-->
         <record id="work_order_action_view_calendar" model="ir.ui.view">
             <field name="name">mc_kontrak.work_order.calendar</field>
             <field name="model">mc_kontrak.work_order</field>
@@ -87,6 +107,8 @@
                                         name="insert_so_line"
                                         string="Insert SO"
                                         type="object"
+                                        states="draft"
+                                        attrs="{'invisible': ['|',('order_id', '=', False)]}"
                                 />
                             </group>
                             <group>
