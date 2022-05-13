@@ -482,37 +482,40 @@ class CustomSalesOrder(models.Model):
 
     def action_cancel(self):
         print('test cancel SO')
-        # query = """
-        #     SELECT product_uom_qty, kontrak_line_id  FROM sale_order_line sol
-        #     WHERE sol.order_id  = %s
-        # """ % self.id
-        #
-        # self.env.cr.execute(query)
-        # arrQuery = self.env.cr.dictfetchall()
-        #
-        # if arrQuery:
-        #     query = """
-        #         update mc_kontrak_mc_kontrak set mc_isopen = true where id = %s
-        #     """ % self.kontrak_id.id
-        #     self.env.cr.execute(query)
-        #     for row in arrQuery:
-        #         query = """
-        #             update mc_kontrak_product_order_line set
-        #             mc_qty_terpasang = mc_qty_belum_terpasang - %s,
-        #             mc_qty_belum_terpasang = mc_qty_belum_terpasang - %s
-        #             where id = %s
-        #         """ % (row['product_uom_qty'], row['product_uom_qty'], row['kontrak_line_id'])
-        #         self.env.cr.execute(query)
-        #
-        # query = """
-        #         UPDATE sale_order SET state = 'cancel' WHERE id = %s
-        # """ % self.id
-        # self.env.cr.execute(query)
-        #
-        # query = """
-        #     DELETE FROM mc_kontrak_histori_so WHERE x_order_id = %s
-        # """ % self.id
-        # self.env.cr.execute(query)
+        query = """
+            SELECT product_uom_qty, kontrak_line_id, product_id, kontrak_id  FROM sale_order_line sol
+            WHERE sol.order_id  = %s
+        """ % self.id
+        print(query)
+
+        self.env.cr.execute(query)
+        arrQuery = self.env.cr.dictfetchall()
+
+        if arrQuery:
+            query = """
+                update mc_kontrak_mc_kontrak set mc_isopen = true where id = %s
+            """ % self.kontrak_id.id
+            self.env.cr.execute(query)
+            for row in arrQuery:
+                # where id = %s
+                query = """
+                    update mc_kontrak_product_order_line set
+                    mc_qty_terpasang = mc_qty_belum_terpasang - %s,
+                    mc_qty_belum_terpasang = mc_qty_belum_terpasang - %s
+                    where product_id = %s AND kontrak_id = %s
+                """ % (row['product_uom_qty'], row['product_uom_qty'], row['product_id'], row['kontrak_id'])
+                print(query)
+                self.env.cr.execute(query)
+
+        query = """
+                UPDATE sale_order SET state = 'cancel' WHERE id = %s
+        """ % self.id
+        self.env.cr.execute(query)
+
+        query = """
+            DELETE FROM mc_kontrak_histori_so WHERE x_order_id = %s
+        """ % self.id
+        self.env.cr.execute(query)
 
         res = super(CustomSalesOrder, self).action_cancel()
         return res
@@ -584,8 +587,28 @@ class CustomSalesOrder(models.Model):
                             result = self.env.cr.dictfetchone()
                             id_sol = result['id']
 
+                        query = """
+                            UPDATE sale_order_line SET kontrak_line_id = %s WHERE kontrak_id = %s 
+                            AND order_id = %s AND product_id = %s
+                        """ % (
+                        id_sol, kontrak_id, self.id, row.product_id.id if row.product_id.id else 0)
+                        print(query)
+                        self.env.cr.execute(query)
+
+                        query = """
+                            SELECT name, kontrak_line_id, kontrak_id, order_id FROM sale_order_line 
+                            WHERE kontrak_id = %s 
+                            AND order_id = %s AND product_id = %s
+                        """ % (
+                        kontrak_id, self.id, row.product_id.id if row.product_id.id else 0)
+                        print(query)
+                        self.env.cr.execute(query)
+                        hasilkueri = self.env.cr.dictfetchone()
+                        print(hasilkueri)
+
                         # Masukkan Sales Order ke histori SO
-                        if row.product_id.id and row.order_id.id == self.id:
+                        if row.product_id.id and row.order_id.id == self.id \
+                                and row.product_id.product_tmpl_id.recurring_invoice:
                             query = """
                                 INSERT INTO mc_kontrak_histori_so(x_kontrak_id,
                                 x_tgl_start, x_item, x_period,
@@ -624,18 +647,46 @@ class CustomSalesOrder(models.Model):
                         print('row :', row)
                         print('row kontrak line : ', row.kontrak_line_id.id)
                         print('row kontrak line 2 : ', row.kontrak_line_id)
-                        print('row kontrak id ', row.kontrak_id.id)
-                        if row.kontrak_line_id.id is False and row.product_id.id:
-                            print(row.order_id.kontrak_id.mc_qty_kontrak)
-                            print(int(row.order_id.kontrak_id.mc_qty_kontrak))
+                        print('row kontrak id ', self.kontrak_id.id)
 
+                        query = """
+                            SELECT COUNT(product_id) FROM mc_kontrak_mc_kontrak k
+                            LEFT JOIN mc_kontrak_product_order_line kl
+                            ON kl.kontrak_id = k.id
+                            WHERE k.id = %s AND kl.product_id = %s
+                        """ % (self.kontrak_id.id, row.product_id.id)
+                        print(query)
+                        self.env.cr.execute(query)
+                        hasilkueri = self.env.cr.fetchone()[0]
+                        if hasilkueri == 0:
+                            print('kontrak_id', self.kontrak_id.id)
                             query = """
-                                SELECT id FROM mc_kontrak_product_order_line WHERE kontrak_id = %s AND product_id = %s 
-                            """ % (row.kontrak_id.id, row.product_id.id)
+                                INSERT INTO mc_kontrak_product_order_line(kontrak_id, product_id, mc_qty_kontrak, 
+                                mc_qty_terpasang, mc_harga_produk, mc_harga_diskon, mc_period, mc_period_info, 
+                                currency_id, tax_id, mc_isopen, name, mc_payment, mc_total)
+                                VALUES ('%s','%s','%s','%s','%s','%s', '1', 'bulan', 12, 1, true, '%s', '%s', '%s') RETURNING id
+                            """ % (self.kontrak_id.id, row.product_id.id if row.product_id.id else 0, row.x_mc_qty_kontrak,
+                                    int(row.product_uom_qty), row.x_mc_harga_produk, row.price_unit, row.name,
+                                    row.price_total, row.price_total)
                             print(query)
                             self.env.cr.execute(query)
                             result = self.env.cr.dictfetchone()
                             id_sol = result['id']
+
+                            self.env.cr.execute("""UPDATE sale_order_line SET kontrak_id = %s 
+                            WHERE order_id = %s""" % (self.kontrak_id.id, self.id))
+                        else:
+                            if row.kontrak_line_id.id is False and row.product_id.id:
+                                print(row.order_id.kontrak_id.mc_qty_kontrak)
+                                print(int(row.order_id.kontrak_id.mc_qty_kontrak))
+
+                                query = """
+                                    SELECT id FROM mc_kontrak_product_order_line WHERE kontrak_id = %s AND product_id = %s 
+                                """ % (self.kontrak_id.id, row.product_id.id)
+                                print(query)
+                                self.env.cr.execute(query)
+                                result = self.env.cr.dictfetchone()
+                                id_sol = result['id']
 
                         query = """
                             SELECT mc_period, mc_period_info FROM mc_kontrak_product_order_line
@@ -648,7 +699,8 @@ class CustomSalesOrder(models.Model):
 
                         print('row order id', row.order_id.id)
                         print('self order id', self.x_order_line.order_id.id)
-                        if row.product_id.id and row.order_id.id == self.id:
+
+                        if row.product_id.id and row.order_id.id == self.id and row.product_id.product_tmpl_id.recurring_invoice:
                             query = """
                                 INSERT INTO mc_kontrak_histori_so(x_kontrak_id,
                                 x_order_id, x_tgl_start, x_item, x_period, x_status_pembayaran,
@@ -679,17 +731,16 @@ class CustomSalesOrder(models.Model):
                         total_terpasang = x_qty_terpasang + x_qty_terpasang2
 
                         if row.product_id.product_tmpl_id.recurring_invoice:
-                            query = "UPDATE public.mc_kontrak_product_order_line SET mc_qty_terpasang = %s, " \
-                                    "mc_qty_belum_terpasang = (mc_qty_kontrak - %s) " \
+                            query = "UPDATE public.mc_kontrak_product_order_line SET mc_qty_terpasang = %s " \
                                     "WHERE id = %s" % (
-                                        total_terpasang, total_terpasang, id_sol if row.kontrak_line_id.id is False
+                                        total_terpasang, id_sol if row.kontrak_line_id.id is False
                                         else row.kontrak_line_id.id)
                             print(query)
                             self.env.cr.execute(query)
 
                         query = """
                             UPDATE mc_kontrak_mc_kontrak SET mc_qty_kontrak = %s WHERE id = %s
-                        """ % (row.x_mc_qty_kontrak, row.kontrak_id.id)
+                        """ % (row.x_mc_qty_kontrak, self.kontrak_id.id)
                         self.env.cr.execute(query)
 
                         if query:
@@ -970,33 +1021,33 @@ class WorkOrder(models.Model):
 
     def action_cancel(self):
         print('test cancel work order')
-        # query = """
-        #     SELECT qty_delivered, sale_order_line_id  FROM mc_kontrak_work_order_line wol
-        #     WHERE wol.work_order_id  = %s
-        # """ % self.id
-        # self.env.cr.execute(query)
-        # print(query)
-        # arrQuery = self.env.cr.dictfetchall()
-        # print(arrQuery)
-        #
-        # if arrQuery:
-        #     query = """
-        #         update sale_order set x_mc_isopen = true where id = %s
-        #     """ % self.kontrak_id.id
-        #     self.env.cr.execute(query)
-        #     for row in arrQuery:
-        #         query = """
-        #             update sale_order_line set
-        #             qty_delivered = qty_delivered - %s
-        #             where id = %s
-        #         """ % (row['qty_delivered'], row['sale_order_line_id'])
-        #         print(query)
-        #         self.env.cr.execute(query)
-        #
-        # query = """
-        #     DELETE FROM mc_kontrak_histori_wo WHERE x_work_order_id = %s
-        # """ % self.id
-        # self.env.cr.execute(query)
+        query = """
+            SELECT qty_delivered, sale_order_line_id  FROM mc_kontrak_work_order_line wol
+            WHERE wol.work_order_id  = %s
+        """ % self.id
+        self.env.cr.execute(query)
+        print(query)
+        arrQuery = self.env.cr.dictfetchall()
+        print(arrQuery)
+
+        if arrQuery:
+            query = """
+                update sale_order set x_mc_isopen = true where id = %s
+            """ % self.kontrak_id.id
+            self.env.cr.execute(query)
+            for row in arrQuery:
+                query = """
+                    update sale_order_line set
+                    qty_delivered = qty_delivered - %s
+                    where id = %s
+                """ % (row['qty_delivered'], row['sale_order_line_id'])
+                print(query)
+                self.env.cr.execute(query)
+
+        query = """
+            DELETE FROM mc_kontrak_histori_wo WHERE x_work_order_id = %s
+        """ % self.id
+        self.env.cr.execute(query)
 
         query = """
                 UPDATE mc_kontrak_work_order SET state = 'cancel' WHERE id = %s
