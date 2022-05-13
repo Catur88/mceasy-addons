@@ -20,13 +20,16 @@ class CustomSaleOrderSumReport(models.AbstractModel):
                 'name': line.name,
                 'display_type': line.display_type,
                 'price_subtotal': line.price_subtotal,
+                'currency_id': line.currency_id,
             }
             arr_items.append(vals)
 
         subtotal_sub = 0
         subtotal_otf = 0
+        currency_id = 0
         for idx, val in enumerate(arr_items):
             print(val)
+            currency_id = val["currency_id"]
             if idx < id_section:
                 subtotal_sub += val["price_subtotal"]
             if idx > id_section:
@@ -40,5 +43,6 @@ class CustomSaleOrderSumReport(models.AbstractModel):
             'data': data,
             'docs': docs,
             'subtotal_sub': subtotal_sub,
-            'subtotal_otf': subtotal_otf
+            'subtotal_otf': subtotal_otf,
+            'x_currency_id': currency_id,
         }

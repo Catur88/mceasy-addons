@@ -3,6 +3,7 @@
 from odoo import models, fields, api, _
 from odoo.tools import is_html_empty
 from dateutil.relativedelta import relativedelta
+from odoo.exceptions import ValidationError
 
 
 class mc_kontrak(models.Model):
@@ -498,14 +499,15 @@ class CustomSalesOrder(models.Model):
             self.env.cr.execute(query)
             for row in arrQuery:
                 # where id = %s
-                query = """
-                    update mc_kontrak_product_order_line set
-                    mc_qty_terpasang = mc_qty_belum_terpasang - %s,
-                    mc_qty_belum_terpasang = mc_qty_belum_terpasang - %s
-                    where product_id = %s AND kontrak_id = %s
-                """ % (row['product_uom_qty'], row['product_uom_qty'], row['product_id'], row['kontrak_id'])
-                print(query)
-                self.env.cr.execute(query)
+                if row['product_id'] is not None:
+                    query = """
+                        update mc_kontrak_product_order_line set
+                        mc_qty_terpasang = mc_qty_belum_terpasang - %s,
+                        mc_qty_belum_terpasang = mc_qty_belum_terpasang - %s
+                        where product_id = %s AND kontrak_id = %s
+                    """ % (row['product_uom_qty'], row['product_uom_qty'], row['product_id'], row['kontrak_id'])
+                    print(query)
+                    self.env.cr.execute(query)
 
         query = """
                 UPDATE sale_order SET state = 'cancel' WHERE id = %s
@@ -571,6 +573,7 @@ class CustomSalesOrder(models.Model):
                 if self.x_order_line:
 
                     for row in self.x_order_line:
+                        # Cek apakah produk itu Recurring atau bukan
                         if row.product_id.product_tmpl_id.recurring_invoice:
                             self.env.cr.execute("""SELECT * FROM product_template WHERE id = %s""" % row.product_id.id)
                             product_id = self.env.cr.dictfetchone()
@@ -586,6 +589,8 @@ class CustomSalesOrder(models.Model):
                             self.env.cr.execute(query)
                             result = self.env.cr.dictfetchone()
                             id_sol = result['id']
+                        else:
+                            id_sol = 0
 
                         query = """
                             UPDATE sale_order_line SET kontrak_line_id = %s WHERE kontrak_id = %s 
@@ -1172,11 +1177,14 @@ class WorkOrder(models.Model):
             # return res
 
     def action_sent(self):
-        query = """
-            UPDATE mc_kontrak_work_order SET state = 'sent' WHERE id = %s
-        """ % self.id
-        self.env.cr.execute(query)
-        print('Update Work Order state to Sent')
+        if not self.work_order_line:
+            raise ValidationError(_("Work Order Line harus diisi dengan Button INSERT SO!"))
+        else:
+            query = """
+                UPDATE mc_kontrak_work_order SET state = 'sent' WHERE id = %s
+            """ % self.id
+            self.env.cr.execute(query)
+            print('Update Work Order state to Sent')
 
     def _siapkan_subs_data(self, template):
         """Prepare a dictionnary of values to create a subscription from a template."""

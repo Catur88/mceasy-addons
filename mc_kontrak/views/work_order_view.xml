@@ -127,7 +127,7 @@
                                         <field name="name" readonly="1"/>
                                         <field name="product_uom_qty" string="QTY SO" readonly="1"/>
                                         <field name="x_qty_plan" string="QTY Plan" readonly="0"/>
-                                        <field name="qty_delivered" string="QTY Terpasang" readonly="1"/>
+                                        <field name="qty_delivered" string="QTY Terpasang" readonly="0"/>
                                         <field name="x_start_date"/>
                                         <field name="x_end_date"/>
                                     </tree>

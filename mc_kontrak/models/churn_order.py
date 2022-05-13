@@ -42,6 +42,7 @@ class ChurnOrder(models.Model):
             # Hapus dari Device Terpasang
             kontrak_id = row.x_imei.x_work_order_id.kontrak_id.id
             work_order_id = row.x_imei.x_work_order_id.id
+            order_id = row.x_imei.x_work_order_id.order_id.id
 
             query = """
                 UPDATE mc_kontrak_device_wo SET x_isdeleted = True WHERE id = %s
@@ -52,8 +53,8 @@ class ChurnOrder(models.Model):
 
         # Get product Id dari Churn Order Line
         query = """
-                SELECT product_id FROM mc_kontrak_work_order_line WHERE kontrak_id = %s AND work_order_id = %s
-            """ % (kontrak_id, work_order_id)
+                SELECT product_id FROM mc_kontrak_work_order_line WHERE order_id = %s AND work_order_id = %s
+            """ % (order_id, work_order_id)
         self.env.cr.execute(query)
         product_id = self.env.cr.fetchone()[0]
 

@@ -150,11 +150,14 @@
                                             </td>
                                             <td name="td_price" class="text-right">
                                                 Rp.
-                                                <span t-esc="line.x_mc_harga_produk"/>
+                                                <span t-esc="line.x_mc_harga_produk"
+                                                      t-options='{"widget": "monetary", "display_currency": line.currency_id}'/>
+
                                             </td>
                                             <td name="td_price_discount" class="text-right">
                                                 Rp.
-                                                <span t-esc="line.price_unit"/>
+                                                <span t-esc="line.price_unit"
+                                                      t-options='{"widget": "monetary", "display_currency": line.currency_id}'/>
                                             </td>
                                             <td name="td_subtotal" class="text-right">
                                                 <span t-field="line.price_subtotal"/>
@@ -170,7 +173,8 @@
                                             <td>
                                                 <strong>
                                                     Rp.
-                                                    <span t-esc="subtotal_sub"/>
+                                                    <span t-esc="subtotal_sub"
+                                                          t-options='{"widget": "monetary", "display_currency": x_currency_id}'/>
                                                 </strong>
                                             </td>
                                         </tr>
@@ -194,7 +198,8 @@
                                         <td class="text-right">
                                             <strong>
                                                 Rp.
-                                                <span t-esc="subtotal_otf"/>
+                                                <span t-esc="subtotal_otf"
+                                                      t-options='{"widget": "monetary", "display_currency": x_currency_id}'/>
                                             </strong>
                                         </td>
                                     </tr>
@@ -204,7 +209,8 @@
                                     <td name="td_total" class="text-right">
                                         <strong>
                                             Rp.
-                                            <span t-esc="doc.amount_untaxed"/>
+                                            <span t-esc="doc.amount_untaxed"
+                                                  t-options='{"widget": "monetary", "display_currency": doc.currency_id}'/>
                                         </strong>
                                     </td>
                                 </tr>

@@ -26,7 +26,7 @@
                             name="action_report_wo_spk"
                             type="object"
                             class="oe_stat_button"
-                            string="Cetak WO"
+                            string="Buat WO"
                             attrs="{'invisible': ['|', ('state', 'not in', ('sale','done')), ('x_mc_isopen', '=', False)]}"
                             icon="fa-cog">
                     </button>
