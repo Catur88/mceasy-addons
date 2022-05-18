@@ -47,12 +47,12 @@
                         <field name="state" widget="statusbar" statusbar_visible="draft,sent,sale,cancel"/>
                     </header>
                     <sheet>
-<!--                        <div class="oe_button_box" name="button_box">-->
-<!--                            <button class="oe_stat_button" name="action_open_subscriptions" type="object" icon="fa-book"-->
-<!--                                    attrs="{'invisible': [('subscription_count', '=', 0)]}">-->
-<!--                                <field name="subscription_count" widget="statinfo" string="Subscriptions"/>-->
-<!--                            </button>-->
-<!--                        </div>-->
+                        <!--                        <div class="oe_button_box" name="button_box">-->
+                        <!--                            <button class="oe_stat_button" name="action_open_subscriptions" type="object" icon="fa-book"-->
+                        <!--                                    attrs="{'invisible': [('subscription_count', '=', 0)]}">-->
+                        <!--                                <field name="subscription_count" widget="statinfo" string="Subscriptions"/>-->
+                        <!--                            </button>-->
+                        <!--                        </div>-->
 
                         <div class="oe_title">
                             <span style="font-size: 25px; font-weight: bold;">
@@ -95,8 +95,8 @@
             </field>
         </record>
 
-<!--        <menuitem id="churn_order" name="Customer Churn Order" parent="sale.sale_order_menu"-->
-<!--                  sequence="2" action="churn_order_course_action" groups="base.group_user"/>-->
+        <!--        <menuitem id="churn_order" name="Customer Churn Order" parent="sale.sale_order_menu"-->
+        <!--                  sequence="2" action="churn_order_course_action" groups="base.group_user"/>-->
         <menuitem id="churn_order" name="Customer Churn Order" parent="work_order_menu"
                   sequence="2" action="churn_order_course_action" groups="base.group_user"/>
     </data>

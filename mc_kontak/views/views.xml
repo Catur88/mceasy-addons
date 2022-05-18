@@ -6,16 +6,16 @@
             <field name="inherit_id" ref="base.view_partner_form"/>
             <field name="arch" type="xml">
                 <xpath expr="//field[@name='l10n_id_pkp']" position='after'>
-                    <field name="x_pic"/>
+                    <field name="x_pic" attrs="{'invisible': [('company_type', '!=', 'company')]}"/>
                     <field name="x_isteknisi" attrs="{'invisible': [('company_type', '!=', 'person')]}"/>
-                    <field name="mc_cs_size"/>
-                    <field name="mc_sales_person"/>
+                    <field name="mc_cs_size" attrs="{'invisible': [('company_type', '!=', 'company')]}"/>
+                    <field name="mc_sales_person" attrs="{'invisible': [('company_type', '!=', 'company')]}"/>
                 </xpath>
                 <xpath expr="//field[@name='category_id']" position='after'>
                     <field name="x_islocked" attrs="{'invisible': [('company_type', '!=', 'company')]}"/>
-                    <field name="x_domain"/>
-                    <field name="mc_account_number"/>
-                    <field name="mc_industry"/>
+                    <field name="x_domain" attrs="{'invisible': [('company_type', '!=', 'company')]}"/>
+                    <field name="mc_account_number" attrs="{'invisible': [('company_type', '!=', 'company')]}"/>
+                    <field name="mc_industry" attrs="{'invisible': [('company_type', '!=', 'company')]}"/>
                 </xpath>
                 <xpath expr="//page[@name='contact_addresses']" position='after'>
                     <page string='Device Terpasang'>
@@ -33,48 +33,5 @@
                 </xpath>
             </field>
         </record>
-
-        <!-- explicit list view definition -->
-        <!--    <record model="ir.ui.view" id="mc_kontak.list">-->
-        <!--      <field name="name">mc_kontak list</field>-->
-        <!--      <field name="model">mc_kontak.mc_kontak</field>-->
-        <!--      <field name="arch" type="xml">-->
-        <!--        <tree>-->
-        <!--          <field name="x_test"/>-->
-        <!--        </tree>-->
-        <!--      </field>-->
-        <!--    </record>-->
-
-        <!--    &lt;!&ndash; actions opening views on models &ndash;&gt;-->
-        <!--    <record model="ir.actions.act_window" id="mc_kontak.action_window">-->
-        <!--      <field name="name">mc_kontak window</field>-->
-        <!--      <field name="res_model">mc_kontak.mc_kontak</field>-->
-        <!--      <field name="view_mode">tree,form</field>-->
-        <!--    </record>-->
-
-        <!--    &lt;!&ndash; server action to the one above &ndash;&gt;-->
-        <!--    <record model="ir.actions.server" id="mc_kontak.action_server">-->
-        <!--      <field name="name">mc_kontak server</field>-->
-        <!--      <field name="model_id" ref="model_mc_kontak_mc_kontak"/>-->
-        <!--      <field name="state">code</field>-->
-        <!--      <field name="code">-->
-        <!--        action = {-->
-        <!--          "type": "ir.actions.act_window",-->
-        <!--          "view_mode": "tree,form",-->
-        <!--          "res_model": model._name,-->
-        <!--        }-->
-        <!--      </field>-->
-        <!--    </record>-->
-
-        <!--    &lt;!&ndash; Top menu item &ndash;&gt;-->
-        <!--    <menuitem name="Contacts" id="mc_kontak.menu_root"/>-->
-        <!--    &lt;!&ndash; menu categories &ndash;&gt;-->
-        <!--    <menuitem name="Menu 1" id="mc_kontak.menu_1" parent="mc_kontak.menu_root"/>-->
-        <!--    <menuitem name="Menu 2" id="mc_kontak.menu_2" parent="mc_kontak.menu_root"/>-->
-        <!--    &lt;!&ndash; actions &ndash;&gt;-->
-        <!--    <menuitem name="List" id="mc_kontak.menu_1_list" parent="mc_kontak.menu_1"-->
-        <!--              action="mc_kontak.action_window"/>-->
-        <!--    <menuitem name="Server to list" id="mc_kontak" parent="mc_kontak.menu_2"-->
-        <!--              action="mc_kontak.action_server"/>-->
     </data>
 </odoo>

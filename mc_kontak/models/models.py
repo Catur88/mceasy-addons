@@ -12,19 +12,19 @@ class CustomContact(models.Model):
     x_isteknisi = fields.Boolean(string='Teknisi McEasy', store=True)
     x_islocked = fields.Boolean(string='Lock Customer', store=True, default=False)
     x_domain = fields.Char(string="Domain", store=True)
-    mc_account_number = fields.Char(string='Account Number', store=True, required=True)
+    mc_account_number = fields.Char(string='Account Number', store=True)
     mc_industry = fields.Selection([
         ('transport', 'Transport'),
         ('principal', 'Principal'),
         ('unit', 'Logistics')
-    ], string='Industry', store=True, required=True)
+    ], string='Industry', store=True)
     mc_cs_size = fields.Selection([
         ('sme', 'SME'),
         ('medium', 'Medium'),
         ('large', 'Large')
-    ], string='Customer Size', required=True, store=True)
-    mc_sales_person = fields.Many2one('res.users', string='Salesperson', default=lambda self: self.env.user,
-                                      required=True)
+    ], string='Customer Size', store=True)
+    # mc_sales_person = fields.Many2one('res.users', string='Salesperson', default=lambda self: self.env.user)
+    mc_sales_person = fields.Char(string='Salesperson', store=True)
 
     # Relasi
     channel_ids = fields.Many2many('mail.channel', 'mail_channel_profile_partner', 'partner_id', 'channel_id',
