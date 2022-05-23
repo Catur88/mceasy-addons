@@ -20,11 +20,13 @@ class KontrakSumReport(models.AbstractModel):
                 'name': line.name,
                 'display_type': line.display_type,
                 'price_subtotal': line.mc_payment,
+                'currency_id': line.currency_id,
             }
             arr_items.append(vals)
 
         subtotal_sub = 0
         subtotal_otf = 0
+        currency_id = 0
         for idx, val in enumerate(arr_items):
             print(val)
             if idx < id_section:
@@ -40,5 +42,6 @@ class KontrakSumReport(models.AbstractModel):
             'data': data,
             'docs': docs,
             'subtotal_sub': subtotal_sub,
-            'subtotal_otf': subtotal_otf
+            'subtotal_otf': subtotal_otf,
+            'x_currency_id': currency_id,
         }
