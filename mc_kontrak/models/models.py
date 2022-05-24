@@ -364,18 +364,28 @@ class CustomSalesOrder(models.Model):
 
     note = fields.Html(store=True,
                        default='<p><span style=font-weight:bolder>Catatan: </span><br><ol><li>PIHAK KEDUA melakukan pembayaran sejumlah nilai diatas setelah penandatanganan PERJANJIAN. Pemasangan PRODUK oleh PIHAK PERTAMA akan dilakukan 5 (lima) hari setelah dilakukan pembayaran oleh PIHAK KEDUA.<li>Nilai nominal pembayaran di atas belum termasuk PPN.<li>Masa aktif PRODUK terhitung sejak tanggal pemasangan sampai dengan JANGKA WAKTU<li>Apabila pada tanggal jatuh tempo tidak terjadi pembayaran, maka:<ol type=a><li>30 (tiga puluh) hari sejak tanggal jatuh tempo, akses ke sistem akan ditutup<li>60 (enam puluh) hari sejak tanggal jatuh tempo, layanan akan ditutup</ol><li>Pembayaran dapat dilakukan melalui transfer kepada:<table><tr><td><h5>PT Otto Menara Globalindo</h5><tr><td>Bank Central Asia (BCA)<tr><td>KCP Kusuma Bangsa<tr><td>No. Rekening 188.212.6689</table><li>Setelah dilakukannya pembayaran, PIHAK KEDUA wajib mengirimkan bukti pembayaran ke surel <a href=mailto:finance@mceasy.co.id target=_blank>finance@mceasy.co.id</a></ol>')
-    subs_count = fields.Integer(string='Subscription', compute='_count_subs')
 
-    # Hitung jumlah subs tiap WO
+    # Hitung jumlah subs tiap SO
     subscription_count = fields.Integer(compute='_compute_subscription_count')
 
+    # Hitung berapa SUBS di SO ini
     def _compute_subscription_count(self):
         """Compute the number of distinct subscriptions linked to the order."""
         for order in self:
-            sub_count = len(
-                self.env['sale.order.line'].read_group([('order_id', '=', order.id), ('subscription_id', '!=', False)],
-                                                       ['subscription_id'], ['subscription_id']))
+            sub_count = self.env['sale.subscription'].search_count([('x_order_id', '=', order.id)])
             order.subscription_count = sub_count
+
+    # Buka halaman subs
+    def action_open_subscriptions(self):
+        result = {
+            "type": "ir.actions.act_window",
+            "res_model": "sale.subscription",
+            "views": [[False, "tree"], [False, "form"]],
+            "domain": [["x_order_id", "=", self.id]],
+            "context": {"create": False},
+            "name": "Subscriptions",
+        }
+        return result
 
     @api.model
     def create(self, vals_list):
@@ -848,14 +858,6 @@ class CustomSalesOrder(models.Model):
         self.wo_count = result[0]
         print('product', self.order_line)
 
-    # Hitung berapa SUBS di SO ini
-    def _count_subs(self):
-        query = "SELECT COUNT(0) FROM public.sale_subscription where x_kontrak_id = %s " % self.kontrak_id.id
-        print(query)
-        self.env.cr.execute(query)
-        result = self.env.cr.fetchone()
-        self.subs_count = result[0]
-
     # Button untuk membuka related SUBS
     def action_view_subs_button(self):
         action = self.env.ref('sale_subscription.sale_subscription_action').read()[0]
@@ -888,9 +890,11 @@ class CustomSalesOrderLine(models.Model):
             self.env.cr.execute("""SELECT product_tmpl_id FROM product_product WHERE id = %s""" % self.product_id.id)
             product_tmpl_id = self.env.cr.fetchone()[0]
             if product_tmpl_id:
-                self.env.cr.execute("""SELECT list_price FROM product_template WHERE id = %s""" % product_tmpl_id)
-                list_price = self.env.cr.fetchone()[0]
-                self.x_mc_harga_produk = list_price
+                self.env.cr.execute(
+                    """SELECT list_price, harga_diskon FROM product_template WHERE id = %s""" % product_tmpl_id)
+                list_price = self.env.cr.fetchone()
+                self.x_mc_harga_produk = list_price[0]
+                self.price_unit = list_price[1]
 
     # Total Harga
     @api.depends('x_mc_harga_produk', 'x_mc_harga_diskon', 'x_mc_qty_terpasang')
@@ -959,17 +963,6 @@ class WorkOrder(models.Model):
                     [('work_order_id', '=', order.id), ('subscription_id', '!=', False)],
                     ['subscription_id'], ['subscription_id']))
             order.subscription_count = sub_count
-
-    def action_open_subscriptions(self):
-        result = {
-            "type": "ir.actions.act_window",
-            "res_model": "sale.subscription",
-            "views": [[False, "tree"], [False, "form"]],
-            "domain": [["x_kontrak_id", "=", self.kontrak_id.id]],
-            "context": {"create": False},
-            "name": "Subscriptions",
-        }
-        return result
 
     @api.model
     def create(self, vals_list):
@@ -1158,34 +1151,35 @@ class WorkOrder(models.Model):
                 """ % self.order_id.id
                 self.env.cr.execute(query)
 
+            # Create subs dari WO
             self.env.cr.execute("""
                 SELECT COUNT(id) FROM sale_subscription WHERE x_kontrak_id = %s
             """ % self.kontrak_id.id)
             count_kontrak_on_sub = self.env.cr.fetchone()[0]
-            if count_kontrak_on_sub < 1:
-                subs_id = self.create_subscriptions()
-                print('subs_id', subs_id)
-                query = """
-                    UPDATE sale_subscription SET x_kontrak_id = %s, x_order_id = %s WHERE id = %s
-                """ % (self.kontrak_id.id, self.order_id.id, subs_id[0])
-                self.env.cr.execute(query)
+            # if count_kontrak_on_sub < 1:
+            subs_id = self.create_subscriptions()
+            print('subs_id', subs_id)
+            query = """
+                UPDATE sale_subscription SET x_kontrak_id = %s, x_order_id = %s WHERE id = %s
+            """ % (self.kontrak_id.id, self.order_id.id, subs_id[0])
+            self.env.cr.execute(query)
 
-                query = """
-                    UPDATE sale_subscription_line SET x_order_id = %s WHERE analytic_account_id = %s
-                """ % (self.order_id.id, subs_id[0])
-                self.env.cr.execute(query)
+            query = """
+                UPDATE sale_subscription_line SET x_order_id = %s WHERE analytic_account_id = %s
+            """ % (self.order_id.id, subs_id[0])
+            self.env.cr.execute(query)
 
-                query = """
-                    UPDATE sale_order_line SET subscription_id = %s WHERE order_id = %s
-                """ % (subs_id[0], self.order_id.id)
-                self.env.cr.execute(query)
-            else:
-                self.env.cr.execute("""
-                    SELECT * FROM sale_subscription WHERE x_kontrak_id = %s
-                """ % self.kontrak_id.id)
-                subs_data = self.env.cr.dictfetchone()
-                print(subs_data)
-                self.create_line_subscriptions(subs_data, row)
+            query = """
+                UPDATE sale_order_line SET subscription_id = %s WHERE order_id = %s
+            """ % (subs_id[0], self.order_id.id)
+            self.env.cr.execute(query)
+            # else:
+            #     self.env.cr.execute("""
+            #         SELECT * FROM sale_subscription WHERE x_kontrak_id = %s
+            #     """ % self.kontrak_id.id)
+            #     subs_data = self.env.cr.dictfetchone()
+            #     print(subs_data)
+            #     self.create_line_subscriptions(subs_data, row)
 
             # res = super(WorkOrder, self).action_confirm()
             # return res

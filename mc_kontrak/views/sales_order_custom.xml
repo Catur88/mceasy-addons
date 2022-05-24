@@ -7,7 +7,8 @@
             <field name="model">sale.order</field>
             <field name="inherit_id" ref="sale.view_order_tree"/>
             <field name="arch" type="xml">
-                <tree string="Sales Orders" sample="1" decoration-info="invoice_status == 'to invoice'" decoration-muted="state == 'cancel'">
+                <tree string="Sales Orders" sample="1" decoration-info="invoice_status == 'to invoice'"
+                      decoration-muted="state == 'cancel'">
                     <field name="x_status_open" decoration-success="x_status_open == 'closed'"
                            decoration-info="x_status_open == 'open'" widget="badge"/>
                 </tree>
@@ -27,7 +28,7 @@
                             type="object"
                             class="oe_stat_button"
                             string="Buat WO"
-                            attrs="{'invisible': ['|', ('state', 'not in', ('sale','done')), ('x_mc_isopen', '=', False)]}"
+                            attrs="{'invisible': [('state', 'not in', ('sale','done'))]}"
                             icon="fa-cog">
                     </button>
                     <button
@@ -42,7 +43,7 @@
 <!--                            type="object"-->
 <!--                            class="oe_stat_button"-->
 <!--                            icon="fa-book">-->
-<!--                        <field string="Subscription" name="subs_count" widget="statinfo"/>-->
+<!--                        <field string="Subscription" name="subscription_count" widget="statinfo"/>-->
 <!--                    </button>-->
                     <field name="x_mc_isopen" invisible="1"/>
                 </div>

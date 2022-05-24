@@ -8,3 +8,4 @@ from . import histori_wo
 from . import show_msg_box
 from . import jenis_kendaraan_wo
 from . import churn_order
+from . import product

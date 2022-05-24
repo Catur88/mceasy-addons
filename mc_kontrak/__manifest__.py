@@ -29,6 +29,7 @@
         'views/views.xml',
         'views/templates.xml',
         'views/sequence_data.xml',
+        'views/product_views.xml',
         'views/sales_order_custom.xml',
         'views/sale_subscription_custom.xml',
         'views/work_order_view.xml',

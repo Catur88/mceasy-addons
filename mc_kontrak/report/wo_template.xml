@@ -13,9 +13,10 @@
                         </div>
                         <div class="col-9 mb4">
                             <div style="text-align:right; margin-top:3%">
-                                <h2 style="color: #282561">PT. Otto Menara Globalindo</h2>
-                                <span>Gd. Sinar Mas Land Plaza Lt 7 Jl. Pemuda No. 60-70, Surabaya,</span> <br/>
-                                <span>Jawa Timur, Indonesia, 60271</span>
+                                <h2 style="color: #282561"><span t-field="doc.company_id.name" /></h2>
+                                <span t-field="doc.company_id.partner_id.street"></span>
+                                <br/>
+                                <span t-field="doc.company_id.partner_id.street2"></span>
                             </div>
                         </div>
                     </div>
@@ -39,6 +40,7 @@
                         <!-- This div ensures that the address is not cropped by the header. -->
                         <t t-call="web.address_layout"/>
                     </div>
+                    <style>p{text-align: justify; line-height:1.8}li{text-align: justify;line-height:1.8}</style>
                     <center>
                         <h2>Installation Work Order</h2>
                     </center>
