@@ -13,7 +13,9 @@
                         </div>
                         <div class="col-9 mb4">
                             <div style="text-align:right; margin-top:3%">
-                                <h2 style="color: #282561"><span t-field="doc.company_id.name" /></h2>
+                                <h2 style="color: #282561">
+                                    <span t-field="doc.company_id.name"/>
+                                </h2>
                                 <span t-field="doc.company_id.partner_id.street"></span>
                                 <br/>
                                 <span t-field="doc.company_id.partner_id.street2"></span>
@@ -126,11 +128,11 @@
                                             </td>
                                             <td name="td_price" class="text-right">
                                                 <span t-esc="line.mc_harga_produk"
-                                                      t-options='{"widget": "monetary", "display_currency": line.currency_id}'/>
+                                                      />
                                             </td>
                                             <td name="td_price_discount" class="text-right">
                                                 <span t-esc="line.mc_harga_diskon"
-                                                      t-options='{"widget": "monetary", "display_currency": line.currency_id}'/>
+                                                      />
                                             </td>
                                             <td name="td_period">
                                                 <span t-field="line.mc_period"/>
@@ -139,7 +141,7 @@
                                             </td>
                                             <td name="td_subtotal" class="text-right">
                                                 <span t-esc="line.mc_payment"
-                                                      t-options='{"widget": "monetary", "display_currency": line.currency_id}'/>
+                                                      />
                                             </td>
                                         </tr>
                                     </t>
@@ -150,7 +152,7 @@
                                             <td>
                                                 <strong>
                                                     <span t-esc="subtotal_sub"
-                                                          t-options='{"widget": "monetary", "display_currency": x_currency_id}'/>
+                                                          />
                                                 </strong>
                                             </td>
                                         </tr>
@@ -177,7 +179,7 @@
                                         <td class="text-right">
                                             <strong>
                                                 <span t-esc="subtotal_otf"
-                                                      t-options='{"widget": "monetary", "display_currency": x_currency_id}'/>
+                                                      />
                                             </strong>
                                         </td>
                                     </tr>
@@ -186,7 +188,7 @@
                                     <td colspan="5" class="text-right">Total</td>
                                     <td name="td_total" class="text-right">
                                         <span t-esc="doc.mc_total"
-                                              t-options='{"widget": "monetary", "display_currency": doc.currency_id}'/>
+                                              />
                                     </td>
                                 </tr>
                             </tbody>
@@ -296,11 +298,11 @@
                                             </td>
                                             <td name="td_price" class="text-right">
                                                 <span t-esc="line.mc_harga_produk"
-                                                      t-options='{"widget": "monetary", "display_currency": line.currency_id}'/>
+                                                      />
                                             </td>
                                             <td name="td_price_discount" class="text-right">
                                                 <span t-esc="line.mc_harga_diskon"
-                                                      t-options='{"widget": "monetary", "display_currency": line.currency_id}'/>
+                                                      />
                                             </td>
                                             <td name="td_period">
                                                 <span t-field="line.mc_period"/>
@@ -309,7 +311,7 @@
                                             </td>
                                             <td name="td_subtotal" class="text-right">
                                                 <span t-esc="line.mc_payment"
-                                                      t-options='{"widget": "monetary", "display_currency": line.currency_id}'/>
+                                                      />
                                             </td>
                                         </tr>
                                     </t>
@@ -320,7 +322,7 @@
                                             <td>
                                                 <strong>
                                                     <span t-esc="subtotal_sub"
-                                                          t-options='{"widget": "monetary", "display_currency": x_currency_id}'/>
+                                                          />
                                                 </strong>
                                             </td>
                                         </tr>
@@ -347,7 +349,7 @@
                                         <td class="text-right">
                                             <strong>
                                                 <span t-esc="subtotal_otf"
-                                                      t-options='{"widget": "monetary", "display_currency": x_currency_id}'/>
+                                                      />
                                             </strong>
                                         </td>
                                     </tr>
@@ -356,7 +358,7 @@
                                     <td colspan="5" class="text-right">Total</td>
                                     <td name="td_total" class="text-right">
                                         <span t-esc="doc.mc_total"
-                                              t-options='{"widget": "monetary", "display_currency": doc.currency_id}'/>
+                                              />
                                     </td>
                                 </tr>
                             </tbody>
