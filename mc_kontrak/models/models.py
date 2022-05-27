@@ -322,6 +322,18 @@ class ProductOrderLine(models.Model):
         print(self.display_type)
         print(fields_list)
 
+    @api.onchange('product_id')
+    def _get_unit_price(self):
+        if self.product_id:
+            self.env.cr.execute("""SELECT product_tmpl_id FROM product_product WHERE id = %s""" % self.product_id.id)
+            product_tmpl_id = self.env.cr.fetchone()[0]
+            if product_tmpl_id:
+                self.env.cr.execute(
+                    """SELECT list_price, harga_diskon FROM product_template WHERE id = %s""" % product_tmpl_id)
+                list_price = self.env.cr.fetchone()
+                self.x_mc_harga_produk = list_price[0]
+                self.price_unit = list_price[1]
+
 
 class CustomSalesOrder(models.Model):
     _inherit = 'sale.order'
@@ -964,6 +976,18 @@ class WorkOrder(models.Model):
                     ['subscription_id'], ['subscription_id']))
             order.subscription_count = sub_count
 
+    # Buka halaman subs
+    def action_open_subscriptions(self):
+        result = {
+            "type": "ir.actions.act_window",
+            "res_model": "sale.subscription",
+            "views": [[False, "tree"], [False, "form"]],
+            "domain": [["x_order_id", "=", self.order_id.id]],
+            "context": {"create": False},
+            "name": "Subscriptions",
+        }
+        return result
+
     @api.model
     def create(self, vals_list):
         print('Halo dari Work Order')
@@ -1142,7 +1166,7 @@ class WorkOrder(models.Model):
             print(arr_list_so)
             masihBelumDone = 0
             for arrdata in arr_list_so:
-                if arrdata['qty_to_invoice'] != arrdata['qty_delivered']:
+                if arrdata['qty_to_invoice'] != 0:
                     masihBelumDone += 1
 
             if masihBelumDone == 0:
@@ -1156,30 +1180,30 @@ class WorkOrder(models.Model):
                 SELECT COUNT(id) FROM sale_subscription WHERE x_kontrak_id = %s
             """ % self.kontrak_id.id)
             count_kontrak_on_sub = self.env.cr.fetchone()[0]
-            # if count_kontrak_on_sub < 1:
-            subs_id = self.create_subscriptions()
-            print('subs_id', subs_id)
-            query = """
-                UPDATE sale_subscription SET x_kontrak_id = %s, x_order_id = %s WHERE id = %s
-            """ % (self.kontrak_id.id, self.order_id.id, subs_id[0])
-            self.env.cr.execute(query)
+            if count_kontrak_on_sub < 1:
+                subs_id = self.create_subscriptions()
+                print('subs_id', subs_id)
+                query = """
+                    UPDATE sale_subscription SET x_kontrak_id = %s, x_order_id = %s WHERE id = %s
+                """ % (self.kontrak_id.id, self.order_id.id, subs_id[0])
+                self.env.cr.execute(query)
 
-            query = """
-                UPDATE sale_subscription_line SET x_order_id = %s WHERE analytic_account_id = %s
-            """ % (self.order_id.id, subs_id[0])
-            self.env.cr.execute(query)
+                query = """
+                    UPDATE sale_subscription_line SET x_order_id = %s WHERE analytic_account_id = %s
+                """ % (self.order_id.id, subs_id[0])
+                self.env.cr.execute(query)
 
-            query = """
-                UPDATE sale_order_line SET subscription_id = %s WHERE order_id = %s
-            """ % (subs_id[0], self.order_id.id)
-            self.env.cr.execute(query)
-            # else:
-            #     self.env.cr.execute("""
-            #         SELECT * FROM sale_subscription WHERE x_kontrak_id = %s
-            #     """ % self.kontrak_id.id)
-            #     subs_data = self.env.cr.dictfetchone()
-            #     print(subs_data)
-            #     self.create_line_subscriptions(subs_data, row)
+                query = """
+                    UPDATE sale_order_line SET subscription_id = %s WHERE order_id = %s
+                """ % (subs_id[0], self.order_id.id)
+                self.env.cr.execute(query)
+            else:
+                self.env.cr.execute("""
+                    SELECT * FROM sale_subscription WHERE x_kontrak_id = %s
+                """ % self.kontrak_id.id)
+                subs_data = self.env.cr.dictfetchone()
+                print(subs_data)
+                self.create_line_subscriptions(subs_data, row)
 
             # res = super(WorkOrder, self).action_confirm()
             # return res
