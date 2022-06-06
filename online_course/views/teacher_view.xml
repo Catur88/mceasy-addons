@@ -1,0 +1,31 @@
+<?xml version='1.0' encoding='utf-8'?>
+<odoo>
+        <!-- model.name form view -->
+    <record id="teacher_view" model="ir.ui.view">
+        <field name="name">teacher.view</field>
+        <field name="model">teacher.course</field>
+        <field name="arch" type="xml">
+            <tree>
+            <!-- Add your fields here -->
+                <field name="name"/>
+                <field name="email"/>
+                <field name="no_telp"/>
+                <field name="address"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="teacher_action" model="ir.actions.act_window">
+        <field name="name">Daftar Guru</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">teacher.course</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem 
+    id="teacher_dropdown" 
+    name="Daftar Guru" 
+    parent="teacher_category" 
+    action="teacher_action" 
+    sequence="10"/>
+</odoo>

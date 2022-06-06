@@ -34,6 +34,7 @@
         'views/sale_subscription_custom.xml',
         'views/work_order_view.xml',
         'views/churn_order_view.xml',
+        'views/invoice.xml',
         'report/kontrak_report.xml',
         'report/kontrak_template.xml',
         'report/penawaran_template.xml',

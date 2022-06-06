@@ -1,0 +1,30 @@
+<?xml version='1.0' encoding='utf-8'?>
+<odoo>
+    <!-- model.name form view -->
+    <record id="online_course_view" model="ir.ui.view">
+        <field name="name">online_course.view</field>
+        <field name="model">online.course</field>
+        <field name="arch" type="xml">
+            <tree>
+                <!-- Add your fields here -->
+                <field name="name"/>
+                <field name="description"/>
+                <field name="duration"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="online_course_action" model="ir.actions.act_window">
+        <field name="name">Daftar Kursus</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">online.course</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem
+            id="online_course_dropdown"
+            name="Daftar Kursus"
+            parent="online_course_category"
+            action="online_course_action"
+            sequence="10"/>
+</odoo>

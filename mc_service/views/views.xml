@@ -1,0 +1,62 @@
+<odoo>
+    <data>
+        <!-- explicit list view definition -->
+
+        <record model="ir.ui.view" id="mc_service.list">
+            <field name="name">mc_service list</field>
+            <field name="model">mc_service.mc_service</field>
+            <field name="arch" type="xml">
+                <tree>
+                </tree>
+            </field>
+        </record>
+
+        <!-- actions opening views on models -->
+
+        <record model="ir.actions.act_window" id="mc_service.action_window">
+            <field name="name">Work Order</field>
+            <field name="res_model">mc_kontrak.work_order</field>
+            <field name="view_mode">tree,form,calendar</field>
+        </record>
+
+        <!--        Custom Search field-->
+<!--        <record id="mc_kontrak_work_order_inherit_search" model="ir.ui.view">-->
+<!--            <field name="name">mc_kontrak.work_order.inherit.search</field>-->
+<!--            <field name="model">mc_kontrak.work_order</field>-->
+<!--            <field name="acrh" type="xml">-->
+<!--                <search string="Cari Work Order">-->
+<!--                    <field name="name"/>-->
+<!--                    <field name="x_teknisi_1"/>-->
+<!--                    <field name="x_teknisi_2"/>-->
+<!--                </search>-->
+<!--            </field>-->
+<!--        </record>-->
+
+        <record id="mc_service.action_view_calendar" model="ir.ui.view">
+            <field name="name">mc_kontrak.work_order.calendar</field>
+            <field name="model">mc_kontrak.work_order</field>
+            <field eval="2" name="priority"/>
+            <field name="arch" type="xml">
+                <calendar date_start="x_plan_start_date" date_stop="x_plan_end_date" string="Tasks" mode="month"
+                          color="partner_id" event_limit="5"
+                          hide_time="true" js_class="project_calendar" event_open_popup="true" quick_add="false">
+                </calendar>
+            </field>
+        </record>
+
+
+        <!-- Top menu item -->
+
+        <menuitem name="Service" id="mc_service.menu_root" groups="base.group_user"/>
+
+        <!-- menu categories -->
+        <menuitem name="Operation" id="mc_service.menu_1" parent="mc_service.menu_root"/>
+        <!--    <menuitem name="Menu 2" id="mc_service.menu_2" parent="mc_service.menu_root"/>-->
+
+        <!-- actions -->
+        <menuitem name="Installation Work Order" id="mc_service.menu_1_list" parent="mc_service.menu_1"
+                  action="mc_service.action_window"/>
+        <!--    <menuitem name="Server to list" id="mc_service" parent="mc_service.menu_2"-->
+        <!--              action="mc_service.action_server"/>-->
+    </data>
+</odoo>
